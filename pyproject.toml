@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ir-system"
+version = "0.1.0"
+description = "End-to-end Information Retrieval pipeline"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "rank-bm25>=0.2.2",
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+dense = [
+    "sentence-transformers>=3.0",
+    "torch>=2.0",
+]
+late-interaction = [
+    "transformers>=4.40",
+    "torch>=2.0",
+]
+cross-encoder = [
+    "sentence-transformers>=3.0",
+    "torch>=2.0",
+]
+all = [
+    "sentence-transformers>=3.0",
+    "transformers>=4.40",
+    "torch>=2.0",
+]
+
+[project.scripts]
+ir-system = "ir_system.cli.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-dir]
+"" = "src"
