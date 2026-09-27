@@ -38,6 +38,7 @@ class SentenceTransformerAdapter(SingleVectorEmbeddingModel):
         normalize_embeddings: bool = True,
     ) -> None:
         try:
+            # pyrefly: ignore [missing-import]
             from sentence_transformers import SentenceTransformer
         except ImportError as exc:
             raise ImportError(

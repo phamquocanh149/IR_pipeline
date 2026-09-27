@@ -51,6 +51,8 @@ def _parse_metric_spec(spec: str):
     from ir_system.evaluation.mrr import MRRAtK
     from ir_system.evaluation.ndcg import NDCGAtK
     from ir_system.evaluation.recall import RecallAtK
+    from ir_system.evaluation.precision import PrecisionAtK
+    from ir_system.evaluation.map import MAPAtK
 
     spec = spec.strip().lower()
     if "@" not in spec:
@@ -71,11 +73,16 @@ def _parse_metric_spec(spec: str):
         return MRRAtK(k)
     elif name == "recall":
         return RecallAtK(k)
+    elif name in ("precision", "p"):
+        return PrecisionAtK(k)
+    elif name == "map":
+        return MAPAtK(k)
     else:
         raise ValueError(
             f"Unknown metric {name!r} in spec {spec!r}. "
-            "Supported: ndcg@K, mrr@K, recall@K"
+            "Supported: ndcg@K, mrr@K, recall@K, precision@K, map@K"
         )
+
 
 
 def _build_retriever(
