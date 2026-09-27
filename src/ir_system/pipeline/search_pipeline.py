@@ -20,6 +20,8 @@ from __future__ import annotations
 import logging
 from typing import Dict, Optional, Sequence
 
+from tqdm import tqdm
+
 from ir_system.domain.hit import Hit
 from ir_system.domain.qrels import Qrels
 from ir_system.domain.query import Query
@@ -83,7 +85,7 @@ class SearchPipeline:
         logger.info("[SEARCH] Processing %d queries (top_k=%d)...", len(queries), top_k)
 
         run = Run()
-        for i, query in enumerate(queries):
+        for i, query in enumerate(tqdm(queries, desc="[SEARCH] Retrieving", unit="query")):
             hits: Sequence[Hit] = self._retriever.retrieve(query, top_k)
             run.add(query.qid, hits)
             if (i + 1) % 100 == 0 or (i + 1) == len(queries):
@@ -91,6 +93,7 @@ class SearchPipeline:
 
         logger.info("[SEARCH] Done. Run contains %d queries.", len(run))
         return run
+
 
     def evaluate(
         self,

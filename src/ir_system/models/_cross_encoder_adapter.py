@@ -89,7 +89,9 @@ class CrossEncoderAdapter(CrossEncoderModel):
         bs = batch_size if batch_size is not None else self._default_batch_size
         pairs = list(zip(query_texts, document_texts))
 
-        raw_scores = self._model.predict(pairs, batch_size=bs)
+        show_progress = kwargs.get("show_progress", False)
+        raw_scores = self._model.predict(pairs, batch_size=bs, show_progress_bar=show_progress)
+
 
         result: List[float] = []
         for i, s in enumerate(raw_scores):

@@ -21,6 +21,8 @@ from __future__ import annotations
 import logging
 from typing import Callable, List, Optional, Sequence
 
+from tqdm import tqdm
+
 from ir_system.domain.document import Document
 from ir_system.domain.hit import Hit
 from ir_system.domain.query import Query
@@ -82,7 +84,7 @@ class BM25Retriever(SparseRetriever):
         self._doc_ids = []
         tokenized_corpus: List[List[str]] = []
 
-        for i, doc in enumerate(documents):
+        for i, doc in enumerate(tqdm(documents, desc="[BM25] Tokenizing corpus", unit="doc")):
             if not doc.text.strip():
                 raise ValueError(
                     f"BM25Retriever.build: document at index {i} "
@@ -91,6 +93,7 @@ class BM25Retriever(SparseRetriever):
                 )
             self._doc_ids.append(doc.doc_id)
             tokenized_corpus.append(self._tokenizer(doc.text))
+
 
         from rank_bm25 import BM25Okapi
 

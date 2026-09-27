@@ -81,7 +81,13 @@ class DenseRetriever(Retriever):
         self._doc_ids = [doc.doc_id for doc in documents]
         texts = [doc.text for doc in documents]
 
-        embeddings = self._model.encode(texts, batch_size=self._batch_size)
+        try:
+            embeddings = self._model.encode(
+                texts, batch_size=self._batch_size, show_progress=True
+            )
+        except TypeError:
+            embeddings = self._model.encode(texts, batch_size=self._batch_size)
+
 
         # Validate output shape
         if not hasattr(embeddings, "shape") or embeddings.ndim != 2:

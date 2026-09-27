@@ -11,7 +11,9 @@ requires-python = ">=3.10"
 dependencies = [
     "rank-bm25>=0.2.2",
     "numpy>=1.24",
+    "tqdm>=4.66",
 ]
+
 
 [project.optional-dependencies]
 dense = [

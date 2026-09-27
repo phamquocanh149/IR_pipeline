@@ -73,6 +73,7 @@ class ColBERTAdapter(MultiVectorEmbeddingModel):
         self,
         texts: Sequence[str],
         batch_size: int | None = None,
+        show_progress: bool = False,
         **kwargs: Any,
     ) -> List[np.ndarray]:
         """
@@ -93,8 +94,14 @@ class ColBERTAdapter(MultiVectorEmbeddingModel):
         bs = batch_size if batch_size is not None else self._default_batch_size
         all_vectors: List[np.ndarray] = []
 
+        batch_starts = range(0, len(texts), bs)
+        if show_progress:
+            from tqdm import tqdm
+            batch_starts = tqdm(batch_starts, desc="[ColBERT] Encoding batches", unit="batch")
+
         with torch.inference_mode():
-            for start in range(0, len(texts), bs):
+            for start in batch_starts:
+
                 batch = texts[start: start + bs]
                 encoded = self._tokenizer(
                     batch,

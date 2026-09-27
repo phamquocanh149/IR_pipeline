@@ -85,7 +85,13 @@ class LateInteractionRetriever(Retriever):
         self._doc_ids = [doc.doc_id for doc in documents]
         texts = [doc.text for doc in documents]
 
-        all_vecs = self._model.encode(texts, batch_size=self._batch_size)
+        try:
+            all_vecs = self._model.encode(
+                texts, batch_size=self._batch_size, show_progress=True
+            )
+        except TypeError:
+            all_vecs = self._model.encode(texts, batch_size=self._batch_size)
+
 
         if len(all_vecs) != len(documents):
             raise RuntimeError(
