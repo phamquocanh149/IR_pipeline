@@ -84,3 +84,14 @@ Each run saves to `results/<run_id>/`:
 - `config.json` — run configuration
 - `metrics.json` — computed metric scores
 - `run.jsonl` — per-query ranked hits
+
+### Customizing Run Name / Output Directory
+
+By default, `<run_id>` is an auto-generated timestamp string (e.g. `20260927T094744_bm25`). You can customize it using:
+
+- `--name <name>` / `--run-name <name>` / `-n <name>`: Saves directly to `results/<name>/`.
+  ```bash
+  python -m ir_system.cli.main --dataset data/toy --retriever bm25 --top-k 10 --metrics ndcg@10 --name my_bm25_test
+  ```
+- `--output <dir>` / `-o <dir>`: Saves to a custom directory. If a single folder name is passed, it is placed under `results/<dir>/`.
+

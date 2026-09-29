@@ -265,9 +265,17 @@ def _make_parser() -> argparse.ArgumentParser:
     )
     # Output / reproducibility
     parser.add_argument(
-        "--output",
+        "--run-name",
+        "--name",
+        "-n",
         default=None,
-        help="Output directory for results (default: results/<auto_run_id>).",
+        help="Custom run name (saved under results/<run_name>/). Replaces auto-generated timestamp.",
+    )
+    parser.add_argument(
+        "--output",
+        "-o",
+        default=None,
+        help="Output directory for results (default: results/<run_name> or results/<timestamp>_<retriever>).",
     )
     parser.add_argument(
         "--seed",
@@ -392,9 +400,26 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     # --- Build config dict ---
     timestamp = time.strftime("%Y%m%dT%H%M%S")
-    run_id = args.output or f"results/{timestamp}_{args.retriever}"
+
+    # Resolve output directory and run name
+    if args.output:
+        raw_output = Path(args.output)
+        # If user passed a bare name without path separators (e.g. 'my_run'),
+        # place it under results/ to keep standard directory layout.
+        if len(raw_output.parts) == 1 and not args.output.startswith((".", "/", "\\")):
+            output_path = Path("results") / raw_output
+        else:
+            output_path = raw_output
+        run_name = raw_output.name
+    elif args.run_name:
+        run_name = args.run_name
+        output_path = Path("results") / run_name
+    else:
+        run_name = f"{timestamp}_{args.retriever}"
+        output_path = Path("results") / run_name
 
     config = {
+        "run_id": run_name,
         "model": args.model,
         "retriever": args.retriever,
         "top_k": args.top_k,
@@ -408,7 +433,6 @@ def main(argv: Optional[List[str]] = None) -> int:
     }
 
     # --- Save results ---
-    output_path = Path(run_id) if not Path(run_id).is_absolute() else Path(run_id)
     try:
         _save_results(output_path, run, metrics_result, config)
     except OSError as exc:

@@ -85,14 +85,11 @@ class BM25Retriever(SparseRetriever):
         tokenized_corpus: List[List[str]] = []
 
         for i, doc in enumerate(tqdm(documents, desc="[BM25] Tokenizing corpus", unit="doc")):
-            if not doc.text.strip():
-                raise ValueError(
-                    f"BM25Retriever.build: document at index {i} "
-                    f"(doc_id={doc.doc_id!r}) has empty text. "
-                    "BM25 requires non-empty document text."
-                )
             self._doc_ids.append(doc.doc_id)
-            tokenized_corpus.append(self._tokenizer(doc.text))
+            if not doc.text or not doc.text.strip():
+                tokenized_corpus.append([])
+            else:
+                tokenized_corpus.append(self._tokenizer(doc.text))
 
 
         from rank_bm25 import BM25Okapi
