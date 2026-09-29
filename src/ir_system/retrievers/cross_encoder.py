@@ -1,24 +1,25 @@
 """
 Retrievers: CrossEncoderRetriever
 ===================================
-Cross-encoder based retriever supporting two modes:
+Two-stage cross-encoder retriever:
 
-1. Direct scoring (small corpus):
-   query + all documents → CrossEncoderModel → ranking
+  Stage 1 (Candidate Retrieval):
+    A first-stage Retriever (e.g. BM25, Dense) retrieves candidate_top_k
+    documents from the corpus.
 
-2. Reranking (large corpus):
-   candidate_retriever → Top-N candidates → CrossEncoderModel → reranked Top-K
+  Stage 2 (Cross-Encoder Reranking):
+    CrossEncoderModel scores each (query, candidate_doc) pair and reranks
+    to produce the final top-k results.
 
-The mode is determined by whether a candidate_retriever is provided.
-
-Dependency injection: candidate_retriever is optional.
-CrossEncoderRetriever does NOT scan the entire corpus in reranking mode.
+The first-stage retriever is injected via constructor (Dependency Injection).
+CrossEncoderRetriever does NOT know which concrete retriever is used —
+that decision belongs to the CLI composition root.
 """
 from __future__ import annotations
 
 import logging
 import math
-from typing import List, Optional, Sequence
+from typing import List, Sequence
 
 from ir_system.domain.document import Document
 from ir_system.domain.hit import Hit
@@ -31,27 +32,36 @@ logger = logging.getLogger(__name__)
 
 class CrossEncoderRetriever(Retriever):
     """
-    Cross-encoder retriever supporting direct scoring and reranking.
+    Two-stage cross-encoder retriever.
+
+    Stage 1: candidate_retriever retrieves candidate_top_k documents.
+    Stage 2: CrossEncoderModel scores and reranks candidates.
 
     Parameters
     ----------
     model               : CrossEncoderModel
-    candidate_retriever : Retriever, optional
-        If provided, operates in reranking mode:
-        first retrieves candidate_top_k docs, then reranks with cross-encoder.
+        The cross-encoder model used for scoring (query, document) pairs.
+    candidate_retriever : Retriever
+        First-stage retriever for candidate selection (e.g. BM25, Dense).
     candidate_top_k     : int
-        Number of initial candidates for reranking (default 100).
+        Number of candidates to retrieve in Stage 1 (default 100).
     batch_size          : int
-        Scoring batch size (default 32).
+        Scoring batch size for Stage 2 (default 32).
     """
 
     def __init__(
         self,
         model: CrossEncoderModel,
-        candidate_retriever: Optional[Retriever] = None,
+        candidate_retriever: Retriever,
         candidate_top_k: int = 100,
         batch_size: int = 32,
     ) -> None:
+        if candidate_retriever is None:
+            raise ValueError(
+                "CrossEncoderRetriever requires a candidate_retriever "
+                "(Stage 1). Pass a concrete Retriever instance "
+                "(e.g. BM25Retriever, DenseRetriever)."
+            )
         self._model = model
         self._candidate_retriever = candidate_retriever
         self._candidate_top_k = candidate_top_k
@@ -61,16 +71,12 @@ class CrossEncoderRetriever(Retriever):
         self._documents: dict[str, str] = {}  # doc_id → text
         self._built = False
 
-    @property
-    def _reranking_mode(self) -> bool:
-        return self._candidate_retriever is not None
-
     def build(self, documents: Sequence[Document]) -> None:
         """
-        Prepare the retriever for cross-encoder scoring.
+        Build indexes for both stages.
 
-        - Always stores doc_id → text mapping for cross-encoder input.
-        - Also calls candidate_retriever.build() if in reranking mode.
+        - Stores doc_id → text mapping for cross-encoder input (Stage 2).
+        - Delegates to candidate_retriever.build() for Stage 1 index.
 
         Raises
         ------
@@ -82,27 +88,25 @@ class CrossEncoderRetriever(Retriever):
             )
 
         logger.info(
-            "[RETRIEVER] Building CrossEncoder index (mode=%s) with model=%s "
-            "over %d documents...",
-            "reranking" if self._reranking_mode else "direct",
+            "[RETRIEVER] Building CrossEncoder 2-stage index "
+            "(stage1=%s, stage2=%s) over %d documents...",
+            type(self._candidate_retriever).__name__,
             self._model.name,
             len(documents),
         )
 
         self._documents = {doc.doc_id: doc.text for doc in documents}
-
-        if self._reranking_mode:
-            self._candidate_retriever.build(documents)  # type: ignore[union-attr]
+        self._candidate_retriever.build(documents)
 
         self._built = True
-        logger.info("[RETRIEVER] CrossEncoder index ready.")
+        logger.info("[RETRIEVER] CrossEncoder 2-stage index ready.")
 
     def retrieve(self, query: Query, top_k: int) -> Sequence[Hit]:
         """
-        Retrieve using cross-encoder scoring.
+        Two-stage retrieval using cross-encoder scoring.
 
-        In direct mode:  scores all documents in corpus.
-        In reranking mode: scores top candidate_top_k from candidate_retriever.
+        Stage 1: candidate_retriever retrieves candidate_top_k documents.
+        Stage 2: CrossEncoderModel scores each (query, doc) pair and reranks.
 
         Parameters
         ----------
@@ -123,17 +127,16 @@ class CrossEncoderRetriever(Retriever):
                 f"CrossEncoderRetriever.retrieve: top_k must be > 0, got {top_k}"
             )
 
-        if self._reranking_mode:
-            candidates = self._candidate_retriever.retrieve(  # type: ignore[union-attr]
-                query, self._candidate_top_k
-            )
-            doc_ids = [h.doc_id for h in candidates]
-        else:
-            doc_ids = list(self._documents.keys())
+        # --- Stage 1: Candidate retrieval ---
+        candidates = self._candidate_retriever.retrieve(
+            query, self._candidate_top_k
+        )
+        doc_ids = [h.doc_id for h in candidates]
 
         if not doc_ids:
             return []
 
+        # --- Stage 2: Cross-encoder scoring ---
         query_texts = [query.text] * len(doc_ids)
         doc_texts = [self._documents[did] for did in doc_ids]
 
@@ -160,3 +163,4 @@ class CrossEncoderRetriever(Retriever):
             for doc_id, score in pairs[:top_k]
             if math.isfinite(score)
         ]
+

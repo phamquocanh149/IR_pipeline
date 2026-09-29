@@ -85,11 +85,50 @@ def _parse_metric_spec(spec: str):
 
 
 
+def _build_candidate_retriever(
+    candidate_type: str,
+    candidate_model,
+    batch_size: int,
+):
+    """
+    Build the first-stage (candidate) retriever for cross-encoder reranking.
+
+    This is separated from _build_retriever to keep the composition root clean.
+    """
+    from ir_system.retrievers.bm25 import BM25Retriever
+    from ir_system.retrievers.dense import DenseRetriever
+    from ir_system.models.single_vector import SingleVectorEmbeddingModel
+
+    ctype = candidate_type.lower().strip()
+
+    if ctype == "bm25":
+        return BM25Retriever()
+    elif ctype == "dense":
+        if candidate_model is None:
+            raise ValueError(
+                "--candidate-retriever dense requires --candidate-model "
+                "to specify the embedding model for Stage 1."
+            )
+        if not isinstance(candidate_model, SingleVectorEmbeddingModel):
+            raise ValueError(
+                f"--candidate-retriever dense requires a SingleVectorEmbeddingModel. "
+                f"Got: {type(candidate_model).__name__}."
+            )
+        return DenseRetriever(model=candidate_model, batch_size=batch_size)
+    else:
+        raise ValueError(
+            f"Unknown candidate retriever type: {candidate_type!r}. "
+            "Supported: bm25, dense"
+        )
+
+
 def _build_retriever(
     retriever_type: str,
     model,
     candidate_top_k: int,
     batch_size: int,
+    candidate_retriever_type: str = "bm25",
+    candidate_model=None,
 ):
     """
     Map --retriever string to a concrete Retriever instance.
@@ -136,11 +175,15 @@ def _build_retriever(
                 f"Got: {type(model).__name__}. "
                 "Use --model-type cross-encoder."
             )
-        # Cross-encoder with BM25 candidate retriever for large corpora.
-        candidate_bm25 = BM25Retriever()
+        # Build the first-stage candidate retriever from CLI args.
+        stage1 = _build_candidate_retriever(
+            candidate_type=candidate_retriever_type,
+            candidate_model=candidate_model,
+            batch_size=batch_size,
+        )
         return CrossEncoderRetriever(
             model=model,
-            candidate_retriever=candidate_bm25,
+            candidate_retriever=stage1,
             candidate_top_k=candidate_top_k,
             batch_size=batch_size,
         )
@@ -263,6 +306,17 @@ def _make_parser() -> argparse.ArgumentParser:
         default=100,
         help="Candidate retrieval count for hybrid/reranking (default: 100).",
     )
+    parser.add_argument(
+        "--candidate-retriever",
+        choices=["bm25", "dense"],
+        default="bm25",
+        help="First-stage retriever for cross-encoder reranking (default: bm25).",
+    )
+    parser.add_argument(
+        "--candidate-model",
+        default=None,
+        help="Model for first-stage candidate retriever when --candidate-retriever=dense.",
+    )
     # Output / reproducibility
     parser.add_argument(
         "--run-name",
@@ -322,6 +376,18 @@ def main(argv: Optional[List[str]] = None) -> int:
         )
         return 1
 
+    # --- Validate candidate-retriever usage ---
+    is_cross_encoder = args.retriever in ("cross-encoder", "cross_encoder", "reranker")
+    if not is_cross_encoder and args.candidate_model:
+        logger.warning(
+            "--candidate-model is ignored when --retriever is not cross-encoder."
+        )
+    if is_cross_encoder and args.candidate_retriever == "dense" and not args.candidate_model:
+        logger.error(
+            "--candidate-model is required when --candidate-retriever=dense."
+        )
+        return 1
+
     # --- Load dataset ---
     from ir_system.io.dataset_loader import DatasetLoader
 
@@ -348,6 +414,20 @@ def main(argv: Optional[List[str]] = None) -> int:
             logger.error("Model loading failed: %s", exc)
             return 1
 
+    # --- Load candidate model (for cross-encoder Stage 1) ---
+    candidate_model = None
+    if is_cross_encoder and args.candidate_model:
+        try:
+            candidate_model = create_model(
+                model_id=args.candidate_model,
+                model_type="single-vector",
+                device=args.device,
+                batch_size=args.batch_size,
+            )
+        except (ImportError, ValueError, RuntimeError) as exc:
+            logger.error("Candidate model loading failed: %s", exc)
+            return 1
+
     # --- Build retriever ---
     try:
         retriever = _build_retriever(
@@ -355,6 +435,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             model=model,
             candidate_top_k=args.candidate_top_k,
             batch_size=args.batch_size,
+            candidate_retriever_type=args.candidate_retriever,
+            candidate_model=candidate_model,
         )
     except (ValueError, TypeError) as exc:
         logger.error("Retriever construction failed: %s", exc)
@@ -427,6 +509,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         "device": args.device,
         "batch_size": args.batch_size,
         "candidate_top_k": args.candidate_top_k,
+        "candidate_retriever": args.candidate_retriever,
+        "candidate_model": args.candidate_model,
         "seed": args.seed,
         "dataset": str(args.dataset),
         "timestamp": timestamp,
