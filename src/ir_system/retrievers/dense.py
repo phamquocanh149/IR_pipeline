@@ -12,6 +12,12 @@ Architecture
   or explicit normalization otherwise).
 - Tie-break: score descending, doc_id ascending.
 
+Persistence
+-----------
+- save_index(path): Saves FAISS index + doc_id mapping + config to disk.
+- load_index(path): Loads a previously saved index, skipping encode/build.
+- Index format: indexes/<name>/index.faiss, doc_ids.json, config.json.
+
 Key invariant
 -------------
     vector row index ↔ Document.doc_id
@@ -22,7 +28,8 @@ from __future__ import annotations
 
 import logging
 import math
-from typing import List, Sequence
+from pathlib import Path
+from typing import List, Optional, Sequence, Union
 
 import numpy as np
 
@@ -53,7 +60,7 @@ class DenseRetriever(Retriever):
         self._model = model
         self._batch_size = batch_size
 
-        # State populated by build()
+        # State populated by build() or load_index()
         self._doc_ids: List[str] = []
         self._embeddings: np.ndarray | None = None  # shape [N, dim]
         self._built = False
@@ -183,3 +190,82 @@ class DenseRetriever(Retriever):
             for doc_id, score in top_pairs
             if math.isfinite(score)
         ]
+
+    # ------------------------------------------------------------------
+    # Index Persistence (FAISS)
+    # ------------------------------------------------------------------
+
+    def save_index(self, index_dir: Union[str, Path]) -> Path:
+        """
+        Save the current dense index to disk as a FAISS index.
+
+        Must be called after build(). Saves:
+          - index.faiss   : FAISS binary index (IndexFlatIP)
+          - doc_ids.json  : Ordered list mapping FAISS row → doc_id
+          - config.json   : Model name, embedding dim, similarity info
+
+        Parameters
+        ----------
+        index_dir : str or Path
+            Directory to write index files to (created if needed).
+
+        Returns
+        -------
+        Path  The index directory.
+
+        Raises
+        ------
+        RuntimeError  If called before build().
+        ImportError   If faiss is not installed.
+        """
+        if not self._built or self._embeddings is None:
+            raise RuntimeError(
+                "DenseRetriever.save_index: build() must be called before "
+                "saving the index."
+            )
+
+        from ir_system.indexing.faiss_store import save_faiss_index
+
+        return save_faiss_index(
+            index_dir=index_dir,
+            embeddings=self._embeddings,
+            doc_ids=self._doc_ids,
+            model_name=self._model.name,
+            similarity="cosine",
+        )
+
+    def load_index(self, index_dir: Union[str, Path]) -> None:
+        """
+        Load a previously saved FAISS index from disk, skipping build().
+
+        After a successful load, the retriever is ready for retrieve() calls
+        without needing to call build().
+
+        Parameters
+        ----------
+        index_dir : str or Path
+            Directory containing index.faiss, doc_ids.json, config.json.
+
+        Raises
+        ------
+        FileNotFoundError  If index_dir or required files are missing.
+        ValueError         If model mismatch or data integrity check fails.
+        ImportError        If faiss is not installed.
+        """
+        from ir_system.indexing.faiss_store import load_faiss_index
+
+        embeddings, doc_ids, config = load_faiss_index(
+            index_dir=index_dir,
+            expected_model=self._model.name,
+        )
+
+        self._embeddings = embeddings
+        self._doc_ids = doc_ids
+        self._built = True
+
+        logger.info(
+            "[RETRIEVER] Dense index loaded from disk: %d vectors, dim=%d.",
+            self._embeddings.shape[0],
+            self._embeddings.shape[1],
+        )
+

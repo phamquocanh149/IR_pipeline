@@ -129,6 +129,7 @@ def _build_retriever(
     batch_size: int,
     candidate_retriever_type: str = "bm25",
     candidate_model=None,
+    candidate_batch_size: int = 32,
 ):
     """
     Map --retriever string to a concrete Retriever instance.
@@ -179,7 +180,7 @@ def _build_retriever(
         stage1 = _build_candidate_retriever(
             candidate_type=candidate_retriever_type,
             candidate_model=candidate_model,
-            batch_size=batch_size,
+            batch_size=candidate_batch_size,
         )
         return CrossEncoderRetriever(
             model=model,
@@ -317,6 +318,12 @@ def _make_parser() -> argparse.ArgumentParser:
         default=None,
         help="Model for first-stage candidate retriever when --candidate-retriever=dense.",
     )
+    parser.add_argument(
+        "--candidate-batch-size",
+        type=int,
+        default=None,
+        help="Batch size for Stage 1 candidate retriever (default: same as --batch-size).",
+    )
     # Output / reproducibility
     parser.add_argument(
         "--run-name",
@@ -341,6 +348,17 @@ def _make_parser() -> argparse.ArgumentParser:
         "--verbose",
         action="store_true",
         help="Enable debug logging.",
+    )
+    # Index persistence
+    parser.add_argument(
+        "--save-index",
+        default=None,
+        help="Save FAISS index to this directory after building (e.g. indexes/fiqa_bge).",
+    )
+    parser.add_argument(
+        "--load-index",
+        default=None,
+        help="Load a previously saved FAISS index from this directory (skip encoding).",
     )
     return parser
 
@@ -429,6 +447,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             return 1
 
     # --- Build retriever ---
+    candidate_batch_size = args.candidate_batch_size or args.batch_size
     try:
         retriever = _build_retriever(
             retriever_type=args.retriever,
@@ -437,18 +456,79 @@ def main(argv: Optional[List[str]] = None) -> int:
             batch_size=args.batch_size,
             candidate_retriever_type=args.candidate_retriever,
             candidate_model=candidate_model,
+            candidate_batch_size=candidate_batch_size,
         )
     except (ValueError, TypeError) as exc:
         logger.error("Retriever construction failed: %s", exc)
         return 1
 
-    # --- Build index ---
+    # --- Build index (with optional FAISS load/save) ---
+    from ir_system.retrievers.dense import DenseRetriever
+
+    def _find_dense_retrievers(ret):
+        """Discover all DenseRetriever instances inside a (possibly composite) retriever."""
+        found = []
+        if isinstance(ret, DenseRetriever):
+            found.append(ret)
+        # CrossEncoderRetriever: check stage 1
+        if hasattr(ret, '_candidate_retriever') and ret._candidate_retriever is not None:
+            found.extend(_find_dense_retrievers(ret._candidate_retriever))
+        # HybridRetriever: check sub-retrievers
+        if hasattr(ret, '_retrievers'):
+            for sub in ret._retrievers:
+                found.extend(_find_dense_retrievers(sub))
+        return found
+
     try:
-        logger.info("[RETRIEVER] Building index...")
-        retriever.build(documents)
-        logger.info("[RETRIEVER] Index ready.")
-    except (ValueError, RuntimeError, ImportError) as exc:
-        logger.error("Index building failed: %s", exc)
+        dense_retrievers = _find_dense_retrievers(retriever)
+
+        if args.load_index and dense_retrievers:
+            # Load FAISS index into every DenseRetriever found
+            logger.info("[INDEX] Loading FAISS index from %s...", args.load_index)
+            for dr in dense_retrievers:
+                dr.load_index(args.load_index)
+            # Still need to build non-dense sub-retrievers (BM25 in hybrid, etc.)
+            # and CrossEncoder's doc_id map. Use build() but DenseRetriever
+            # will skip re-encoding since _built is already True.
+            # For composite retrievers, we need a full build so BM25/CrossEncoder
+            # components also get built.
+            if not isinstance(retriever, DenseRetriever):
+                logger.info("[RETRIEVER] Building non-dense components...")
+                # Temporarily mark dense retrievers as not-built so composite
+                # build() doesn't skip them, then restore.
+                # Actually, composite build() calls sub.build() which for
+                # DenseRetriever will re-encode. Instead, we should build
+                # the full retriever normally but let DenseRetriever skip
+                # if already loaded.
+                # The cleanest approach: build the composite, but DenseRetriever.
+                # build() will overwrite. So we save state, build, then restore.
+                saved_states = []
+                for dr in dense_retrievers:
+                    saved_states.append((
+                        dr._doc_ids[:],
+                        dr._embeddings.copy() if dr._embeddings is not None else None,
+                        dr._built,
+                    ))
+                retriever.build(documents)
+                # Restore loaded dense indexes
+                for dr, (doc_ids, embs, built) in zip(dense_retrievers, saved_states):
+                    dr._doc_ids = doc_ids
+                    dr._embeddings = embs
+                    dr._built = built
+            logger.info("[INDEX] FAISS index loaded successfully.")
+        else:
+            logger.info("[RETRIEVER] Building index...")
+            retriever.build(documents)
+            logger.info("[RETRIEVER] Index ready.")
+
+        # Save index after build if requested
+        if args.save_index and dense_retrievers:
+            logger.info("[INDEX] Saving FAISS index to %s...", args.save_index)
+            for dr in dense_retrievers:
+                dr.save_index(args.save_index)
+
+    except (ValueError, RuntimeError, ImportError, FileNotFoundError) as exc:
+        logger.error("Index building/loading failed: %s", exc)
         return 1
 
     # --- Parse metrics ---
@@ -511,6 +591,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         "candidate_top_k": args.candidate_top_k,
         "candidate_retriever": args.candidate_retriever,
         "candidate_model": args.candidate_model,
+        "candidate_batch_size": candidate_batch_size,
         "seed": args.seed,
         "dataset": str(args.dataset),
         "timestamp": timestamp,

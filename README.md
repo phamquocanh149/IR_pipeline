@@ -57,17 +57,56 @@ python -m ir_system.cli.main \
     --metrics ndcg@10 mrr@10 recall@100
 ```
 
-### Cross Encoder (reranking)
+### Cross Encoder (2-Stage Reranking)
 
 ```bash
+# Stage 1: BM25 (default)
 python -m ir_system.cli.main \
     --dataset ./data/toy \
     --model cross-encoder/ms-marco-MiniLM-L-6-v2 \
     --retriever cross-encoder \
+    --candidate-retriever bm25 \
+    --top-k 10 \
+    --candidate-top-k 100 \
+    --metrics ndcg@10 mrr@10
+
+# Stage 1: Dense
+python -m ir_system.cli.main \
+    --dataset ./data/toy \
+    --model cross-encoder/ms-marco-MiniLM-L-6-v2 \
+    --retriever cross-encoder \
+    --candidate-retriever dense \
+    --candidate-model BAAI/bge-base-en-v1.5 \
     --top-k 10 \
     --candidate-top-k 100 \
     --metrics ndcg@10 mrr@10
 ```
+
+### FAISS Index Persistence (Save / Load Offline)
+
+Save FAISS index after build:
+```bash
+python -m ir_system.cli.main \
+    --dataset ./data/toy \
+    --model BAAI/bge-base-en-v1.5 \
+    --retriever dense \
+    --save-index indexes/toy_bge \
+    --top-k 10 \
+    --metrics ndcg@10
+```
+
+Load previously saved FAISS index (skips corpus encoding):
+```bash
+python -m ir_system.cli.main \
+    --dataset ./data/toy \
+    --model BAAI/bge-base-en-v1.5 \
+    --retriever dense \
+    --load-index indexes/toy_bge \
+    --top-k 10 \
+    --metrics ndcg@10
+```
+
+Also works for the Dense branch in **Hybrid** and the Dense candidate retriever in **Cross-Encoder**.
 
 ## Dataset Format
 

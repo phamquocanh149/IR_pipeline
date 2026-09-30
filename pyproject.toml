@@ -28,10 +28,14 @@ cross-encoder = [
     "sentence-transformers>=3.0",
     "torch>=2.0",
 ]
+faiss = [
+    "faiss-cpu>=1.7",
+]
 all = [
     "sentence-transformers>=3.0",
     "transformers>=4.40",
     "torch>=2.0",
+    "faiss-cpu>=1.7",
 ]
 
 [project.scripts]
