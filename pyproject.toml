@@ -40,6 +40,7 @@ all = [
 
 [project.scripts]
 ir-system = "ir_system.cli.main:main"
+ir-analyze = "ir_system.cli.analysis:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

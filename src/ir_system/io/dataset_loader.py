@@ -53,6 +53,8 @@ class DatasetLoader:
     def load(
         self,
         dataset_dir: str | Path,
+        *,
+        language: str | None = None,
     ) -> Tuple[Sequence[Query], Sequence[Document], Qrels]:
         """
         Load full dataset from directory.
@@ -60,6 +62,9 @@ class DatasetLoader:
         Parameters
         ----------
         dataset_dir : str | Path
+        language : str, optional
+            Read queries.<language>.jsonl and documents.<language>.jsonl.
+            Use qrels.<language>.tsv if present, otherwise shared qrels.tsv.
 
         Returns
         -------
@@ -70,31 +75,57 @@ class DatasetLoader:
         FileNotFoundError  If required file is missing.
         ValueError         If data is malformed (includes file + line number).
         """
-        dataset_dir = Path(dataset_dir)
-        self._validate_dir(dataset_dir)
+        queries = self.load_queries(dataset_dir, language=language)
+        documents, qrels = self.load_corpus(dataset_dir, language=language)
+        return queries, documents, qrels
 
-        queries_path = dataset_dir / "queries.jsonl"
-        documents_path = dataset_dir / "documents.jsonl"
-        qrels_path = dataset_dir / "qrels.tsv"
+    def load_queries(self, dataset_dir: str | Path, *, language: str | None = None) -> Sequence[Query]:
+        """Load query views independently of the corpus language."""
+        path = self.query_path(dataset_dir, language=language)
+        self._check_file_exists(path)
+        logger.info("[DATASET] Loading queries from %s", path)
+        return self._load_queries(path)
 
-        self._check_file_exists(queries_path)
+    def query_path(self, dataset_dir: str | Path, *, language: str | None = None) -> Path:
+        """Resolve a query filename, also usable to discover optional views.
+
+        Vietnamese vi/vn suffixes are aliases. Prefer the explicitly requested
+        spelling when both exist. A missing view returns its expected path.
+        """
+        return self._language_file(dataset_dir, "queries", "jsonl", language)
+
+    def load_corpus(
+        self, dataset_dir: str | Path, *, language: str | None = None,
+    ) -> tuple[Sequence[Document], Qrels]:
+        """Load a fixed document-language index and its relevance judgments."""
+        documents_path = self._language_file(dataset_dir, "documents", "jsonl", language)
+        qrels_path = self._language_file(dataset_dir, "qrels", "tsv", language)
+        if language and not qrels_path.is_file():
+            qrels_path = documents_path.parent / "qrels.tsv"
         self._check_file_exists(documents_path)
         self._check_file_exists(qrels_path)
-
-        logger.info("[DATASET] Loading queries from %s", queries_path)
-        queries = self._load_queries(queries_path)
-        logger.info("[DATASET] Loaded %d queries.", len(queries))
-
         logger.info("[DATASET] Loading documents from %s", documents_path)
         documents = self._load_documents(documents_path)
-        logger.info("[DATASET] Loaded %d documents.", len(documents))
-
         logger.info("[DATASET] Loading qrels from %s", qrels_path)
-        doc_id_set = {doc.doc_id for doc in documents}
-        qrels = self._load_qrels(qrels_path, doc_id_set)
-        logger.info("[DATASET] Loaded %d qrel judgments.", len(qrels))
+        qrels = self._load_qrels(qrels_path, {doc.doc_id for doc in documents})
+        return documents, qrels
 
-        return queries, documents, qrels
+    def _language_file(self, dataset_dir, stem, extension, language) -> Path:
+        directory, suffix = self._language_path(dataset_dir, language)
+        path = directory / f"{stem}{suffix}.{extension}"
+        if not path.is_file() and language in {"vi", "vn"}:
+            alias = "vn" if language == "vi" else "vi"
+            alias_path = directory / f"{stem}.{alias}.{extension}"
+            if alias_path.is_file():
+                return alias_path
+        return path
+
+    def _language_path(self, dataset_dir, language):
+        directory = Path(dataset_dir)
+        self._validate_dir(directory)
+        if language is not None and language not in {"vn", "vi", "en", "csw"}:
+            raise ValueError(f"Unsupported dataset language: {language!r}")
+        return directory, f".{language}" if language else ""
 
     # ------------------------------------------------------------------
     # Private helpers
@@ -113,8 +144,7 @@ class DatasetLoader:
     def _check_file_exists(self, path: Path) -> None:
         if not path.exists():
             raise FileNotFoundError(
-                f"DatasetLoader: required file not found: {path}\n"
-                "Expected files: queries.jsonl, documents.jsonl, qrels.tsv"
+                f"DatasetLoader: required file not found: {path}"
             )
 
     def _load_queries(self, path: Path) -> list[Query]:

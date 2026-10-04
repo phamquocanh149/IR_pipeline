@@ -195,6 +195,12 @@ class DenseRetriever(Retriever):
     # Index Persistence (FAISS)
     # ------------------------------------------------------------------
 
+    def document_embeddings(self) -> dict[str, np.ndarray]:
+        """Return normalized document vectors for representation diagnostics."""
+        if not self._built or self._embeddings is None:
+            raise RuntimeError("DenseRetriever.document_embeddings: build or load the index first.")
+        return {doc_id: vector.copy() for doc_id, vector in zip(self._doc_ids, self._embeddings)}
+
     def save_index(self, index_dir: Union[str, Path]) -> Path:
         """
         Save the current dense index to disk as a FAISS index.
