@@ -37,6 +37,7 @@ all = [
     "transformers>=4.40",
     "torch>=2.0",
     "faiss-cpu>=1.7",
+    "colbert-ai==0.2.22",
 ]
 
 [project.scripts]
