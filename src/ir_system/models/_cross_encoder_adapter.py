@@ -34,6 +34,23 @@ class CrossEncoderAdapter(CrossEncoderModel):
         device: str = "cpu",
         default_batch_size: int = 32,
     ) -> None:
+        if "qwen3-reranker" in model_id.lower():
+            from importlib.metadata import PackageNotFoundError, version
+            from packaging.version import Version
+
+            try:
+                compatible = (Version(version("transformers")) >= Version("4.51.0")
+                              and Version(version("sentence-transformers")) >= Version("5.4.0"))
+            except PackageNotFoundError:
+                compatible = False
+            if not compatible:
+                raise ImportError(
+                    "Qwen3 Reranker requires transformers>=4.51 and sentence-transformers>=5.4. "
+                    'Install with: pip install -U -e ".[qwen3]" in a separate environment. '
+                    "Do not combine with [all]/[late-interaction], which pin transformers<4.48. "
+                    "Restart the notebook runtime after upgrading."
+                )
+
         try:
             from sentence_transformers import CrossEncoder
         except ImportError as exc:
@@ -47,7 +64,6 @@ class CrossEncoderAdapter(CrossEncoderModel):
         self._default_batch_size = default_batch_size
 
         logger.info("[MODEL] Loading CrossEncoder: %s on %s", model_id, device)
-        from sentence_transformers import CrossEncoder
         self._model = CrossEncoder(model_id, device=device)
 
     @property

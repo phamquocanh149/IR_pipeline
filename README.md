@@ -18,9 +18,26 @@ pip install -e .
 # With dense/hybrid retrieval
 pip install -e ".[dense]"
 
-# Full (all retrievers)
+# ColBERT-compatible stack (excludes Qwen3)
 pip install -e ".[all]"
 ```
+
+### Qwen3 Reranker
+
+Use a separate environment from ColBERT:
+
+```bash
+pip install -U -e ".[qwen3]"
+```
+
+Qwen3 requires Transformers >=4.51. Its native CrossEncoder integration requires
+Sentence Transformers >=5.4. The `all` and `late-interaction` extras pin
+Transformers <4.48 for ColBERT, so do not combine them with `qwen3`.
+Restart the notebook runtime after changing dependencies, then rerun the CLI.
+For example, use `--model Qwen/Qwen3-Reranker-4B --retriever cross-encoder`.
+
+References: [Qwen3 model card](https://huggingface.co/Qwen/Qwen3-Reranker-4B)
+and [Sentence Transformers v5.4 integration](https://huggingface.co/Qwen/Qwen3-Reranker-4B/discussions/11).
 
 ## Usage
 
