@@ -82,15 +82,24 @@ python -m ir_system.cli.main \
     --metrics ndcg@10 mrr@10
 ```
 
-### FAISS Index Persistence (Save / Load Offline)
+### Mandatory FAISS Index Storage and Search
 
-Save FAISS index after build:
+Dense retrieval always builds and saves a FAISS `IndexFlatIP`, then searches it
+directly using normalized inner products (cosine similarity). The `[dense]` extra
+includes FAISS. This is exact search, not an approximate index.
+
+Indexes are automatically written under `indexes/<sha256>/` relative to the current
+working directory. The hash includes the model name and ordered document IDs/text,
+so different corpora and languages have separate directories. The saved path is
+logged. Each directory contains `index.faiss`, `doc_ids.json`, and `config.json`.
+There is no save switch: every new build persists its index.
+
+Build and save automatically:
 ```bash
 python -m ir_system.cli.main \
     --dataset ./data/toy \
     --model BAAI/bge-base-en-v1.5 \
     --retriever dense \
-    --save-index indexes/toy_bge \
     --top-k 10 \
     --metrics ndcg@10
 ```
@@ -101,7 +110,7 @@ python -m ir_system.cli.main \
     --dataset ./data/toy \
     --model BAAI/bge-base-en-v1.5 \
     --retriever dense \
-    --load-index indexes/toy_bge \
+    --load-index indexes/<sha256> \
     --top-k 10 \
     --metrics ndcg@10
 ```

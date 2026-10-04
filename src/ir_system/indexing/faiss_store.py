@@ -24,9 +24,8 @@ import json
 import logging
 import time
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
-import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +37,7 @@ _CONFIG_FILE = "config.json"
 
 def save_faiss_index(
     index_dir: str | Path,
-    embeddings: np.ndarray,
+    index: Any,
     doc_ids: List[str],
     model_name: str,
     *,
@@ -51,8 +50,8 @@ def save_faiss_index(
     Parameters
     ----------
     index_dir   : Path to output directory (created if needed).
-    embeddings  : np.ndarray shape [N, dim], L2-normalized float32 vectors.
-    doc_ids     : List[str] length N — position i maps to embeddings row i.
+    index       : FAISS IndexFlatIP containing normalized float32 vectors.
+    doc_ids     : List[str] length N — position i maps to FAISS row i.
     model_name  : Canonical model identifier for compatibility checking.
     similarity  : Similarity metric used (default "cosine").
     extra_config: Optional extra metadata to store in config.json.
@@ -64,7 +63,7 @@ def save_faiss_index(
     Raises
     ------
     ImportError   If faiss is not installed.
-    ValueError    If embeddings/doc_ids length mismatch.
+    ValueError    If index/doc_ids length mismatch.
     OSError       If writing to disk fails.
     """
     try:
@@ -75,20 +74,11 @@ def save_faiss_index(
             "Install with: pip install faiss-cpu  (or faiss-gpu)"
         )
 
-    if embeddings.shape[0] != len(doc_ids):
-        raise ValueError(
-            f"save_faiss_index: embeddings rows ({embeddings.shape[0]}) "
-            f"!= doc_ids length ({len(doc_ids)})"
-        )
-
+    if index.ntotal != len(doc_ids):
+        raise ValueError("FAISS index size does not match doc_ids length.")
     index_dir = Path(index_dir)
     index_dir.mkdir(parents=True, exist_ok=True)
-
-    n_vectors, dim = embeddings.shape
-
-    # --- Build FAISS index (FlatIP for cosine with pre-normalized vectors) ---
-    index = faiss.IndexFlatIP(dim)
-    index.add(embeddings.astype(np.float32))
+    n_vectors, dim = index.ntotal, index.d
 
     # --- Write files ---
     faiss.write_index(index, str(index_dir / _INDEX_FILE))
@@ -124,7 +114,7 @@ def save_faiss_index(
 def load_faiss_index(
     index_dir: str | Path,
     expected_model: Optional[str] = None,
-) -> tuple[np.ndarray, List[str], Dict]:
+) -> tuple[Any, List[str], Dict]:
     """
     Load a previously saved FAISS index from disk.
 
@@ -136,8 +126,8 @@ def load_faiss_index(
 
     Returns
     -------
-    (embeddings, doc_ids, config)
-        embeddings : np.ndarray [N, dim] float32, reconstructed from FAISS.
+    (index, doc_ids, config)
+        index      : FAISS index ready for search.
         doc_ids    : List[str] length N.
         config     : dict from config.json.
 
@@ -177,18 +167,13 @@ def load_faiss_index(
         raise ValueError(
             f"Index model mismatch: index was built with "
             f"'{config.get('model')}', but current model is '{expected_model}'. "
-            f"Rebuild the index with --save-index or use the matching model."
+            f"Rebuild without --load-index or use the matching model."
         )
 
     # --- Load FAISS index ---
     index = faiss.read_index(str(index_path))
     n_vectors = index.ntotal
     dim = index.d
-
-    # Reconstruct embeddings from FAISS (FlatIP stores raw vectors)
-    embeddings = np.zeros((n_vectors, dim), dtype=np.float32)
-    for i in range(n_vectors):
-        embeddings[i] = index.reconstruct(i)
 
     # --- Load doc_ids ---
     with open(doc_ids_path, "r", encoding="utf-8") as f:
@@ -216,4 +201,10 @@ def load_faiss_index(
         config.get("model", "unknown"),
     )
 
-    return embeddings, doc_ids, config
+    if not isinstance(index, faiss.IndexFlatIP):
+        raise ValueError("Dense retrieval requires a FAISS IndexFlatIP index.")
+    if config.get("similarity") != "cosine" or config.get("normalized") is not True:
+        raise ValueError("Dense retrieval requires normalized cosine embeddings.")
+    if config.get("n_vectors") != n_vectors or n_vectors == 0:
+        raise ValueError("Invalid vector count in FAISS index metadata.")
+    return index, doc_ids, config

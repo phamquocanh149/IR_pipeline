@@ -17,6 +17,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dense = [
+    "faiss-cpu>=1.7",
     "sentence-transformers>=3.0",
     "torch>=2.0",
 ]
@@ -28,9 +29,6 @@ late-interaction = [
 cross-encoder = [
     "sentence-transformers>=3.0",
     "torch>=2.0",
-]
-faiss = [
-    "faiss-cpu>=1.7",
 ]
 all = [
     "sentence-transformers>=3.0",
