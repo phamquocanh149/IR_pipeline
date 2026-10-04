@@ -21,6 +21,7 @@ dense = [
     "torch>=2.0",
 ]
 late-interaction = [
+    "colbert-ai==0.2.22",
     "transformers>=4.40",
     "torch>=2.0",
 ]
