@@ -86,11 +86,19 @@ class LateInteractionRetriever(Retriever):
         texts = [doc.text for doc in documents]
 
         try:
-            all_vecs = self._model.encode(
-                texts, batch_size=self._batch_size, show_progress=True
-            )
+            if hasattr(self._model, "encode_documents"):
+                all_vecs = self._model.encode_documents(
+                    texts, batch_size=self._batch_size, show_progress=True
+                )
+            else:
+                all_vecs = self._model.encode(
+                    texts, batch_size=self._batch_size, show_progress=True
+                )
         except TypeError:
-            all_vecs = self._model.encode(texts, batch_size=self._batch_size)
+            if hasattr(self._model, "encode_documents"):
+                all_vecs = self._model.encode_documents(texts, batch_size=self._batch_size)
+            else:
+                all_vecs = self._model.encode(texts, batch_size=self._batch_size)
 
 
         if len(all_vecs) != len(documents):
@@ -132,8 +140,13 @@ class LateInteractionRetriever(Retriever):
                 f"LateInteractionRetriever.retrieve: top_k must be > 0, got {top_k}"
             )
 
-        # Encode query: List[np.ndarray] of length 1
-        q_vecs_list = self._model.encode([query.text], batch_size=1)
+        # Encode query: List[np.ndarray] of length 1.
+        # Pass is_query=True so ColBERTAdapter uses query encoding (MASK augmentation).
+        # Fallback to plain encode() for other MultiVectorEmbeddingModel implementations.
+        if hasattr(self._model, "encode_queries"):
+            q_vecs_list = self._model.encode_queries([query.text], batch_size=1)
+        else:
+            q_vecs_list = self._model.encode([query.text], batch_size=1)
         if len(q_vecs_list) != 1:
             raise RuntimeError(
                 f"LateInteractionRetriever.retrieve: expected 1 query representation, "

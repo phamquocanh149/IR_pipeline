@@ -17,25 +17,25 @@ dependencies = [
 
 [project.optional-dependencies]
 dense = [
+    "faiss-cpu>=1.7",
     "sentence-transformers>=3.0",
     "torch>=2.0",
 ]
 late-interaction = [
-    "transformers>=4.40",
+    "colbert-ai==0.2.22",
+    "transformers>=4.40,<4.48",
     "torch>=2.0",
 ]
 cross-encoder = [
     "sentence-transformers>=3.0",
     "torch>=2.0",
 ]
-faiss = [
-    "faiss-cpu>=1.7",
-]
 all = [
     "sentence-transformers>=3.0",
-    "transformers>=4.40",
+    "transformers>=4.40,<4.48",
     "torch>=2.0",
     "faiss-cpu>=1.7",
+    "colbert-ai==0.2.22",
 ]
 
 [project.scripts]

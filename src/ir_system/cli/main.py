@@ -500,11 +500,6 @@ def _make_parser() -> argparse.ArgumentParser:
 
     # ---- Index persistence ----
     parser.add_argument(
-        "--save-index",
-        default=None,
-        help="Save FAISS index to this directory after building (e.g. indexes/fiqa_bge).",
-    )
-    parser.add_argument(
         "--load-index",
         default=None,
         help="Load a previously saved FAISS index from this directory (skip encoding).",
@@ -533,33 +528,16 @@ def _find_dense_retrievers(ret):
 
 def _build_index(retriever, documents, load_dir, save_dir, logger):
     """Build (or load) the retrieval index for *documents*."""
-    from ir_system.retrievers.dense import DenseRetriever
-
     dense_retrievers = _find_dense_retrievers(retriever)
-
-    if load_dir and dense_retrievers:
+    if load_dir:
+        if not dense_retrievers:
+            raise ValueError("--load-index requires a dense retriever component.")
         logger.info("[INDEX] Loading FAISS index from %s...", load_dir)
         for dr in dense_retrievers:
             dr.load_index(load_dir)
-        if not isinstance(retriever, DenseRetriever):
-            logger.info("[RETRIEVER] Building non-dense components...")
-            saved_states = []
-            for dr in dense_retrievers:
-                saved_states.append((
-                    dr._doc_ids[:],
-                    dr._embeddings.copy() if dr._embeddings is not None else None,
-                    dr._built,
-                ))
-            retriever.build(documents)
-            for dr, (doc_ids, embs, built) in zip(dense_retrievers, saved_states):
-                dr._doc_ids = doc_ids
-                dr._embeddings = embs
-                dr._built = built
-        logger.info("[INDEX] FAISS index loaded successfully.")
-    else:
-        logger.info("[RETRIEVER] Building index...")
-        retriever.build(documents)
-        logger.info("[RETRIEVER] Index ready.")
+    logger.info("[RETRIEVER] Building index...")
+    retriever.build(documents)
+    logger.info("[RETRIEVER] Index ready.")
 
     if save_dir and dense_retrievers:
         logger.info("[INDEX] Saving FAISS index to %s...", save_dir)
