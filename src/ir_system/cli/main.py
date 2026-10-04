@@ -531,16 +531,16 @@ def _find_dense_retrievers(ret):
     return found
 
 
-def _build_index(retriever, documents, args, logger):
+def _build_index(retriever, documents, load_dir, save_dir, logger):
     """Build (or load) the retrieval index for *documents*."""
     from ir_system.retrievers.dense import DenseRetriever
 
     dense_retrievers = _find_dense_retrievers(retriever)
 
-    if args.load_index and dense_retrievers:
-        logger.info("[INDEX] Loading FAISS index from %s...", args.load_index)
+    if load_dir and dense_retrievers:
+        logger.info("[INDEX] Loading FAISS index from %s...", load_dir)
         for dr in dense_retrievers:
-            dr.load_index(args.load_index)
+            dr.load_index(load_dir)
         if not isinstance(retriever, DenseRetriever):
             logger.info("[RETRIEVER] Building non-dense components...")
             saved_states = []
@@ -561,10 +561,10 @@ def _build_index(retriever, documents, args, logger):
         retriever.build(documents)
         logger.info("[RETRIEVER] Index ready.")
 
-    if args.save_index and dense_retrievers:
-        logger.info("[INDEX] Saving FAISS index to %s...", args.save_index)
+    if save_dir and dense_retrievers:
+        logger.info("[INDEX] Saving FAISS index to %s...", save_dir)
         for dr in dense_retrievers:
-            dr.save_index(args.save_index)
+            dr.save_index(save_dir)
 
 
 # ---------------------------------------------------------------------------
@@ -741,49 +741,71 @@ def main(argv: Optional[List[str]] = None) -> int:
     all_results: Dict[str, Dict[str, float]] = {}
     all_runs: Dict[str, object] = {}
 
-    for q_lang in q_tags:
-        for d_lang in d_tags:
+    # The index depends only on the document set, so build it once per d_lang
+    # and evaluate every query language against it.
+    results_by_pair: Dict[Tuple[str, str], Dict[str, float]] = {}
+    runs_by_pair: Dict[Tuple[str, str], object] = {}
+
+    for d_lang in d_tags:
+        cur_documents = docs_by_lang[d_lang]
+        logger.info("[RUN] === Documents: %s ===", d_lang)
+
+        # With several doc sets, each one needs its own index directory.
+        def _index_dir(base: Optional[str]) -> Optional[str]:
+            if base and len(d_tags) > 1:
+                return str(Path(base) / d_lang)
+            return base
+
+        try:
+            retriever = _build_retriever(
+                retriever_type=args.retriever,
+                model=model,
+                candidate_top_k=args.candidate_top_k,
+                batch_size=args.batch_size,
+                candidate_retriever_type=args.candidate_retriever,
+                candidate_model=candidate_model,
+                candidate_batch_size=candidate_batch_size,
+            )
+        except (ValueError, TypeError) as exc:
+            logger.error("Retriever construction failed: %s", exc)
+            return 1
+
+        try:
+            _build_index(
+                retriever,
+                cur_documents,
+                _index_dir(args.load_index),
+                _index_dir(args.save_index),
+                logger,
+            )
+        except (ValueError, RuntimeError, ImportError, FileNotFoundError) as exc:
+            logger.error("Index building/loading failed: %s", exc)
+            return 1
+
+        pipeline = SearchPipeline(retriever=retriever, evaluator=evaluator)
+
+        for q_lang in q_tags:
             pair_label = f"queries={q_lang}  x  docs={d_lang}"
             logger.info("[RUN] === Pair: %s ===", pair_label)
 
-            cur_queries = queries_by_lang[q_lang]
-            cur_documents = docs_by_lang[d_lang]
-
-            # Build a fresh retriever per pair (state is per-corpus)
             try:
-                retriever = _build_retriever(
-                    retriever_type=args.retriever,
-                    model=model,
-                    candidate_top_k=args.candidate_top_k,
-                    batch_size=args.batch_size,
-                    candidate_retriever_type=args.candidate_retriever,
-                    candidate_model=candidate_model,
-                    candidate_batch_size=candidate_batch_size,
+                run, metrics_result = pipeline.evaluate(
+                    queries_by_lang[q_lang], qrels, top_k=args.top_k
                 )
-            except (ValueError, TypeError) as exc:
-                logger.error("Retriever construction failed: %s", exc)
-                return 1
-
-            # Build index for this document set
-            try:
-                _build_index(retriever, cur_documents, args, logger)
-            except (ValueError, RuntimeError, ImportError, FileNotFoundError) as exc:
-                logger.error("Index building/loading failed: %s", exc)
-                return 1
-
-            pipeline = SearchPipeline(retriever=retriever, evaluator=evaluator)
-
-            # Run evaluation
-            try:
-                run, metrics_result = pipeline.evaluate(cur_queries, qrels, top_k=args.top_k)
             except (RuntimeError, ValueError) as exc:
                 logger.error("Evaluation failed for pair %s: %s", pair_label, exc)
                 return 1
 
-            all_results[pair_label] = metrics_result
-            all_runs[pair_label] = run
-
+            results_by_pair[(q_lang, d_lang)] = metrics_result
+            runs_by_pair[(q_lang, d_lang)] = run
             logger.info("[RUN] Pair %s done.", pair_label)
+
+    # Report in the original order: grouped by query language, then doc language.
+    for q_lang in q_tags:
+        for d_lang in d_tags:
+            pair_label = f"queries={q_lang}  x  docs={d_lang}"
+            all_results[pair_label] = results_by_pair[(q_lang, d_lang)]
+            all_runs[pair_label] = runs_by_pair[(q_lang, d_lang)]
 
     # --- Print results as tables ---
     # Flush logging (stderr) first so table is not interleaved with log lines.
