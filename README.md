@@ -117,6 +117,10 @@ data/<dataset_name>/
 └── qrels.tsv          q1\td1\t2
 ```
 
+Query IDs can use `_id`, `qid`, or `id`; document IDs can use `_id`, `doc_id`,
+or `id` (in that priority order). The loader converts IDs to strings, so a numeric
+JSON ID `7` matches `7` in qrels. The `text` field remains required.
+
 ## Results
 
 ### Language analysis: run four benchmarks and create report.html
@@ -145,6 +149,9 @@ for queries and `vi`, `en` for documents. Matching `qid` values represent the sa
 information need; matching `doc_id` values represent the same document group.
 Use one shared `qrels.tsv` per benchmark. Only requested document files are needed.
 The analysis calls the existing `DatasetLoader` APIs without modifying the loader.
+The same ID aliases work in split-language files, for example
+`{"_id":7,"text":"query"}` and `{"_id":11,"text":"document"}` with
+the qrels row `7<TAB>11<TAB>1`. Keep these IDs consistent across language views.
 
 Replace the four dataset paths below with your actual benchmark folders:
 

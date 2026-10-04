@@ -94,7 +94,8 @@ def test_report_escapes_query_text(tmp_path):
 
 @pytest.mark.parametrize("use_reranker", [False, True])
 @pytest.mark.parametrize("directions", [["vi-en"], ["csw-vi"], ["vi-en", "en-en", "csw-en"], ["vi-vi", "csw-en"]])
-def test_cli_end_to_end(tmp_path, monkeypatch, use_reranker, directions):
+@pytest.mark.parametrize("id_format", ["canonical", "_id", "id"])
+def test_cli_end_to_end(tmp_path, monkeypatch, use_reranker, directions, id_format):
     from ir_system.cli import analysis as cli
     from ir_system.models.single_vector import SingleVectorEmbeddingModel
     corpus_encodes = []
@@ -121,17 +122,21 @@ def test_cli_end_to_end(tmp_path, monkeypatch, use_reranker, directions):
     directory = tmp_path / "fiqa"
     directory.mkdir()
     document_languages = {direction.split("-")[1] for direction in directions}
+    query_key = "qid" if id_format == "canonical" else id_format
+    document_key = "doc_id" if id_format == "canonical" else id_format
+    # Numeric JSON IDs must match the string IDs in qrels and saved diagnostics.
+    query_id, positive_id, negative_id = ("q", "d+", "d-") if id_format == "canonical" else (7, 11, 12)
     suffixes = {"vi": "vi", "en": "en", "csw": "csw"}
     for language, lang in suffixes.items():
         if directions == ["vi-en"] and language != "vi":
             continue  # A direction does not require query files for its document language.
-        (directory / f"queries.{lang}.jsonl").write_text(json.dumps({"qid": "q", "text": f"positive {lang}"}))
+        (directory / f"queries.{lang}.jsonl").write_text(json.dumps({query_key: query_id, "text": f"positive {lang}"}))
     for language in document_languages:
         suffix = suffixes[language]
         (directory / f"documents.{suffix}.jsonl").write_text('\n'.join(json.dumps(row) for row in [
-            {"doc_id": "d+", "text": f"positive {suffix}"},
-            {"doc_id": "d-", "text": f"negative {suffix}"}]))
-    (directory / "qrels.tsv").write_text("q\td+\t1\n")
+            {document_key: positive_id, "text": f"positive {suffix}"},
+            {document_key: negative_id, "text": f"negative {suffix}"}]))
+    (directory / "qrels.tsv").write_text(f"{query_id}\t{positive_id}\t1\n")
     output = tmp_path / "output"
     args = ["--dataset", str(directory), "--model", "fixture-encoder", "--top-k", "2", "--output", str(output)]
     if directions == ["csw-vi"]:
@@ -143,6 +148,7 @@ def test_cli_end_to_end(tmp_path, monkeypatch, use_reranker, directions):
         args.extend(["--reranker", "fixture-reranker"])
     assert cli.main(args) == 0
     report = json.loads((output / "analysis.json").read_text(encoding="utf-8"))
+    assert {p["qid"] for p in report["query_projection"]["points"]} == {str(query_id)}
     if directions == ["vi-en"]:
         assert len(report["query_projection"]["points"]) == 1
         assert report["query_gaps"] == {}
@@ -152,6 +158,8 @@ def test_cli_end_to_end(tmp_path, monkeypatch, use_reranker, directions):
     assert set(report["indexes"]) == document_languages
     actual_directions = []
     for index_language, index in report["indexes"].items():
+        assert all(r["best_positive"] == str(positive_id) and r["hardest_negative"] == str(negative_id)
+                   for r in index["margins"])
         actual_directions.extend(row["direction"] for row in index["margins"])
         for lang, stats in index["summary"].items():
             assert stats["margin"]["mean"] == pytest.approx(.6 if use_reranker else 1.)

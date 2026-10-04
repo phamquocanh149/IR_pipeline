@@ -352,14 +352,19 @@ class DatasetLoader:
                         f"  {path}:{lineno} -- invalid JSON: {exc}"
                     ) from exc
 
-                for field in ("qid", "text"):
-                    if field not in obj:
-                        raise ValueError(
-                            f"Dataset validation failed:\n"
-                            f"  {path}:{lineno} -- missing required field {field!r}"
-                        )
+                qid_key = next((k for k in ("_id", "qid", "id") if k in obj and obj[k] is not None), None)
+                if not qid_key:
+                    raise ValueError(
+                        f"Dataset validation failed:\n"
+                        f"  {path}:{lineno} -- missing required query ID field ('_id' or 'qid')"
+                    )
+                if "text" not in obj:
+                    raise ValueError(
+                        f"Dataset validation failed:\n"
+                        f"  {path}:{lineno} -- missing required field 'text'"
+                    )
 
-                qid = str(obj["qid"])
+                qid = str(obj[qid_key])
                 text = str(obj["text"])
 
                 if qid in seen_qids:
@@ -401,14 +406,19 @@ class DatasetLoader:
                         f"  {path}:{lineno} -- invalid JSON: {exc}"
                     ) from exc
 
-                for field in ("doc_id", "text"):
-                    if field not in obj:
-                        raise ValueError(
-                            f"Dataset validation failed:\n"
-                            f"  {path}:{lineno} -- missing required field {field!r}"
-                        )
+                doc_id_key = next((k for k in ("_id", "doc_id", "id") if k in obj and obj[k] is not None), None)
+                if not doc_id_key:
+                    raise ValueError(
+                        f"Dataset validation failed:\n"
+                        f"  {path}:{lineno} -- missing required document ID field ('_id' or 'doc_id')"
+                    )
+                if "text" not in obj:
+                    raise ValueError(
+                        f"Dataset validation failed:\n"
+                        f"  {path}:{lineno} -- missing required field 'text'"
+                    )
 
-                doc_id = str(obj["doc_id"])
+                doc_id = str(obj[doc_id_key])
                 text = str(obj["text"])
 
                 if doc_id in seen_doc_ids:
