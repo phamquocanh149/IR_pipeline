@@ -91,7 +91,7 @@ class SentenceTransformerAdapter(SingleVectorEmbeddingModel):
             convert_to_numpy=True,
         )
 
-        embeddings = embeddings.astype(np.float32)
+        embeddings = np.asarray(embeddings, dtype=np.float32)
 
         if embeddings.shape[0] != len(texts):
             raise RuntimeError(

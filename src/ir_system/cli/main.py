@@ -531,7 +531,7 @@ def _find_dense_retrievers(ret):
     return found
 
 
-def _build_index(retriever, documents, load_dir, save_dir, logger):
+def _build_index(retriever, documents, load_dir, logger):
     """Build (or load) the retrieval index for *documents*."""
     dense_retrievers = _find_dense_retrievers(retriever)
     if load_dir:
@@ -544,10 +544,6 @@ def _build_index(retriever, documents, load_dir, save_dir, logger):
     retriever.build(documents)
     logger.info("[RETRIEVER] Index ready.")
 
-    if save_dir and dense_retrievers:
-        logger.info("[INDEX] Saving FAISS index to %s...", save_dir)
-        for dr in dense_retrievers:
-            dr.save_index(save_dir)
 
 
 # ---------------------------------------------------------------------------
@@ -758,10 +754,9 @@ def main(argv: Optional[List[str]] = None) -> int:
                 retriever,
                 cur_documents,
                 _index_dir(args.load_index),
-                _index_dir(args.save_index),
                 logger,
             )
-        except (ValueError, RuntimeError, ImportError, FileNotFoundError) as exc:
+        except (ValueError, RuntimeError, ImportError, OSError) as exc:
             logger.error("Index building/loading failed: %s", exc)
             return 1
 
@@ -782,6 +777,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             results_by_pair[(q_lang, d_lang)] = metrics_result
             runs_by_pair[(q_lang, d_lang)] = run
             logger.info("[RUN] Pair %s done.", pair_label)
+
+        del pipeline, retriever  # Release this corpus index before building the next.
 
     # Report in the original order: grouped by query language, then doc language.
     for q_lang in q_tags:
