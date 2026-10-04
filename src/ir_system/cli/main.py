@@ -526,7 +526,7 @@ def _find_dense_retrievers(ret):
     return found
 
 
-def _build_index(retriever, documents, load_dir, save_dir, logger):
+def _build_index(retriever, documents, load_dir, logger):
     """Build (or load) the retrieval index for *documents*."""
     dense_retrievers = _find_dense_retrievers(retriever)
     if load_dir:
@@ -538,11 +538,6 @@ def _build_index(retriever, documents, load_dir, save_dir, logger):
     logger.info("[RETRIEVER] Building index...")
     retriever.build(documents)
     logger.info("[RETRIEVER] Index ready.")
-
-    if save_dir and dense_retrievers:
-        logger.info("[INDEX] Saving FAISS index to %s...", save_dir)
-        for dr in dense_retrievers:
-            dr.save_index(save_dir)
 
 
 # ---------------------------------------------------------------------------
@@ -753,7 +748,6 @@ def main(argv: Optional[List[str]] = None) -> int:
                 retriever,
                 cur_documents,
                 _index_dir(args.load_index),
-                _index_dir(args.save_index),
                 logger,
             )
         except (ValueError, RuntimeError, ImportError, FileNotFoundError) as exc:
