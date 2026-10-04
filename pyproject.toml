@@ -22,7 +22,7 @@ dense = [
 ]
 late-interaction = [
     "colbert-ai==0.2.22",
-    "transformers>=4.40",
+    "transformers>=4.40,<4.48",
     "torch>=2.0",
 ]
 cross-encoder = [
@@ -34,7 +34,7 @@ faiss = [
 ]
 all = [
     "sentence-transformers>=3.0",
-    "transformers>=4.40",
+    "transformers>=4.40,<4.48",
     "torch>=2.0",
     "faiss-cpu>=1.7",
     "colbert-ai==0.2.22",
