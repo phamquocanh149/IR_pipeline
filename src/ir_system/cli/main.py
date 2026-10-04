@@ -500,6 +500,11 @@ def _make_parser() -> argparse.ArgumentParser:
 
     # ---- Index persistence ----
     parser.add_argument(
+        "--save-index",
+        default=None,
+        help="Save an extra copy of the FAISS index to this directory after building (e.g. indexes/fiqa_bge).",
+    )
+    parser.add_argument(
         "--load-index",
         default=None,
         help="Load a previously saved FAISS index from this directory (skip encoding).",
