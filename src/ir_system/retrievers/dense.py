@@ -1,35 +1,11 @@
-"""
-Retrievers: DenseRetriever
-===========================
-Dense retrieval using a SingleVectorEmbeddingModel + cosine similarity search.
-
-Architecture
-------------
-- Accepts any SingleVectorEmbeddingModel (no concrete model assumed).
-- Encodes corpus ONCE during build(); never re-encodes per query.
-- Maintains strict row-index ↔ doc_id mapping.
-- Similarity: cosine (via normalized inner product if model normalizes,
-  or explicit normalization otherwise).
-- Tie-break: score descending, doc_id ascending.
-
-Persistence
------------
-- save_index(path): Saves FAISS index + doc_id mapping + config to disk.
-- load_index(path): Loads a previously saved index, skipping encode/build.
-- Index format: indexes/<name>/index.faiss, doc_ids.json, config.json.
-
-Key invariant
--------------
-    vector row index ↔ Document.doc_id
-
-This mapping is maintained via self._doc_ids[i] ↔ self._embeddings[i].
-"""
+"""Dense retrieval with mandatory FAISS persistence and cosine search."""
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
-import math
 from pathlib import Path
-from typing import List, Optional, Sequence, Union
+from typing import Sequence
 
 import numpy as np
 
@@ -38,240 +14,119 @@ from ir_system.domain.hit import Hit
 from ir_system.domain.query import Query
 from ir_system.models.single_vector import SingleVectorEmbeddingModel
 from ir_system.retrievers.base import Retriever
+from ir_system.indexing.faiss_store import load_faiss_index, save_faiss_index
 
 logger = logging.getLogger(__name__)
 
 
 class DenseRetriever(Retriever):
-    """
-    Dense retriever using single-vector embeddings and cosine similarity.
+    """Build and persist normalized IndexFlatIP vectors; search directly in FAISS.
 
-    Parameters
-    ----------
-    model      : SingleVectorEmbeddingModel
-    batch_size : int   Encoding batch size (default 32)
+    Default storage is indexes/<SHA256 of model and ordered corpus>.
+    index_dir can override this location for Python callers.
     """
 
-    def __init__(
-        self,
-        model: SingleVectorEmbeddingModel,
-        batch_size: int = 32,
-    ) -> None:
+    def __init__(self, model: SingleVectorEmbeddingModel, batch_size: int = 32,
+                 index_dir: str | Path | None = None) -> None:
         self._model = model
         self._batch_size = batch_size
-
-        # State populated by build() or load_index()
-        self._doc_ids: List[str] = []
-        self._embeddings: np.ndarray | None = None  # shape [N, dim]
+        self._index_dir = Path(index_dir) if index_dir is not None else None
+        self._index = None
+        self._doc_ids: list[str] = []
         self._built = False
+        self._loaded = False
+        self._corpus_hash = None
 
     def build(self, documents: Sequence[Document]) -> None:
-        """
-        Encode all documents and build the dense index.
-
-        Row i of self._embeddings corresponds to self._doc_ids[i].
-
-        Raises
-        ------
-        ValueError  If corpus is empty.
-        RuntimeError  If embedding shape is unexpected.
-        """
         if not documents:
             raise ValueError("DenseRetriever.build: corpus must not be empty.")
-
-        logger.info(
-            "[RETRIEVER] Building dense index with model=%s over %d documents...",
-            self._model.name,
-            len(documents),
-        )
-
-        self._doc_ids = [doc.doc_id for doc in documents]
-        texts = [doc.text for doc in documents]
+        doc_ids = [doc.doc_id for doc in documents]
+        digest = hashlib.sha256()
+        digest.update(json.dumps(self._model.name).encode("utf-8"))
+        for doc in documents:
+            digest.update(json.dumps([doc.doc_id, doc.text], ensure_ascii=False).encode("utf-8"))
+        corpus_hash = digest.hexdigest()
+        if self._loaded:
+            if doc_ids != self._doc_ids or (
+                self._corpus_hash is not None and self._corpus_hash != corpus_hash
+            ):
+                raise ValueError("Loaded FAISS index does not match the current corpus.")
+            self._loaded = False
+            return
 
         try:
-            embeddings = self._model.encode(
-                texts, batch_size=self._batch_size, show_progress=True
-            )
+            import faiss
+        except ImportError as exc:
+            raise ImportError("FAISS is required for dense retrieval. Install faiss-cpu.") from exc
+        self._built = False
+        texts = [doc.text for doc in documents]
+        try:
+            embeddings = self._model.encode(texts, batch_size=self._batch_size, show_progress=True)
         except TypeError:
             embeddings = self._model.encode(texts, batch_size=self._batch_size)
-
-
-        # Validate output shape
-        if not hasattr(embeddings, "shape") or embeddings.ndim != 2:
-            raise RuntimeError(
-                f"DenseRetriever.build: model.encode must return a 2-D array, "
-                f"got shape {getattr(embeddings, 'shape', type(embeddings))}"
-            )
-        if embeddings.shape[0] != len(documents):
-            raise RuntimeError(
-                f"DenseRetriever.build: expected {len(documents)} embeddings, "
-                f"got {embeddings.shape[0]}. Row-to-doc_id mapping is broken."
-            )
-
-        # L2-normalize for cosine similarity via inner product.
-        # If the model already normalizes (e.g. SentenceTransformerAdapter with
-        # normalize_embeddings=True), this is a no-op (norms ≈ 1).
+        embeddings = np.asarray(embeddings, dtype=np.float32)
+        if embeddings.ndim != 2 or embeddings.shape[0] != len(documents) or embeddings.shape[1] == 0:
+            raise RuntimeError("DenseRetriever.build: invalid embedding shape or document count.")
+        if not np.isfinite(embeddings).all():
+            raise ValueError("Dense embeddings must contain only finite values.")
         norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
-        norms = np.where(norms < 1e-10, 1.0, norms)  # avoid divide-by-zero
-        self._embeddings = (embeddings / norms).astype(np.float32)
-
+        embeddings = np.ascontiguousarray(embeddings / np.where(norms < 1e-10, 1.0, norms))
+        index = faiss.IndexFlatIP(embeddings.shape[1])
+        index.add(embeddings)
+        index_dir = self._index_dir or Path("indexes") / corpus_hash
+        save_faiss_index(index_dir, index, doc_ids, self._model.name,
+                         extra_config={"corpus_hash": corpus_hash})
+        self._index, self._doc_ids = index, doc_ids
+        self._corpus_hash = corpus_hash
         self._built = True
-        logger.info(
-            "[RETRIEVER] Dense index ready: %d vectors, dim=%d.",
-            self._embeddings.shape[0],
-            self._embeddings.shape[1],
-        )
+        logger.info("[RETRIEVER] FAISS index ready and saved to %s", index_dir)
 
     def retrieve(self, query: Query, top_k: int) -> Sequence[Hit]:
-        """
-        Encode query and return top-K hits by cosine similarity.
-
-        Parameters
-        ----------
-        query : Query
-        top_k : int   > 0
-
-        Returns
-        -------
-        List[Hit]  length ≤ top_k, score desc / doc_id asc tie-break.
-
-        Raises
-        ------
-        RuntimeError  If called before build().
-        ValueError    If top_k <= 0.
-        """
         if not self._built:
-            raise RuntimeError(
-                "DenseRetriever.retrieve: build() must be called before retrieve()."
-            )
+            raise RuntimeError("DenseRetriever.retrieve: build() or load_index() must be called first.")
         if top_k <= 0:
-            raise ValueError(
-                f"DenseRetriever.retrieve: top_k must be > 0, got {top_k}"
-            )
-
-        # Encode query — single text, returns [1, dim]
-        q_emb = self._model.encode([query.text], batch_size=1)
-        if q_emb.ndim != 2 or q_emb.shape[0] != 1:
-            raise RuntimeError(
-                f"DenseRetriever.retrieve: unexpected query embedding shape {q_emb.shape}"
-            )
-
-        # Normalize query vector
-        q_vec = q_emb[0].astype(np.float32)
-        q_norm = np.linalg.norm(q_vec)
-        if q_norm > 1e-10:
-            q_vec = q_vec / q_norm
-
-        # Cosine similarity = dot product (both sides normalized)
-        scores = self._embeddings @ q_vec  # [N]
-
-        # Sanitize non-finite scores (defensive)
-        scores = np.where(np.isfinite(scores), scores, -np.inf)
-
-        # Partial sort for efficiency: argpartition then sort top_k
-        n = len(self._doc_ids)
-        k_actual = min(top_k, n)
-
-        if k_actual == n:
-            indices = np.arange(n)
-        else:
-            # Get top_k indices (unsorted)
-            partition_idx = np.argpartition(scores, -k_actual)[-k_actual:]
-            indices = partition_idx
-
-        # Sort selected indices by score desc, doc_id asc for tie-break
-        top_pairs = sorted(
-            ((self._doc_ids[i], float(scores[i])) for i in indices),
-            key=lambda x: (-x[1], x[0]),
-        )[:top_k]
-
-        return [
-            Hit(doc_id=doc_id, score=score)
-            for doc_id, score in top_pairs
-            if math.isfinite(score)
-        ]
-
-    # ------------------------------------------------------------------
-    # Index Persistence (FAISS)
-    # ------------------------------------------------------------------
+            raise ValueError("DenseRetriever.retrieve: top_k must be > 0.")
+        vector = np.asarray(self._model.encode([query.text], batch_size=1), dtype=np.float32)
+        if vector.shape != (1, self._index.d):
+            raise RuntimeError(f"Unexpected query embedding shape {vector.shape}.")
+        if not np.isfinite(vector).all():
+            raise ValueError("Query embedding must contain only finite values.")
+        norm = np.linalg.norm(vector)
+        if norm > 1e-10:
+            vector = vector / norm
+        vector = np.ascontiguousarray(vector)
+        k = min(top_k, self._index.ntotal)
+        # Fetch one extra result to detect ties at the cutoff. Expand only when
+        # needed so doc_id tie breaking is deterministic across the full corpus.
+        limit = min(k + 1, self._index.ntotal)
+        while True:
+            scores, rows = self._index.search(vector, limit)
+            if limit == self._index.ntotal or scores[0, k - 1] > scores[0, -1]:
+                break
+            limit = min(limit * 2, self._index.ntotal)
+        pairs = sorted(((self._doc_ids[int(row)], float(score))
+                        for row, score in zip(rows[0], scores[0])
+                        if row >= 0 and np.isfinite(score)), key=lambda pair: (-pair[1], pair[0]))
+        return [Hit(doc_id=doc_id, score=score) for doc_id, score in pairs[:k]]
 
     def document_embeddings(self) -> dict[str, np.ndarray]:
-        """Return normalized document vectors for representation diagnostics."""
-        if not self._built or self._embeddings is None:
+        """Return normalized vectors on demand for representation diagnostics."""
+        if not self._built:
             raise RuntimeError("DenseRetriever.document_embeddings: build or load the index first.")
-        return {doc_id: vector.copy() for doc_id, vector in zip(self._doc_ids, self._embeddings)}
+        return {doc_id: self._index.reconstruct(row).copy()
+                for row, doc_id in enumerate(self._doc_ids)}
 
-    def save_index(self, index_dir: Union[str, Path]) -> Path:
-        """
-        Save the current dense index to disk as a FAISS index.
+    def save_index(self, index_dir: str | Path) -> Path:
+        """Save an additional copy of the current index."""
+        if not self._built:
+            raise RuntimeError("Build or load an index before saving.")
+        return save_faiss_index(index_dir, self._index, self._doc_ids, self._model.name,
+                                extra_config={"corpus_hash": self._corpus_hash})
 
-        Must be called after build(). Saves:
-          - index.faiss   : FAISS binary index (IndexFlatIP)
-          - doc_ids.json  : Ordered list mapping FAISS row → doc_id
-          - config.json   : Model name, embedding dim, similarity info
-
-        Parameters
-        ----------
-        index_dir : str or Path
-            Directory to write index files to (created if needed).
-
-        Returns
-        -------
-        Path  The index directory.
-
-        Raises
-        ------
-        RuntimeError  If called before build().
-        ImportError   If faiss is not installed.
-        """
-        if not self._built or self._embeddings is None:
-            raise RuntimeError(
-                "DenseRetriever.save_index: build() must be called before "
-                "saving the index."
-            )
-
-        from ir_system.indexing.faiss_store import save_faiss_index
-
-        return save_faiss_index(
-            index_dir=index_dir,
-            embeddings=self._embeddings,
-            doc_ids=self._doc_ids,
-            model_name=self._model.name,
-            similarity="cosine",
-        )
-
-    def load_index(self, index_dir: Union[str, Path]) -> None:
-        """
-        Load a previously saved FAISS index from disk, skipping build().
-
-        After a successful load, the retriever is ready for retrieve() calls
-        without needing to call build().
-
-        Parameters
-        ----------
-        index_dir : str or Path
-            Directory containing index.faiss, doc_ids.json, config.json.
-
-        Raises
-        ------
-        FileNotFoundError  If index_dir or required files are missing.
-        ValueError         If model mismatch or data integrity check fails.
-        ImportError        If faiss is not installed.
-        """
-        from ir_system.indexing.faiss_store import load_faiss_index
-
-        embeddings, doc_ids, config = load_faiss_index(
-            index_dir=index_dir,
-            expected_model=self._model.name,
-        )
-
-        self._embeddings = embeddings
-        self._doc_ids = doc_ids
+    def load_index(self, index_dir: str | Path) -> None:
+        """Load FAISS directly without reconstructing a NumPy embedding matrix."""
+        index, doc_ids, config = load_faiss_index(index_dir, expected_model=self._model.name)
+        self._index, self._doc_ids = index, doc_ids
+        self._corpus_hash = config.get("corpus_hash")
         self._built = True
-
-        logger.info(
-            "[RETRIEVER] Dense index loaded from disk: %d vectors, dim=%d.",
-            self._embeddings.shape[0],
-            self._embeddings.shape[1],
-        )
-
+        self._loaded = True

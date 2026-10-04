@@ -1,4 +1,4 @@
-"""
+﻿"""
 IO: DatasetLoader
 ==================
 Loads queries, documents, and qrels from a dataset directory.

@@ -500,11 +500,6 @@ def _make_parser() -> argparse.ArgumentParser:
 
     # ---- Index persistence ----
     parser.add_argument(
-        "--save-index",
-        default=None,
-        help="Save FAISS index to this directory after building (e.g. indexes/fiqa_bge).",
-    )
-    parser.add_argument(
         "--load-index",
         default=None,
         help="Load a previously saved FAISS index from this directory (skip encoding).",
@@ -533,38 +528,15 @@ def _find_dense_retrievers(ret):
 
 def _build_index(retriever, documents, args, logger):
     """Build (or load) the retrieval index for *documents*."""
-    from ir_system.retrievers.dense import DenseRetriever
-
     dense_retrievers = _find_dense_retrievers(retriever)
-
-    if args.load_index and dense_retrievers:
-        logger.info("[INDEX] Loading FAISS index from %s...", args.load_index)
+    if args.load_index:
+        if not dense_retrievers:
+            raise ValueError("--load-index requires a dense retriever component.")
         for dr in dense_retrievers:
             dr.load_index(args.load_index)
-        if not isinstance(retriever, DenseRetriever):
-            logger.info("[RETRIEVER] Building non-dense components...")
-            saved_states = []
-            for dr in dense_retrievers:
-                saved_states.append((
-                    dr._doc_ids[:],
-                    dr._embeddings.copy() if dr._embeddings is not None else None,
-                    dr._built,
-                ))
-            retriever.build(documents)
-            for dr, (doc_ids, embs, built) in zip(dense_retrievers, saved_states):
-                dr._doc_ids = doc_ids
-                dr._embeddings = embs
-                dr._built = built
-        logger.info("[INDEX] FAISS index loaded successfully.")
-    else:
-        logger.info("[RETRIEVER] Building index...")
-        retriever.build(documents)
-        logger.info("[RETRIEVER] Index ready.")
-
-    if args.save_index and dense_retrievers:
-        logger.info("[INDEX] Saving FAISS index to %s...", args.save_index)
-        for dr in dense_retrievers:
-            dr.save_index(args.save_index)
+    logger.info("[RETRIEVER] Building index...")
+    retriever.build(documents)
+    logger.info("[RETRIEVER] Index ready.")
 
 
 # ---------------------------------------------------------------------------
