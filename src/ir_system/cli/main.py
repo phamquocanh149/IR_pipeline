@@ -431,6 +431,22 @@ def _make_parser() -> argparse.ArgumentParser:
         help="Model identifier (HuggingFace name or path). Required for non-BM25 retrievers.",
     )
     parser.add_argument(
+        "--query-prefix",
+        default=None,
+        help=(
+            "Prefix added to every query for single-vector models. Default: taken from "
+            "the model (Qwen3, ...) or inferred from its name (e5, bge). Pass '' to disable."
+        ),
+    )
+    parser.add_argument(
+        "--doc-prefix",
+        default=None,
+        help=(
+            "Prefix added to every document for single-vector models. Default: taken from "
+            "the model or inferred from its name (e5). Pass '' to disable."
+        ),
+    )
+    parser.add_argument(
         "--model-type",
         choices=["single-vector", "multi-vector", "cross-encoder"],
         default=None,
@@ -685,6 +701,8 @@ def main(argv: Optional[List[str]] = None) -> int:
                 model_type=args.model_type,
                 device=args.device,
                 batch_size=args.batch_size,
+                query_prompt=args.query_prefix,
+                document_prompt=args.doc_prefix,
             )
         except (ImportError, ValueError, RuntimeError) as exc:
             logger.error("Model loading failed: %s", exc)
