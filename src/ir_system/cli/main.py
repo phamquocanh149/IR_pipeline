@@ -6,31 +6,55 @@ Entry point for the IR pipeline.
 Responsibilities (ONLY):
 1. Parse CLI arguments.
 2. Setup logging.
-3. Load dataset.
+3. Load dataset (with multilingual split-file support).
 4. Instantiate model (via ModelFactory).
 5. Instantiate retriever (mapping --retriever string to concrete class).
 6. Instantiate metrics (parsing --metrics string list).
 7. Instantiate Evaluator and SearchPipeline.
 8. Build retriever index.
-9. Execute evaluation.
-10. Print summary.
+9. Execute evaluation over every (queries_lang x docs_lang) pair.
+10. Print results as per-metric tables.
 11. Save results to results/<run_id>/.
 
 No BM25/NDCG/RRF formula logic here.
-No business logic here — only wiring.
+No business logic here -- only wiring.
 """
 from __future__ import annotations
 
 import argparse
+import io
 import json
 import logging
 import random
 import sys
 import time
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
+
+
+# ---------------------------------------------------------------------------
+# Ensure stdout can handle Unicode box-drawing characters on Windows.
+# ---------------------------------------------------------------------------
+def _ensure_utf8_stdout() -> None:
+    """Re-configure stdout/stderr to UTF-8 when the shell encoding differs."""
+    for stream_name in ("stdout", "stderr"):
+        stream = getattr(sys, stream_name)
+        if hasattr(stream, "reconfigure"):
+            try:
+                stream.reconfigure(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
+        elif hasattr(stream, "buffer"):
+            new_stream = io.TextIOWrapper(
+                stream.buffer, encoding="utf-8", errors="replace", line_buffering=True
+            )
+            setattr(sys, stream_name, new_stream)
+
+
+_ensure_utf8_stdout()
+
 
 
 def _setup_logging(verbose: bool) -> None:
@@ -84,7 +108,6 @@ def _parse_metric_spec(spec: str):
         )
 
 
-
 def _build_candidate_retriever(
     candidate_type: str,
     candidate_model,
@@ -92,8 +115,6 @@ def _build_candidate_retriever(
 ):
     """
     Build the first-stage (candidate) retriever for cross-encoder reranking.
-
-    This is separated from _build_retriever to keep the composition root clean.
     """
     from ir_system.retrievers.bm25 import BM25Retriever
     from ir_system.retrievers.dense import DenseRetriever
@@ -133,8 +154,6 @@ def _build_retriever(
 ):
     """
     Map --retriever string to a concrete Retriever instance.
-
-    This is the composition root — the only place that knows string→class mapping.
     """
     from ir_system.retrievers.bm25 import BM25Retriever
     from ir_system.retrievers.dense import DenseRetriever
@@ -176,7 +195,6 @@ def _build_retriever(
                 f"Got: {type(model).__name__}. "
                 "Use --model-type cross-encoder."
             )
-        # Build the first-stage candidate retriever from CLI args.
         stage1 = _build_candidate_retriever(
             candidate_type=candidate_retriever_type,
             candidate_model=candidate_model,
@@ -212,11 +230,104 @@ def _build_retriever(
         )
 
 
+# ---------------------------------------------------------------------------
+# Table printing helpers
+# ---------------------------------------------------------------------------
+
+def _col_width(values: Sequence[str], header: str, min_w: int = 8) -> int:
+    """Return the column width needed to fit the header and all values."""
+    return max(min_w, len(header), *(len(v) for v in values))
+
+
+def _print_metric_table(
+    metric_name: str,
+    pair_labels: List[str],
+    scores: List[float],
+) -> None:
+    """
+    Print a single metric table.
+
+    Uses Unicode box-drawing characters when the terminal supports them,
+    falls back to ASCII otherwise.
+
+    Example output (Unicode)
+    ------------------------
+    ╔══════════════════════════════════╦══════════╗
+    ║  METRIC: ndcg@10                 ║   score  ║
+    ╠══════════════════════════════════╬══════════╣
+    ║  queries=vi  x  docs=vi          ║   0.7500 ║
+    ║  queries=en  x  docs=vi          ║   0.6230 ║
+    ╚══════════════════════════════════╩══════════╝
+    """
+    # Detect if stdout can render Unicode box chars
+    _enc = getattr(sys.stdout, "encoding", "ascii") or "ascii"
+    _use_unicode = _enc.lower().replace("-", "") in (
+        "utf8", "utf16", "utf32", "cp65001"
+    )
+
+    if _use_unicode:
+        C = dict(tl="\u2554", tr="\u2557", bl="\u255a", br="\u255d",
+                 h="\u2550", v="\u2551", tc="\u2566", bc="\u2569",
+                 ml="\u2560", mr="\u2563", mc="\u256c")
+    else:
+        C = dict(tl="+", tr="+", bl="+", br="+",
+                 h="-", v="|", tc="+", bc="+",
+                 ml="+", mr="+", mc="+")
+
+    SCORE_HDR = "  score  "
+    SCORE_W = max(len(SCORE_HDR), 10)
+    pair_w = _col_width(pair_labels, f"  METRIC: {metric_name}  ", min_w=30)
+
+    top    = C["tl"] + C["h"] * pair_w + C["tc"] + C["h"] * SCORE_W + C["tr"]
+    header = C["v"] + f"  METRIC: {metric_name:<{pair_w - 2}}" + C["v"] + f"{SCORE_HDR:^{SCORE_W}}" + C["v"]
+    sep    = C["ml"] + C["h"] * pair_w + C["mc"] + C["h"] * SCORE_W + C["mr"]
+    bottom = C["bl"] + C["h"] * pair_w + C["bc"] + C["h"] * SCORE_W + C["br"]
+
+    print(top)
+    print(header)
+    print(sep)
+    for label, score in zip(pair_labels, scores):
+        score_str = f"{score:.4f}"
+        row = C["v"] + f"  {label:<{pair_w - 2}}" + C["v"] + f"{score_str:^{SCORE_W}}" + C["v"]
+        print(row)
+    print(bottom)
+    print()
+
+
+def _print_all_tables(
+    all_results: Dict[str, Dict[str, float]],
+    metric_names: List[str],
+) -> None:
+    """
+    Print one table per metric, with rows = retrieval pairs.
+
+    Parameters
+    ----------
+    all_results : dict  pair_label -> {metric_name: score}
+    metric_names : list[str]  ordered list of metric names to display
+    """
+    pair_labels = list(all_results.keys())
+
+    print()
+    print("=" * 60)
+    print("  CROSS-LINGUAL RETRIEVAL EVALUATION RESULTS")
+    print("=" * 60)
+    print()
+
+    for metric in metric_names:
+        scores = [all_results[label].get(metric, float("nan")) for label in pair_labels]
+        _print_metric_table(metric, pair_labels, scores)
+
+
+# ---------------------------------------------------------------------------
+# Save helpers
+# ---------------------------------------------------------------------------
+
 def _save_results(
     output_dir: Path,
     run,
-    metrics_dict,
-    config_dict,
+    metrics_dict: Dict,
+    config_dict: Dict,
 ) -> None:
     """Save config.json, metrics.json, and run.jsonl to output_dir."""
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -243,21 +354,27 @@ def _save_results(
             }
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
-    logging.getLogger(__name__).info(
-        "[RESULT] Saved to %s", output_dir
-    )
+    logging.getLogger(__name__).info("[RESULT] Saved to %s", output_dir)
 
+
+# ---------------------------------------------------------------------------
+# Argument parser
+# ---------------------------------------------------------------------------
 
 def _make_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m ir_system.cli.main",
-        description="IR Pipeline — end-to-end information retrieval evaluation.",
+        description="IR Pipeline -- end-to-end information retrieval evaluation.",
     )
-    # Required
+    # ---- Required ----
     parser.add_argument(
         "--dataset",
         required=True,
-        help="Path to dataset directory (must contain queries.jsonl, documents.jsonl, qrels.tsv).",
+        help=(
+            "Path to dataset directory. For multilingual datasets may contain "
+            "queries.{vi,en,csw}.jsonl and documents.{vi,en}.jsonl. "
+            "For legacy datasets: queries.jsonl, documents.jsonl, qrels.tsv."
+        ),
     )
     parser.add_argument(
         "--retriever",
@@ -277,7 +394,37 @@ def _make_parser() -> argparse.ArgumentParser:
         required=True,
         help="Metrics to compute, e.g. ndcg@10 mrr@10 recall@100",
     )
-    # Model options
+
+    # ---- Multilingual selection ----
+    parser.add_argument(
+        "--queries",
+        "--queries-lang",
+        dest="queries_lang",
+        nargs="+",
+        default=["all"],
+        metavar="LANG",
+        help=(
+            "Query language variant(s) to use. "
+            "Choices: vi en csw all (default: all). "
+            "Example: --queries vi en  -- uses vi and en query files."
+        ),
+    )
+    parser.add_argument(
+        "--documents",
+        "--docs-lang",
+        "--docs",
+        dest="docs_lang",
+        nargs="+",
+        default=["all"],
+        metavar="LANG",
+        help=(
+            "Document language variant(s) to use. "
+            "Choices: vi en all (default: all). "
+            "Example: --documents vi  -- uses only vi document file."
+        ),
+    )
+
+    # ---- Model options ----
     parser.add_argument(
         "--model",
         default=None,
@@ -324,7 +471,8 @@ def _make_parser() -> argparse.ArgumentParser:
         default=None,
         help="Batch size for Stage 1 candidate retriever (default: same as --batch-size).",
     )
-    # Output / reproducibility
+
+    # ---- Output / reproducibility ----
     parser.add_argument(
         "--run-name",
         "--name",
@@ -349,7 +497,8 @@ def _make_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Enable debug logging.",
     )
-    # Index persistence
+
+    # ---- Index persistence ----
     parser.add_argument(
         "--save-index",
         default=None,
@@ -362,6 +511,80 @@ def _make_parser() -> argparse.ArgumentParser:
     )
     return parser
 
+
+# ---------------------------------------------------------------------------
+# Retriever index helpers (DenseRetriever aware)
+# ---------------------------------------------------------------------------
+
+def _find_dense_retrievers(ret):
+    """Discover all DenseRetriever instances inside a (possibly composite) retriever."""
+    from ir_system.retrievers.dense import DenseRetriever
+
+    found = []
+    if isinstance(ret, DenseRetriever):
+        found.append(ret)
+    if hasattr(ret, "_candidate_retriever") and ret._candidate_retriever is not None:
+        found.extend(_find_dense_retrievers(ret._candidate_retriever))
+    if hasattr(ret, "_retrievers"):
+        for sub in ret._retrievers:
+            found.extend(_find_dense_retrievers(sub))
+    return found
+
+
+def _build_index(retriever, documents, args, logger):
+    """Build (or load) the retrieval index for *documents*."""
+    from ir_system.retrievers.dense import DenseRetriever
+
+    dense_retrievers = _find_dense_retrievers(retriever)
+
+    if args.load_index and dense_retrievers:
+        logger.info("[INDEX] Loading FAISS index from %s...", args.load_index)
+        for dr in dense_retrievers:
+            dr.load_index(args.load_index)
+        if not isinstance(retriever, DenseRetriever):
+            logger.info("[RETRIEVER] Building non-dense components...")
+            saved_states = []
+            for dr in dense_retrievers:
+                saved_states.append((
+                    dr._doc_ids[:],
+                    dr._embeddings.copy() if dr._embeddings is not None else None,
+                    dr._built,
+                ))
+            retriever.build(documents)
+            for dr, (doc_ids, embs, built) in zip(dense_retrievers, saved_states):
+                dr._doc_ids = doc_ids
+                dr._embeddings = embs
+                dr._built = built
+        logger.info("[INDEX] FAISS index loaded successfully.")
+    else:
+        logger.info("[RETRIEVER] Building index...")
+        retriever.build(documents)
+        logger.info("[RETRIEVER] Index ready.")
+
+    if args.save_index and dense_retrievers:
+        logger.info("[INDEX] Saving FAISS index to %s...", args.save_index)
+        for dr in dense_retrievers:
+            dr.save_index(args.save_index)
+
+
+# ---------------------------------------------------------------------------
+# Resolve lang spec helper (wraps DatasetLoader utility)
+# ---------------------------------------------------------------------------
+
+def _parse_lang_spec(raw: List[str], kind: str) -> str | List[str]:
+    """
+    Normalise --queries-lang / --docs-lang into "all" or a list of tags.
+
+    ``raw`` comes straight from argparse (always a list because nargs="+").
+    """
+    if len(raw) == 1 and raw[0].lower() == "all":
+        return "all"
+    return [t.lower() for t in raw]
+
+
+# ---------------------------------------------------------------------------
+# main
+# ---------------------------------------------------------------------------
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = _make_parser()
@@ -389,32 +612,84 @@ def main(argv: Optional[List[str]] = None) -> int:
     # --- Model requirement check ---
     needs_model = args.retriever != "bm25"
     if needs_model and not args.model:
-        logger.error(
-            "--model is required for --retriever=%s", args.retriever
-        )
+        logger.error("--model is required for --retriever=%s", args.retriever)
         return 1
 
     # --- Validate candidate-retriever usage ---
     is_cross_encoder = args.retriever in ("cross-encoder", "cross_encoder", "reranker")
     if not is_cross_encoder and args.candidate_model:
-        logger.warning(
-            "--candidate-model is ignored when --retriever is not cross-encoder."
-        )
+        logger.warning("--candidate-model is ignored when --retriever is not cross-encoder.")
     if is_cross_encoder and args.candidate_retriever == "dense" and not args.candidate_model:
-        logger.error(
-            "--candidate-model is required when --candidate-retriever=dense."
-        )
+        logger.error("--candidate-model is required when --candidate-retriever=dense.")
+        return 1
+
+    # --- Resolve lang specs ---
+    from ir_system.io.dataset_loader import DatasetLoader, QUERY_LANGS, DOC_LANGS, _resolve_lang_spec
+
+    queries_lang_spec = _parse_lang_spec(args.queries_lang, "queries")
+    docs_lang_spec = _parse_lang_spec(args.docs_lang, "docs")
+
+    # Validate lang tags early (before loading models)
+    try:
+        q_tags = _resolve_lang_spec(queries_lang_spec, QUERY_LANGS)
+        d_tags = _resolve_lang_spec(docs_lang_spec, DOC_LANGS)
+    except ValueError as exc:
+        logger.error("Language spec error: %s", exc)
         return 1
 
     # --- Load dataset ---
-    from ir_system.io.dataset_loader import DatasetLoader
-
     try:
         loader = DatasetLoader(strict_qrels=False)
-        queries, documents, qrels = loader.load(args.dataset)
+
+        # Check dataset dir exists
+        dataset_path = Path(args.dataset)
+        if not dataset_path.exists():
+            raise FileNotFoundError(
+                f"DatasetLoader: dataset directory not found: {dataset_path}"
+            )
+
+        # Detect mode: multilingual split files vs legacy
+        has_legacy_queries = (dataset_path / "queries.jsonl").exists()
+        has_legacy_docs = (dataset_path / "documents.jsonl").exists()
+        is_legacy = has_legacy_queries and has_legacy_docs
+
+        if is_legacy:
+            # Legacy: load once, ignore --queries-lang / --docs-lang
+            logger.info(
+                "[DATASET] Legacy single-file layout detected. "
+                "--queries-lang / --docs-lang are ignored."
+            )
+            queries, documents, qrels = loader.load(args.dataset)
+            queries_by_lang: Dict = {"all": list(queries)}
+            docs_by_lang: Dict = {"all": list(documents)}
+        else:
+            # Multilingual: load requested lang variants
+            queries_by_lang = loader.load_queries(args.dataset, lang=queries_lang_spec)
+            docs_by_lang = loader.load_documents(args.dataset, lang=docs_lang_spec)
+
+            # Collect all doc ids across all doc langs for qrels validation
+            all_doc_ids: set = set()
+            for docs in docs_by_lang.values():
+                for doc in docs:
+                    all_doc_ids.add(doc.doc_id)
+
+            qrels = loader.load_qrels(args.dataset, known_doc_ids=all_doc_ids)
+
+        # Filter to tags actually found on disk
+        q_tags = list(queries_by_lang.keys())
+        d_tags = list(docs_by_lang.keys())
+
     except (FileNotFoundError, ValueError, NotADirectoryError) as exc:
         logger.error("Dataset loading failed:\n%s", exc)
         return 1
+
+    logger.info(
+        "[DATASET] Query langs: %s | Doc langs: %s", q_tags, d_tags
+    )
+    logger.info(
+        "[DATASET] Cross-retrieval pairs to run: %d",
+        len(q_tags) * len(d_tags),
+    )
 
     # --- Load model ---
     from ir_system.models.factory import create_model
@@ -446,91 +721,6 @@ def main(argv: Optional[List[str]] = None) -> int:
             logger.error("Candidate model loading failed: %s", exc)
             return 1
 
-    # --- Build retriever ---
-    candidate_batch_size = args.candidate_batch_size or args.batch_size
-    try:
-        retriever = _build_retriever(
-            retriever_type=args.retriever,
-            model=model,
-            candidate_top_k=args.candidate_top_k,
-            batch_size=args.batch_size,
-            candidate_retriever_type=args.candidate_retriever,
-            candidate_model=candidate_model,
-            candidate_batch_size=candidate_batch_size,
-        )
-    except (ValueError, TypeError) as exc:
-        logger.error("Retriever construction failed: %s", exc)
-        return 1
-
-    # --- Build index (with optional FAISS load/save) ---
-    from ir_system.retrievers.dense import DenseRetriever
-
-    def _find_dense_retrievers(ret):
-        """Discover all DenseRetriever instances inside a (possibly composite) retriever."""
-        found = []
-        if isinstance(ret, DenseRetriever):
-            found.append(ret)
-        # CrossEncoderRetriever: check stage 1
-        if hasattr(ret, '_candidate_retriever') and ret._candidate_retriever is not None:
-            found.extend(_find_dense_retrievers(ret._candidate_retriever))
-        # HybridRetriever: check sub-retrievers
-        if hasattr(ret, '_retrievers'):
-            for sub in ret._retrievers:
-                found.extend(_find_dense_retrievers(sub))
-        return found
-
-    try:
-        dense_retrievers = _find_dense_retrievers(retriever)
-
-        if args.load_index and dense_retrievers:
-            # Load FAISS index into every DenseRetriever found
-            logger.info("[INDEX] Loading FAISS index from %s...", args.load_index)
-            for dr in dense_retrievers:
-                dr.load_index(args.load_index)
-            # Still need to build non-dense sub-retrievers (BM25 in hybrid, etc.)
-            # and CrossEncoder's doc_id map. Use build() but DenseRetriever
-            # will skip re-encoding since _built is already True.
-            # For composite retrievers, we need a full build so BM25/CrossEncoder
-            # components also get built.
-            if not isinstance(retriever, DenseRetriever):
-                logger.info("[RETRIEVER] Building non-dense components...")
-                # Temporarily mark dense retrievers as not-built so composite
-                # build() doesn't skip them, then restore.
-                # Actually, composite build() calls sub.build() which for
-                # DenseRetriever will re-encode. Instead, we should build
-                # the full retriever normally but let DenseRetriever skip
-                # if already loaded.
-                # The cleanest approach: build the composite, but DenseRetriever.
-                # build() will overwrite. So we save state, build, then restore.
-                saved_states = []
-                for dr in dense_retrievers:
-                    saved_states.append((
-                        dr._doc_ids[:],
-                        dr._embeddings.copy() if dr._embeddings is not None else None,
-                        dr._built,
-                    ))
-                retriever.build(documents)
-                # Restore loaded dense indexes
-                for dr, (doc_ids, embs, built) in zip(dense_retrievers, saved_states):
-                    dr._doc_ids = doc_ids
-                    dr._embeddings = embs
-                    dr._built = built
-            logger.info("[INDEX] FAISS index loaded successfully.")
-        else:
-            logger.info("[RETRIEVER] Building index...")
-            retriever.build(documents)
-            logger.info("[RETRIEVER] Index ready.")
-
-        # Save index after build if requested
-        if args.save_index and dense_retrievers:
-            logger.info("[INDEX] Saving FAISS index to %s...", args.save_index)
-            for dr in dense_retrievers:
-                dr.save_index(args.save_index)
-
-    except (ValueError, RuntimeError, ImportError, FileNotFoundError) as exc:
-        logger.error("Index building/loading failed: %s", exc)
-        return 1
-
     # --- Parse metrics ---
     try:
         metrics = [_parse_metric_spec(spec) for spec in args.metrics]
@@ -543,31 +733,77 @@ def main(argv: Optional[List[str]] = None) -> int:
     from ir_system.pipeline.search_pipeline import SearchPipeline
 
     evaluator = Evaluator(metrics)
-    pipeline = SearchPipeline(retriever=retriever, evaluator=evaluator)
 
-    # --- Run evaluation ---
-    try:
-        run, metrics_result = pipeline.evaluate(queries, qrels, top_k=args.top_k)
-    except (RuntimeError, ValueError) as exc:
-        logger.error("Evaluation failed: %s", exc)
-        return 1
+    # --- Cross-lingual retrieval loop ---
+    candidate_batch_size = args.candidate_batch_size or args.batch_size
 
-    # --- Print summary ---
-    print("\n" + "=" * 50)
-    print("EVALUATION RESULTS")
-    print("=" * 50)
-    for metric_name, score in metrics_result.items():
-        print(f"  {metric_name:<20}  {score:.4f}")
-    print("=" * 50 + "\n")
+    # all_results: pair_label -> {metric_name: score}
+    all_results: Dict[str, Dict[str, float]] = {}
+    all_runs: Dict[str, object] = {}
 
-    # --- Build config dict ---
+    for q_lang in q_tags:
+        for d_lang in d_tags:
+            pair_label = f"queries={q_lang}  x  docs={d_lang}"
+            logger.info("[RUN] === Pair: %s ===", pair_label)
+
+            cur_queries = queries_by_lang[q_lang]
+            cur_documents = docs_by_lang[d_lang]
+
+            # Build a fresh retriever per pair (state is per-corpus)
+            try:
+                retriever = _build_retriever(
+                    retriever_type=args.retriever,
+                    model=model,
+                    candidate_top_k=args.candidate_top_k,
+                    batch_size=args.batch_size,
+                    candidate_retriever_type=args.candidate_retriever,
+                    candidate_model=candidate_model,
+                    candidate_batch_size=candidate_batch_size,
+                )
+            except (ValueError, TypeError) as exc:
+                logger.error("Retriever construction failed: %s", exc)
+                return 1
+
+            # Build index for this document set
+            try:
+                _build_index(retriever, cur_documents, args, logger)
+            except (ValueError, RuntimeError, ImportError, FileNotFoundError) as exc:
+                logger.error("Index building/loading failed: %s", exc)
+                return 1
+
+            pipeline = SearchPipeline(retriever=retriever, evaluator=evaluator)
+
+            # Run evaluation
+            try:
+                run, metrics_result = pipeline.evaluate(cur_queries, qrels, top_k=args.top_k)
+            except (RuntimeError, ValueError) as exc:
+                logger.error("Evaluation failed for pair %s: %s", pair_label, exc)
+                return 1
+
+            all_results[pair_label] = metrics_result
+            all_runs[pair_label] = run
+
+            logger.info("[RUN] Pair %s done.", pair_label)
+
+    # --- Print results as tables ---
+    # Flush logging (stderr) first so table is not interleaved with log lines.
+    logging.shutdown()
+    sys.stderr.flush()
+    metric_names = list(next(iter(all_results.values())).keys()) if all_results else []
+    _print_all_tables(all_results, metric_names)
+    sys.stdout.flush()
+    # Re-open basic logging for remaining INFO messages (save results).
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s  %(levelname)-8s  %(message)s",
+        datefmt="%H:%M:%S",
+    )
+
+    # --- Resolve output directory ---
     timestamp = time.strftime("%Y%m%dT%H%M%S")
 
-    # Resolve output directory and run name
     if args.output:
         raw_output = Path(args.output)
-        # If user passed a bare name without path separators (e.g. 'my_run'),
-        # place it under results/ to keep standard directory layout.
         if len(raw_output.parts) == 1 and not args.output.startswith((".", "/", "\\")):
             output_path = Path("results") / raw_output
         else:
@@ -580,12 +816,15 @@ def main(argv: Optional[List[str]] = None) -> int:
         run_name = f"{timestamp}_{args.retriever}"
         output_path = Path("results") / run_name
 
+    # --- Build config dict ---
     config = {
         "run_id": run_name,
         "model": args.model,
         "retriever": args.retriever,
         "top_k": args.top_k,
         "metrics": args.metrics,
+        "queries_lang": q_tags,
+        "docs_lang": d_tags,
         "device": args.device,
         "batch_size": args.batch_size,
         "candidate_top_k": args.candidate_top_k,
@@ -597,9 +836,23 @@ def main(argv: Optional[List[str]] = None) -> int:
         "timestamp": timestamp,
     }
 
-    # --- Save results ---
+    # --- Save combined results ---
+    # Save aggregate metrics summary + one sub-dir per pair
+    combined_metrics = {
+        label: scores for label, scores in all_results.items()
+    }
     try:
-        _save_results(output_path, run, metrics_result, config)
+        # Use the last run for the top-level run.jsonl (single-pair compat)
+        last_pair = list(all_runs.keys())[-1]
+        _save_results(output_path, all_runs[last_pair], combined_metrics, config)
+
+        # Per-pair subdirectories for multi-pair runs
+        if len(all_runs) > 1:
+            for label, run in all_runs.items():
+                safe_label = label.replace(" ", "").replace("=", "_").replace("x", "X")
+                pair_dir = output_path / safe_label
+                _save_results(pair_dir, run, all_results[label], config)
+
     except OSError as exc:
         logger.error("Failed to save results: %s", exc)
         return 1

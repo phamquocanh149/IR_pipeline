@@ -1,0 +1,10 @@
+{"doc_id": "d1", "text": "BM25 là hàm xếp hạng xác suất được sử dụng trong truy xuất thông tin. Nó dựa trên công thức Okapi BM25 và xem xét tần suất thuật ngữ và tần suất tài liệu nghịch đảo."}
+{"doc_id": "d2", "text": "Truy xuất dày đặc sử dụng mô hình embedding thần kinh để mã hóa truy vấn và tài liệu thành biểu diễn vector dày đặc. Độ tương tự được tính bằng cosine hoặc tích vô hướng."}
+{"doc_id": "d3", "text": "Các độ đo đánh giá truy xuất thông tin bao gồm NDCG, MRR, MAP và Recall. Các độ đo này đo lường mức độ một hệ thống xếp hạng tài liệu liên quan."}
+{"doc_id": "d4", "text": "Kết hợp xếp hạng nghịch đảo (RRF) là kỹ thuật tìm kiếm lai kết hợp xếp hạng từ nhiều hệ thống truy xuất. Mỗi tài liệu nhận điểm dựa trên thứ hạng trong từng danh sách."}
+{"doc_id": "d5", "text": "NDCG là viết tắt của Lợi ích tích lũy chiết khấu chuẩn hóa. Nó đo chất lượng truy xuất bằng cách xem xét độ liên quan có cấp độ và vị trí của tài liệu liên quan trong xếp hạng."}
+{"doc_id": "d6", "text": "TF-IDF là phương pháp cổ điển tính trọng số từ trong truy xuất thông tin. Nó kết hợp tần suất thuật ngữ với tần suất tài liệu nghịch đảo để đánh giá tầm quan trọng của thuật ngữ."}
+{"doc_id": "d7", "text": "Cross encoder là mô hình thần kinh mã hóa chung truy vấn và tài liệu để tạo điểm liên quan. Chúng chính xác hơn bi-encoder nhưng chậm hơn."}
+{"doc_id": "d8", "text": "ColBERT là mô hình truy xuất tương tác muộn mã hóa truy vấn và tài liệu thành biểu diễn đa vector và tính điểm bằng MaxSim trên các token embedding."}
+{"doc_id": "d9", "text": "Độ chính xác và độ thu hồi là các độ đo truy xuất cổ điển. Độ chính xác đo tỷ lệ tài liệu truy xuất có liên quan, trong khi độ thu hồi đo tỷ lệ tài liệu liên quan được truy xuất."}
+{"doc_id": "d10", "text": "Truy xuất lai kết hợp tín hiệu thưa và dày đặc. Các phương pháp kết hợp phổ biến bao gồm RRF, tổng có trọng số và kết hợp học có neural reranker."}

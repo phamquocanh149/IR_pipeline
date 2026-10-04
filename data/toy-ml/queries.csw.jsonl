@@ -1,0 +1,5 @@
+{"qid": "q1", "text": "BM25 ranking function là gì và how does it work"}
+{"qid": "q2", "text": "dense retrieval dùng neural embeddings để truy xuất văn bản"}
+{"qid": "q3", "text": "evaluation metrics cho information retrieval systems"}
+{"qid": "q4", "text": "hybrid search kết hợp sparse và dense với RRF"}
+{"qid": "q5", "text": "NDCG metric dùng để đo chất lượng ranking"}

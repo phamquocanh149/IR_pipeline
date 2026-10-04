@@ -108,14 +108,53 @@ python -m ir_system.cli.main \
 
 Also works for the Dense branch in **Hybrid** and the Dense candidate retriever in **Cross-Encoder**.
 
+## Multilingual & Cross-Lingual Evaluation
+
+IR Pipeline supports evaluating cross-lingual retrieval across combinations of query and document languages (e.g. `queries.vi` vs `documents.en`).
+
+```bash
+# Evaluate all 6 cross-lingual pairs (3 query langs x 2 doc langs)
+python -m ir_system.cli.main \
+    --dataset ./data/toy-ml \
+    --retriever bm25 \
+    --queries all \
+    --documents all \
+    --top-k 10 \
+    --metrics ndcg@10 mrr@10
+
+# Or evaluate specific language combinations
+python -m ir_system.cli.main \
+    --dataset ./data/toy-ml \
+    --retriever bm25 \
+    --queries vi en \
+    --documents vi \
+    --top-k 10 \
+    --metrics ndcg@10
+```
+
+Results are printed as a comprehensive summary table and saved under `results/<run_id>/queries_<lang>Xdocs_<lang>/`.
+
 ## Dataset Format
 
+### Legacy (Single-file)
 ```
 data/<dataset_name>/
 ├── queries.jsonl      {"qid": "q1", "text": "what is bm25"}
 ├── documents.jsonl    {"doc_id": "d1", "text": "BM25 is ..."}
 └── qrels.tsv          q1\td1\t2
 ```
+
+### Multilingual (Split-file)
+```
+data/<dataset_name>/
+├── queries.vi.jsonl       {"qid": "q1", "text": "bm25 là gì"}
+├── queries.en.jsonl       {"qid": "q1", "text": "what is bm25"}
+├── queries.csw.jsonl      {"qid": "q1", "text": "bm25 la gi va how it works"}
+├── documents.vi.jsonl     {"doc_id": "d1", "text": "BM25 là thuật toán..."}
+├── documents.en.jsonl     {"doc_id": "d1", "text": "BM25 is a ranking function..."}
+└── qrels.tsv              q1\td1\t2
+```
+*Note: `qid` and `doc_id` are shared across languages for consistent relevance judgments.*
 
 ## Results
 
