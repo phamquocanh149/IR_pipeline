@@ -52,6 +52,7 @@ class SentenceTransformerAdapter(SingleVectorEmbeddingModel):
         self._normalize = normalize_embeddings
         logger.info("[MODEL] Loading SentenceTransformer: %s on %s", model_id, device)
         self._model = SentenceTransformer(model_id, device=device)
+        self._model.max_seq_length = 512
 
     @property
     def name(self) -> str:
