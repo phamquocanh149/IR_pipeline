@@ -117,7 +117,7 @@ def main(argv=None) -> int:
         for lang in queries:
             logging.info("Encoding %s query views", lang)
             qids = list(queries[lang])
-            qv = normalize(model.encode([queries[lang][qid].text for qid in qids],
+            qv = normalize(model.encode_queries([queries[lang][qid].text for qid in qids],
                                         batch_size=args.batch_size, show_progress=True))
             if len(qv) != len(qids):
                 raise ValueError("Encoder returned an incorrect number of embeddings.")
