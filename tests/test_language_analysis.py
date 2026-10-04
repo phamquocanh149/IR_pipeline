@@ -46,6 +46,18 @@ def test_positive_outside_top_k_and_missing_negatives():
     assert no_negative["summary"]["csw"]["delta_margin"]["count"] == 0
 
 
+def test_shared_negative_pool_uses_scores_outside_each_views_top_k():
+    qrels = Qrels()
+    qrels.add("q", "p", 1)
+    result = fixed_index_analysis([make_runs("q", {
+        "vi": [("n1", .9), ("n2", .8), ("p", .6)],
+        "csw": [("n2", .95), ("p", .7), ("n1", .1)],
+    })], qrels, 1)
+    assert all(r["negative_pool_ids"] == ["n1", "n2"] for r in result["margins"])
+    assert result["margins"][0]["margin"] == pytest.approx(-.3)
+    assert result["margins"][1]["margin"] == pytest.approx(-.25)
+
+
 def test_no_positive_and_unpaired_queries():
     runs = make_runs("q", {lang: [("d", .1)] for lang in ("vi", "en", "csw")})
     runs["vi"].add("extra", [])
@@ -190,4 +202,98 @@ def test_report_javascript_syntax():
         pytest.skip("Node unavailable")
     script = _HTML.split("</script><script>", 1)[1].split("</script>", 1)[0]
     result = subprocess.run([node, "--check"], input=script.encode("utf-8"), capture_output=True)
+    assert result.returncode == 0, result.stderr.decode("utf-8", errors="replace")
+
+
+def test_report_horizontal_panels_and_shared_references():
+    """Execute report JS against a minimal DOM to check labels, scales and paging."""
+    import shutil
+    import subprocess
+    from ir_system.analysis.language_views import summary
+    from ir_system.analysis.report import _HTML
+
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("Node unavailable")
+    gaps = {}
+    for name, value in [("vi_en", .12), ("vi_csw", .08), ("en_csw", .06)]:
+        rows = [{"group_id": f"q{i}", "gap": value+(i-1)*.0001,
+                 "cosine": 1-value-(i-1)*.0001} for i in range(1, 23)]
+        gaps[name] = {"pairs": rows, "summary": summary(r["gap"] for r in rows),
+                      "cosine_summary": summary(r["cosine"] for r in rows),
+                      "missing_first": [], "missing_other": []}
+    report = {
+        "config": {"directions": ["vi-en"], "model": "fixture", "scorer": "cosine", "top_k": 10},
+        "query_projection": {"points": [{"qid": f"q{i}", "language": lang, "text": f"query {i}",
+                                         "xyz": [0, 0, 0]} for i in range(1, 23) for lang in ("vi", "csw", "en")],
+                             "explained_variance_ratio": [1, 0, 0]},
+        "query_gaps": gaps, "document_gaps": {}, "policies": {},
+        "indexes": {"en": {"summary": {}, "margins": [
+            {"qid": "q1", "language": "vi", "direction": "vi-en", "positive_score": .6,
+             "negative_score": .3, "margin": .3, "delta_margin": 0, "negative_pool_ids": ["d-"]},
+            {"qid": "q1", "language": "csw", "direction": "csw-en", "positive_score": .7,
+             "negative_score": .5, "margin": .2, "delta_margin": -.1, "negative_pool_ids": ["d-"]},
+            {"qid": "q1", "language": "en", "direction": "en-en", "positive_score": .5,
+             "negative_score": .3, "margin": .2, "delta_margin": -.1, "negative_pool_ids": ["d-"]},
+            {"qid": "q2", "language": "vi", "direction": "vi-en", "positive_score": None,
+             "negative_score": .5, "margin": None, "delta_margin": None},
+        ], "alignment": [
+            {"qid": "q1", "language": "csw", "doc_group_id": "d1", "delta_alignment": .1},
+            {"qid": "q1", "language": "csw", "doc_group_id": "d2", "delta_alignment": .3},
+        ],
+                           "paired_query_count": 22, "excluded_query_ids": {}}},
+    }
+    report["embedding_panels"] = [
+        {"config": {"model": model, "dataset": benchmark}, "query_projection": report["query_projection"]}
+        for model in ("Model A", "Model B") for benchmark in ("Benchmark 1", "Benchmark 2")
+    ]
+    report["benchmark_reports"] = [dict(report, config=dict(report["config"], dataset=f"Benchmark {i}"))
+                                   for i in range(1, 5)]
+    harness = r'''
+const assert=require('node:assert/strict');
+class Element {
+ constructor(tag){this.tag=tag;this.children=[];this.attrs={};this.style={};this.value='';this.textContent='';this.classList={add(){}};this.clientWidth=1000;this.clientHeight=520;}
+ append(...items){this.children.push(...items);if(this.tag==='select'&&!this.value&&items[0])this.value=items[0].value;}
+ replaceChildren(...items){this.children=[];this.append(...items);}
+ setAttribute(key,value){this.attrs[key]=value;}
+ querySelector(){return new Element('option');}
+ addEventListener(){}
+ getContext(){return new Proxy({}, {get(){return ()=>{}}});}
+}
+const nodes=new Map();
+global.document={getElementById(id){if(!nodes.has(id))nodes.set(id,new Element(id==='index'?'select':'div'));return nodes.get(id);},querySelectorAll(){return [];},createElement(tag){return new Element(tag);},createElementNS(ns,tag){return new Element(tag);}};
+global.window={devicePixelRatio:1,addEventListener(){}};
+document.getElementById('drift-kind').value='query';document.getElementById('drift-metric').value='gap';
+document.getElementById('data').textContent=JSON.stringify(REPORT_FIXTURE);
+'''.replace("REPORT_FIXTURE", json.dumps(report, ensure_ascii=False))
+    script = _HTML.split("</script><script>", 1)[1].split("</script>", 1)[0]
+    checks = r'''
+const panels=document.getElementById('score-panels');
+const embeddingPanels=document.getElementById('embedding-panels').children;
+assert.equal(embeddingPanels.length,4);
+assert.equal(embeddingPanels[0].children[0].textContent,'Model A | Benchmark 1');
+assert.equal(embeddingPanels[3].children[0].textContent,'Model B | Benchmark 2');
+assert.match(embeddingPanels[0].children[1].textContent,/100.0%.*22 matched triplets/);
+assert.equal(embeddingPanels[0].children[2].children[0].tag,'canvas');
+assert.match(panels.children[0].textContent,/alignment change vs margin change/);
+const grid=panels.children[1].children[0];
+assert.equal(grid.className,'benchmark-row');assert.equal(grid.children.length,4);
+const scatter=grid.children[0].children[2];
+const dots=scatter.children.filter(e=>e.tag==='circle');
+assert.equal(dots.length,1);assert.equal(dots[0].attrs.fill,'#eea048');
+assert.match(dots[0].children[0].textContent,/Delta A 0.2000.*Delta M -0.1000/);
+assert(scatter.children.some(e=>e.tag==='text'&&e.textContent==='100.0%'));
+const references=grid.children.map(panel=>panel.children[2].children.filter(e=>e.tag==='line').map(e=>e.attrs));
+assert.deepEqual(references[0],references[3]);
+const gapGrid=document.getElementById('representation-violins').children[0].children[0];
+assert.equal(gapGrid.children.length,4);
+const violin=gapGrid.children[0].children[2];
+assert.equal(violin.children.filter(e=>e.tag==='path').length,2);
+assert.equal(violin.children.filter(e=>e.tag==='polygon').length,2);
+const zeros=deltaPanel({config:{dataset:'benchmark'}},[{qid:'q',da:0,dm:0},{qid:'q2',da:.1,dm:.1}],.2);
+assert(zeros.children[2].children.some(e=>e.tag==='text'&&e.textContent==='50.0%'));
+assert.match(zeros.children[3].textContent,/zero-axis=1/);
+assert(!nodes.has('distributions'));assert(!nodes.has('drift-chart'));
+'''
+    result = subprocess.run([node], input=(harness+script+checks).encode("utf-8"), capture_output=True)
     assert result.returncode == 0, result.stderr.decode("utf-8", errors="replace")

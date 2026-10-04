@@ -175,7 +175,7 @@ def main(argv=None) -> int:
                 "pairing": "Exact shared qid and doc_id denote information needs and document groups.",
                 "projection": "One joint PCA on available query-language views; cosine gaps use original dimensions.",
                 "positives": "Shared qrels.tsv, restricted to relevance > 0 documents present in each fixed index, including positives outside top-k.",
-                "negatives": "Non-positive documents in each query view's own top-k; unjudged documents treated as non-relevant.",
+                "negatives": "Shared union of non-positive documents from the selected query views' top-k on the same fixed index; unjudged documents treated as non-relevant and counted separately.",
                 "missing": "Undefined margins/deltas are null. Deltas require a matching vi query direction on the same index. Unpaired IDs are reported; their margins are still evaluated.",
                 "aggregation": "Alignment is averaged over query-positive-document pairs; margins over each requested query direction. Only requested document indexes are built.",
             },

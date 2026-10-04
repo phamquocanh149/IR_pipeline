@@ -16,7 +16,8 @@ Requirements (mandatory)
 - Cosine/gaps use normalized original embeddings, not the PCA coordinates.
 - Preserve document-language indexes; never pool scores from different indexes.
 - Positives: relevance > 0 in the fixed corpus, including outside retrieval top-k.
-- Hard negatives: non-positive documents in each query's own top-k ranking.
+- Hard negatives: union of non-positive documents in all query views' top-k,
+  fixed across available views of the same query on the same document index.
 - M = max positive score - max hard-negative score.
 - Delta alignment/margin uses the matching Vietnamese query on the same index.
 - Missing positives, negatives or Vietnamese baselines yield null, not zero.
@@ -125,6 +126,8 @@ def fixed_index_analysis(
             judgments = qrels.judgments_for(qid)
             relevant = {did for did, rel in judgments.items()
                         if rel > 0 and (document_ids is None or did in document_ids)}
+            negative_pool = {hit.doc_id for run in runs.values() if qid in run.qids
+                             for hit in run.get(qid)[:top_k] if hit.doc_id not in relevant}
             scores, margins = {}, {}
             query_rows = []
             for lang in languages:
@@ -134,9 +137,11 @@ def fixed_index_analysis(
                 scores[lang] = {hit.doc_id: hit.score for hit in hits}
                 if not relevant.issubset(scores[lang]):
                     raise ValueError("Analysis needs scores for every positive, including those outside top-k.")
-                negatives = [hit.doc_id for hit in hits[:top_k] if hit.doc_id not in relevant]
+                if not negative_pool.issubset(scores[lang]):
+                    raise ValueError("Analysis needs scores for every document in the shared negative pool.")
+                negatives = sorted(negative_pool)
                 positive = next((hit.doc_id for hit in hits if hit.doc_id in relevant), None)
-                negative = negatives[0] if negatives else None
+                negative = max(negatives, key=lambda did: scores[lang][did]) if negatives else None
                 margin = (scores[lang][positive] - scores[lang][negative]
                           if positive is not None and negative is not None else None)
                 margins[lang] = margin
@@ -145,6 +150,7 @@ def fixed_index_analysis(
                              "positive_score": scores[lang][positive] if positive else None,
                              "negative_score": scores[lang][negative] if negative else None,
                              "hard_negative_count": len(negatives),
+                             "negative_pool_ids": negatives,
                              "unjudged_negative_count": sum(did not in judgments
                                                             for did in negatives)})
             for lang in scores:

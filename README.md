@@ -119,148 +119,138 @@ data/<dataset_name>/
 
 ## Results
 
-### Paired Vietnamese / English / code-switched analysis
+### Language analysis: run four benchmarks and create report.html
 
-Generate a self-contained interactive HTML report and detailed JSON:
-
-A ready-to-edit Bash example is available in `scripts/run_analysis.sh`.
-Set `DATASET`, `QUERIES`, `DOCUMENTS`, `MODEL`, `TOP_K`, `BATCH_SIZE`, `DEVICE`, and `OUTPUT`
-at the top of the file, then run:
+Run these commands from the repository root in Bash (Git Bash on Windows).
+Install model dependencies once:
 
 ```bash
-bash scripts/run_analysis.sh
+pip install -e ".[dense]"
 ```
 
-The example uses `--queries vi en csw --documents en` (three query languages,
-English documents) and `intfloat/multilingual-e5-small`. Set `PYTHON=python3` if needed.
-Optional `RERANKER` selects
-cross-encoder scores. CLI arguments can override the example configuration:
-
-```bash
-bash scripts/run_analysis.sh --model "YOUR_MODEL" --queries vi csw --documents en --device cpu
-```
-
-Run the script from the repository root (it sets up the local `src` import path
-and forwards all arguments to the existing analysis CLI):
-
-```powershell
-python scripts/run_analysis.py --dataset data/fiqa --direction vi-en csw-en --model "MODEL_ID" --top-k 100 --output results/analysis
-```
-
-View all CLI options with `python scripts/run_analysis.py --help`.
-Replace `MODEL_ID` with your embedding model identifier or local model path.
-The model dependencies still require `pip install -e ".[dense]"`.
-
-```bash
-python -m ir_system.cli.analysis \
-    --dataset data/fiqa \
-    --direction vi-en csw-en \
-    --model YOUR_MULTILINGUAL_EMBEDDING_MODEL \
-    --top-k 100 \
-    --output results/language_analysis
-```
-
-Requires the `dense` extra. `--direction` accepts one or more **query-document**
-language pairs: `vi-en` means Vietnamese queries against English documents;
-`csw-vi` means code-switched queries against Vietnamese documents. Query languages
-are `vi`, `en`, `csw`; document languages are `vi`, `en`, following the loader's
-`QUERY_LANGS` and `DOC_LANGS` (six directions).
-
-Alternatively use separate `--queries` and `--documents` selectors:
-
-```bash
-python -m ir_system.cli.analysis \
-    --dataset data/fiqa \
-    --queries csw \
-    --documents vi \
-    --model intfloat/multilingual-e5-small \
-    --model-type single-vector \
-    --retriever dense \
-    --top-k 10 \
-    --metrics ndcg@10 mrr@10 recall@10
-```
-
-Each selector accepts one or more languages, or `all`. All selected query/document
-combinations are analyzed. Use these selectors or `--direction`, not both.
-Optional `--metrics` reuses the existing evaluator on top-k retrieval results
-and includes scores in JSON and HTML without repeating retrieval.
-
-For example, `--direction vi-en csw-en` builds only the English corpus and
-computes Vietnamese and code-switched query margins on that fixed index, plus
-their alignment/margin changes. To compare all three query views on English
-documents, use `--direction vi-en en-en csw-en`.
-
-All language views live in one dataset directory:
+Each benchmark has its own directory with language-suffixed files:
 
 ```text
-data/fiqa/
-├── queries.vi.jsonl
-├── queries.en.jsonl
-├── queries.csw.jsonl
-├── documents.vi.jsonl
-├── documents.en.jsonl
-└── qrels.tsv
+data/benchmark_1/
+  queries.vi.jsonl       {"qid":"q1","text":"Vietnamese query"}
+  queries.en.jsonl       {"qid":"q1","text":"English query"}
+  queries.csw.jsonl      {"qid":"q1","text":"Code-switched query"}
+  documents.vi.jsonl     {"doc_id":"d1","text":"Vietnamese document"}
+  documents.en.jsonl     {"doc_id":"d1","text":"English document"}
+  qrels.tsv             q1<TAB>d1<TAB>2
 ```
 
-Use the same layout for any dataset name. JSONL record fields remain `qid`/`text`
-and `doc_id`/`text`. Analysis uses the existing multilingual loader API unchanged:
-`load_queries(..., lang="all")`, `load_documents(..., lang=[...])`, and
-`load_qrels(...)`. Files use canonical `.vi`, `.en`, `.csw` query suffixes and
-`.vi`, `.en` document suffixes. A single language-agnostic `qrels.tsv` applies to
-all directions. Query/document views remain separate rather than using the
-legacy loader's merged result. Requested views must be present even though the
-loader itself skips missing optional files.
-Only document files for the requested pairs are required. `vi-en` requires
-`queries.vi.jsonl`, `documents.en.jsonl`, and shared `qrels.tsv`.
-Other available query files are included in the cosine/3D diagnostics but are
-not searched unless their query-document direction is requested.
+Use `.vi.jsonl`, not `.vn.jsonl`: the current loader recognizes `vi`, `en`, `csw`
+for queries and `vi`, `en` for documents. Matching `qid` values represent the same
+information need; matching `doc_id` values represent the same document group.
+Use one shared `qrels.tsv` per benchmark. Only requested document files are needed.
+The analysis calls the existing `DatasetLoader` APIs without modifying the loader.
 
-Shared `qid` must denote the same
-information need and shared `doc_id` the same document group; matching is by ID,
-never row order. If your views use different IDs, remap them to shared group IDs
-before running. Cosine pairs use shared query IDs; margins also cover query IDs
-that have no counterpart in the other requested views.
+Replace the four dataset paths below with your actual benchmark folders:
 
-Open `results/language_analysis/report.html` in a browser. No network or plotting
-dependency is required. It contains:
+```bash
+bash scripts/run_analysis_four_benchmarks.sh \
+    data/benchmark_1 data/benchmark_2 data/benchmark_3 data/benchmark_4 \
+    --model intfloat/multilingual-e5-small \
+    --documents vi en \
+    --device auto
+```
 
-- A draggable, zoomable 3D query scatter plot with language filters, query text
-  tooltips, and lines linking the three versions of each information need.
-  One PCA is fit jointly to available query views; explained variance is shown.
-- Query cosine similarity and representation gaps `1 - cosine(E(view1), E(view2))`
-  for available pairs `vi/en`, `vi/csw`, `en/csw`, with mean, median and
-  distributions. Document gaps are computed only between requested corpus views.
-  Gaps are computed in the original embedding space, not the PCA projection.
-- Positive alignment `delta_A = s(variant, positive) - s(vi, positive)` for every
-  relevant document group, separately on each requested fixed document index.
-- Relevance margins `M = max_positive_score - max_hard_negative_score` and
-  `delta_M = M(variant) - M(vi)`, with distributions and per-query details.
+Defaults: `--queries vi en csw`, `--model-type single-vector`, `--retriever dense`,
+`--top-k 10`, `--metrics ndcg@10 mrr@10 recall@10`, `--batch-size 32`.
+Use `--documents vi` if you have only Vietnamese documents, or `--device cpu`
+to run on CPU. Extra analysis options apply to all four benchmarks. Folder names
+must be distinct, and one model/scorer is used across all panels.
 
-By default `s` is cosine from the specified single-vector encoder. Optionally
-pass `--reranker YOUR_CROSS_ENCODER` to compute alignment/margins using a
-cross-encoder, while representation gaps and PCA still use `--model`.
-This analysis does not represent BM25, Hybrid RRF, or late-interaction scores.
-Cross-encoder scoring covers the entire corpus and can be expensive.
-The analysis CLI reuses `DatasetLoader`, `create_model`, `DenseRetriever`,
-`CrossEncoderRetriever`, `SearchPipeline`, `Run`, and `Qrels`. Corpus embeddings
-are built once per index and reused for document gaps; scoring and ranking stay
-in the existing retrievers. `ir-analyze` is the installed command equivalent.
+The script stops on any failed analysis and creates:
 
-Positives are all judgments with relevance greater than zero in the fixed index,
-including positives outside top-k. Hard negatives are non-positive documents in
-**each query variant's own top-k**; unjudged documents are treated as non-relevant
-and their counts are reported. No positive or no hard negative gives a null margin
-excluded from means/medians. Alignment summaries average query-positive pairs;
-margin summaries average queries per requested direction. Scores are never pooled
-across indexes. Delta alignment/margin requires a requested `vi-<document>`
-baseline and matching qid on the same corpus; otherwise deltas are null.
-Gaps use pairwise shared IDs; the scatter plot shows all available query views.
-`analysis.json` includes unpaired query IDs, coverage, requested directions,
-individual gaps, positive scores, margins, projection coordinates and configuration.
+```text
+results/benchmark_1/analysis.json   results/benchmark_1/report.html
+results/benchmark_2/analysis.json   results/benchmark_2/report.html
+results/benchmark_3/analysis.json   results/benchmark_3/report.html
+results/benchmark_4/analysis.json   results/benchmark_4/report.html
+report.html                       Combined report: open this file in a browser
+```
 
-Large representation gaps alone do not establish retrieval degradation. Negative
-alignment changes indicate positive score loss; negative margin changes indicate
-weaker separation from the strongest retrieved negative. These are distinct effects.
+To change output locations or the Python executable:
+
+```bash
+PYTHON=python ANALYSIS_OUTPUT_ROOT=results/my_model ANALYSIS_REPORT_PATH=my_report.html \
+    bash scripts/run_analysis_four_benchmarks.sh \
+    data/benchmark_1 data/benchmark_2 data/benchmark_3 data/benchmark_4 \
+    --documents vi --device cpu
+```
+
+### Run one benchmark or the toy example
+
+```bash
+bash scripts/run_analysis.sh \
+    --dataset data/toy_multilingual \
+    --queries vi en csw \
+    --documents vi \
+    --model intfloat/multilingual-e5-small \
+    --top-k 10 \
+    --metrics ndcg@10 mrr@10 recall@10 \
+    --output results/toy_multilingual_analysis
+
+# Source-checkout CLI with all options visible:
+python scripts/run_analysis.py --help
+```
+
+`run_analysis.sh` defaults to `data/fiqa`, queries VI/EN/CSW, document indexes
+VI/EN, and `results/analysis_fiqa`; the dataset must contain the split-language files
+above. CLI options override these defaults. You can also set `PYTHON`,
+`ANALYSIS_DATASET`, `ANALYSIS_MODEL`, and `ANALYSIS_OUTPUT` in the environment.
+
+The underlying CLI also accepts `--direction vi-en en-en csw-en` instead of
+`--queries vi en csw --documents en`. A direction means **query-document**:
+`vi-en` uses Vietnamese queries against English documents. Do not combine
+`--direction` with `--queries`/`--documents`. Keep VI as a query baseline for deltas.
+
+### Refresh the combined report without running models again
+
+```bash
+bash scripts/render_analysis_four_benchmarks.sh \
+    results/benchmark_1/analysis.json results/benchmark_2/analysis.json \
+    results/benchmark_3/analysis.json results/benchmark_4/analysis.json
+
+# Optional alternate HTML path:
+bash scripts/render_analysis_four_benchmarks.sh \
+    results/benchmark_1/analysis.json results/benchmark_2/analysis.json \
+    results/benchmark_3/analysis.json results/benchmark_4/analysis.json \
+    --output my_report.html
+
+# Refresh a single report:
+python scripts/render_analysis.py results/toy_multilingual_analysis/analysis.json
+```
+
+This step reads saved JSON only. It does not load models or repeat retrieval.
+The four input reports must have distinct dataset paths and the same model/scorer.
+Benchmarks and document indexes remain separate; the HTML contains:
+
+- One horizontal row of four VI-CSW/EN-CSW gap violin/box panels.
+- One horizontal row of four scatter panels using **delta A versus delta M**,
+  with both reference lines at zero. Select CSW or EN versus VI and a fixed index.
+  Delta A averages score changes over the same relevant document groups per query;
+  delta M is `M(variant) - M(VI)`. Zero-axis points are counted separately.
+- A/M boxplot rows across the four benchmarks, each showing VI, CSW and EN.
+- A two-column embedding-space grid with one joint PCA per benchmark, matched
+  query triplets, language colors, explained variance, rotation and zoom.
+- Retrieval metrics and data policies under a collapsible details section.
+
+HTML works offline without plotting dependencies. Small samples show observations
+and boxes; violin density is estimated only for at least 20 nonconstant values.
+Cosine gaps use original embeddings, not the PCA coordinates.
+
+`A = max positive score`, `B = max shared hard-negative score`, `M = A - B`.
+The shared negative pool is the union of non-positive documents from the selected
+query views' top-k on the same fixed index. Positives outside top-k retain scores;
+unjudged negatives are counted separately. Missing values are null and excluded.
+Old reports without shared `negative_pool_ids` need a fresh analysis run.
+Optional `--reranker MODEL` changes alignment/margin scoring while gaps/PCA still
+use the single-vector encoder. Full-corpus scoring reuses existing retrievers.
+
+### Retrieval pipeline outputs
 
 Each run saves to `results/<run_id>/`:
 - `config.json` — run configuration

@@ -13,17 +13,17 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 
 # Edit these values for your dataset and model.
-PYTHON="python"
-DATASET="$REPO_ROOT/data/fiqa"
+PYTHON="${PYTHON:-python}"
+DATASET="${ANALYSIS_DATASET:-$REPO_ROOT/data/fiqa}"
 QUERIES=(vi en csw)
-DOCUMENTS=(en)                 # Fixed English corpus.
-MODEL="intfloat/multilingual-e5-small"
+DOCUMENTS=(vi en)              # Separate Vietnamese and English indexes.
+MODEL="${ANALYSIS_MODEL:-intfloat/multilingual-e5-small}"
 RERANKER=""                    # Optional cross-encoder; empty uses cosine.
 TOP_K=10
 METRICS=(ndcg@10 mrr@10 recall@10)
 BATCH_SIZE=32
 DEVICE="auto"                 # auto, cpu, cuda.
-OUTPUT="$REPO_ROOT/results/analysis_fiqa_en"
+OUTPUT="${ANALYSIS_OUTPUT:-$REPO_ROOT/results/analysis_fiqa}"
 
 args=(
     --dataset "$DATASET"
