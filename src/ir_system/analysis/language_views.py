@@ -1,4 +1,32 @@
-"""Representation gaps and fixed-index alignment for single-vector encoders."""
+"""
+Analysis: Representation drift and relevance margins
+===================================================
+Compute diagnostics from existing embeddings, Run rankings and Qrels.
+
+Responsibilities
+----------------
+1. Normalize embeddings and compute paired cosine similarity and gap = 1 - cosine.
+2. Fit one joint PCA for available query views and return three coordinates.
+3. Compute positive alignment changes, positive-minus-negative margins and deltas.
+4. Aggregate count, mean, median and distributions' source values.
+
+Requirements (mandatory)
+------------------------
+- Pair views by shared qid/doc_id, never by row position.
+- Cosine/gaps use normalized original embeddings, not the PCA coordinates.
+- Preserve document-language indexes; never pool scores from different indexes.
+- Positives: relevance > 0 in the fixed corpus, including outside retrieval top-k.
+- Hard negatives: non-positive documents in each query's own top-k ranking.
+- M = max positive score - max hard-negative score.
+- Delta alignment/margin uses the matching Vietnamese query on the same index.
+- Missing positives, negatives or Vietnamese baselines yield null, not zero.
+- Keep all query margins, even when the query has no paired language view.
+- Consume full rankings in batches; do not implement model scoring or retrieval.
+
+Output
+------
+JSON-serializable paired gaps, PCA variance and per-query/aggregate diagnostics.
+"""
 from __future__ import annotations
 
 from itertools import combinations
@@ -8,9 +36,10 @@ import numpy as np
 
 from ir_system.domain.qrels import Qrels
 from ir_system.domain.run import Run
+from ir_system.io.dataset_loader import QUERY_LANGS
 
 
-LANGUAGES = ("vi", "en", "csw")
+LANGUAGES = QUERY_LANGS
 
 
 def normalize(vectors: np.ndarray) -> np.ndarray:
@@ -70,6 +99,8 @@ def fixed_index_analysis(
     run_batches: Iterable[Mapping[str, Run]],
     qrels: Qrels,
     top_k: int,
+    *,
+    document_ids: set[str] | None = None,
 ) -> dict:
     """Consume batches of existing full-corpus rankings on one fixed index.
 
@@ -92,7 +123,8 @@ def fixed_index_analysis(
             query_ids.setdefault(lang, set()).update(runs[lang].qids)
         for qid in sorted(set.union(*(set(run.qids) for run in runs.values()))):
             judgments = qrels.judgments_for(qid)
-            relevant = {did for did, rel in judgments.items() if rel > 0}
+            relevant = {did for did, rel in judgments.items()
+                        if rel > 0 and (document_ids is None or did in document_ids)}
             scores, margins = {}, {}
             query_rows = []
             for lang in languages:

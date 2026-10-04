@@ -81,7 +81,7 @@ def test_report_escapes_query_text(tmp_path):
 
 
 @pytest.mark.parametrize("use_reranker", [False, True])
-@pytest.mark.parametrize("directions", [["vi-en"], ["csw-vi"], ["vi-en", "en-en", "csw-en"]])
+@pytest.mark.parametrize("directions", [["vi-en"], ["csw-vi"], ["vi-en", "en-en", "csw-en"], ["vi-vi", "csw-en"]])
 def test_cli_end_to_end(tmp_path, monkeypatch, use_reranker, directions):
     from ir_system.cli import analysis as cli
     from ir_system.models.single_vector import SingleVectorEmbeddingModel
@@ -109,7 +109,7 @@ def test_cli_end_to_end(tmp_path, monkeypatch, use_reranker, directions):
     directory = tmp_path / "fiqa"
     directory.mkdir()
     document_languages = {direction.split("-")[1] for direction in directions}
-    suffixes = {"vi": "vi" if directions == ["csw-vi"] else "vn", "en": "en", "csw": "csw"}
+    suffixes = {"vi": "vi", "en": "en", "csw": "csw"}
     for language, lang in suffixes.items():
         if directions == ["vi-en"] and language != "vi":
             continue  # A direction does not require query files for its document language.
@@ -122,7 +122,11 @@ def test_cli_end_to_end(tmp_path, monkeypatch, use_reranker, directions):
     (directory / "qrels.tsv").write_text("q\td+\t1\n")
     output = tmp_path / "output"
     args = ["--dataset", str(directory), "--model", "fixture-encoder", "--top-k", "2", "--output", str(output)]
-    args.extend(["--direction", *directions])
+    if directions == ["csw-vi"]:
+        args.extend(["--queries", "csw", "--documents", "vi", "--model-type", "single-vector",
+                     "--retriever", "dense", "--metrics", "ndcg@2", "mrr@2", "recall@2"])
+    else:
+        args.extend(["--direction", *directions])
     if use_reranker:
         args.extend(["--reranker", "fixture-reranker"])
     assert cli.main(args) == 0
@@ -143,62 +147,37 @@ def test_cli_end_to_end(tmp_path, monkeypatch, use_reranker, directions):
                 assert stats["delta_margin"]["count"] == 0
                 assert not index["alignment"]
     assert set(actual_directions) == set(directions)
+    if directions == ["csw-vi"]:
+        assert report["indexes"]["vi"]["retrieval_metrics"]["csw-vi"] == {
+            "ndcg@2": 1., "mrr@2": 1., "recall@2": 1.,
+        }
     assert (output / "report.html").is_file()
     assert len(corpus_encodes) == len(document_languages)  # Only requested indexes, encoded once.
 
 
-def test_loader_language_qrels_and_original_layout(tmp_path):
-    from ir_system.io.dataset_loader import DatasetLoader
+@pytest.mark.parametrize("missing", ["query", "document"])
+def test_analysis_checks_missing_requested_languages(tmp_path, monkeypatch, caplog, missing):
+    from ir_system.cli import analysis as cli
 
-    for suffix in ("", ".vn"):
-        (tmp_path / f"queries{suffix}.jsonl").write_text('{"qid":"q","text":"query"}')
-        (tmp_path / f"documents{suffix}.jsonl").write_text('{"doc_id":"d","text":"document"}')
+    (tmp_path / "queries.vi.jsonl").write_text('{"qid":"q","text":"query"}')
+    if missing == "document":
+        (tmp_path / "queries.en.jsonl").write_text('{"qid":"q","text":"English query"}')
+    (tmp_path / "documents.vi.jsonl").write_text('{"doc_id":"d","text":"document"}')
     (tmp_path / "qrels.tsv").write_text("q\td\t1\n")
-    loader = DatasetLoader(strict_qrels=True)
-    assert loader.load(tmp_path)[2].relevance("q", "d") == 1
-    assert loader.load(tmp_path, language="vn")[2].relevance("q", "d") == 1
-    (tmp_path / "qrels.vn.tsv").write_text("q\td\t2\n")
-    assert loader.load(tmp_path, language="vn")[2].relevance("q", "d") == 2
-    with pytest.raises(FileNotFoundError, match="queries.csw.jsonl"):
-        loader.load(tmp_path, language="csw")
+    monkeypatch.setattr(cli, "create_model", lambda *args, **kwargs:
+                        pytest.fail("Missing requested languages must fail before model loading"))
+    assert cli.main(["--dataset", str(tmp_path), "--direction", "vi-vi", "en-en",
+                     "--model", "fixture-encoder"]) == 1
+    assert f"Requested {missing} languages missing" in caplog.text
 
 
-def test_loader_query_and_document_languages_are_independent(tmp_path):
-    from ir_system.io.dataset_loader import DatasetLoader
-
-    (tmp_path / "queries.vn.jsonl").write_text('{"qid":"q","text":"Vietnamese query"}')
-    (tmp_path / "documents.en.jsonl").write_text('{"doc_id":"d","text":"English document"}')
-    (tmp_path / "qrels.en.tsv").write_text("q\td\t1\n")
-    loader = DatasetLoader(strict_qrels=True)
-    assert loader.load_queries(tmp_path, language="vn")[0].text == "Vietnamese query"
-    documents, qrels = loader.load_corpus(tmp_path, language="en")
-    assert documents[0].text == "English document"
-    assert qrels.relevance("q", "d") == 1
-
-
-def test_loader_vietnamese_suffix_alias_and_precedence(tmp_path):
-    from ir_system.io.dataset_loader import DatasetLoader
-
-    (tmp_path / "queries.vn.jsonl").write_text('{"qid":"q","text":"vn query"}')
-    (tmp_path / "documents.vn.jsonl").write_text('{"doc_id":"d","text":"vn document"}')
-    (tmp_path / "qrels.vn.tsv").write_text("q\td\t1\n")
-    loader = DatasetLoader(strict_qrels=True)
-    assert loader.query_path(tmp_path, language="vi").name == "queries.vn.jsonl"
-    queries, documents, qrels = loader.load(tmp_path, language="vi")
-    assert queries[0].text == "vn query"
-    assert documents[0].text == "vn document"
-    assert qrels.relevance("q", "d") == 1
-    for stem, record in [
-        ("queries", {"qid": "q", "text": "vi query"}),
-        ("documents", {"doc_id": "d", "text": "vi document"}),
-    ]:
-        (tmp_path / f"{stem}.vi.jsonl").write_text(json.dumps(record))
-    (tmp_path / "qrels.vi.tsv").write_text("q\td\t2\n")
-    queries, documents, qrels = loader.load(tmp_path, language="vi")
-    assert queries[0].text == "vi query"
-    assert documents[0].text == "vi document"
-    assert qrels.relevance("q", "d") == 2
-    assert loader.load(tmp_path, language="vn")[0][0].text == "vn query"
+def test_shared_qrels_restricts_positives_to_fixed_index():
+    qrels = Qrels()
+    qrels.add("q", "positive", 1)
+    qrels.add("q", "other-language-only", 1)
+    runs = make_runs("q", {"vi": [("positive", .8), ("negative", .2)]})
+    result = fixed_index_analysis([runs], qrels, 2, document_ids={"positive", "negative"})
+    assert result["summary"]["vi"]["margin"]["mean"] == pytest.approx(.6)
 
 
 def test_report_javascript_syntax():

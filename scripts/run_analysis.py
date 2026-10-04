@@ -1,4 +1,14 @@
-"""Run the analysis CLI from a source checkout without installing the package."""
+"""
+Script: Run analysis
+====================
+Expose the analysis CLI from a source checkout.
+
+Requirements
+------------
+- Add the repository src directory to the Python import path.
+- Forward command-line arguments and the exit code to ir_system.cli.analysis.
+- Keep configuration and data loading in the CLI; do not duplicate either here.
+"""
 import sys
 from pathlib import Path
 

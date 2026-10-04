@@ -124,20 +124,20 @@ data/<dataset_name>/
 Generate a self-contained interactive HTML report and detailed JSON:
 
 A ready-to-edit Bash example is available in `scripts/run_analysis.sh`.
-Set `DATASET`, `DIRECTIONS`, `MODEL`, `TOP_K`, `BATCH_SIZE`, `DEVICE`, and `OUTPUT`
+Set `DATASET`, `QUERIES`, `DOCUMENTS`, `MODEL`, `TOP_K`, `BATCH_SIZE`, `DEVICE`, and `OUTPUT`
 at the top of the file, then run:
 
 ```bash
 bash scripts/run_analysis.sh
 ```
 
-The example uses `vi-en en-en csw-en` (three query languages, English documents).
-Replace the `MODEL_ID` placeholder before running. Set `PYTHON=python3` if needed.
+The example uses `--queries vi en csw --documents en` (three query languages,
+English documents) and `intfloat/multilingual-e5-small`. Set `PYTHON=python3` if needed.
 Optional `RERANKER` selects
 cross-encoder scores. CLI arguments can override the example configuration:
 
 ```bash
-bash scripts/run_analysis.sh --model "YOUR_MODEL" --direction vi-en csw-en --device cpu
+bash scripts/run_analysis.sh --model "YOUR_MODEL" --queries vi csw --documents en --device cpu
 ```
 
 Run the script from the repository root (it sets up the local `src` import path
@@ -162,8 +162,28 @@ python -m ir_system.cli.analysis \
 
 Requires the `dense` extra. `--direction` accepts one or more **query-document**
 language pairs: `vi-en` means Vietnamese queries against English documents;
-`csw-vi` means code-switched queries against Vietnamese documents. All nine
-combinations of `vi`, `en`, `csw` are supported.
+`csw-vi` means code-switched queries against Vietnamese documents. Query languages
+are `vi`, `en`, `csw`; document languages are `vi`, `en`, following the loader's
+`QUERY_LANGS` and `DOC_LANGS` (six directions).
+
+Alternatively use separate `--queries` and `--documents` selectors:
+
+```bash
+python -m ir_system.cli.analysis \
+    --dataset data/fiqa \
+    --queries csw \
+    --documents vi \
+    --model intfloat/multilingual-e5-small \
+    --model-type single-vector \
+    --retriever dense \
+    --top-k 10 \
+    --metrics ndcg@10 mrr@10 recall@10
+```
+
+Each selector accepts one or more languages, or `all`. All selected query/document
+combinations are analyzed. Use these selectors or `--direction`, not both.
+Optional `--metrics` reuses the existing evaluator on top-k retrieval results
+and includes scores in JSON and HTML without repeating retrieval.
 
 For example, `--direction vi-en csw-en` builds only the English corpus and
 computes Vietnamese and code-switched query margins on that fixed index, plus
@@ -174,24 +194,24 @@ All language views live in one dataset directory:
 
 ```text
 data/fiqa/
-├── queries.vn.jsonl
+├── queries.vi.jsonl
 ├── queries.en.jsonl
 ├── queries.csw.jsonl
-├── documents.vn.jsonl
+├── documents.vi.jsonl
 ├── documents.en.jsonl
-├── documents.csw.jsonl
 └── qrels.tsv
 ```
 
 Use the same layout for any dataset name. JSONL record fields remain `qid`/`text`
-and `doc_id`/`text`. Vietnamese files can use `.vi` or `.vn` (reported internally as
-`vi`); the loader resolves these aliases. Analysis requests `vi`, so `.vi` takes
-precedence if both spellings exist. Optional `qrels.vi.tsv`/`qrels.vn.tsv`,
-`qrels.en.tsv`, `qrels.csw.tsv` override the shared
-`qrels.tsv` for their respective fixed index. Query and document files must have
-their language suffix; unsuffixed files are not used by analysis.
+and `doc_id`/`text`. Analysis uses the existing multilingual loader API unchanged:
+`load_queries(..., lang="all")`, `load_documents(..., lang=[...])`, and
+`load_qrels(...)`. Files use canonical `.vi`, `.en`, `.csw` query suffixes and
+`.vi`, `.en` document suffixes. A single language-agnostic `qrels.tsv` applies to
+all directions. Query/document views remain separate rather than using the
+legacy loader's merged result. Requested views must be present even though the
+loader itself skips missing optional files.
 Only document files for the requested pairs are required. `vi-en` requires
-`queries.vn.jsonl`, `documents.en.jsonl`, and `qrels.en.tsv` or shared `qrels.tsv`.
+`queries.vi.jsonl`, `documents.en.jsonl`, and shared `qrels.tsv`.
 Other available query files are included in the cosine/3D diagnostics but are
 not searched unless their query-document direction is requested.
 

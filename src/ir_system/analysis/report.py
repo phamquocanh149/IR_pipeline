@@ -1,4 +1,28 @@
-"""Self-contained HTML report with a draggable 3D PCA scatter plot."""
+"""
+Analysis: HTML report
+=====================
+Render precomputed language-view diagnostics as a self-contained report.
+
+Responsibilities
+----------------
+1. Show query PCA points in 3D with rotation, zoom, language filters and tooltips.
+2. Link available language views belonging to the same information need.
+3. Display cosine/gap distributions, positive/negative scores and margin changes.
+4. Show requested query-document directions, fixed indexes and data coverage.
+
+Requirements (mandatory)
+------------------------
+- Consume precomputed diagnostics; do not load data or recompute IR scores.
+- Display only requested query-document directions in retrieval analysis.
+- Keep index scores separate and distinguish undefined values from zero.
+- Explain PCA distortion and the difference between score and margin changes.
+- Escape embedded JSON; insert query text through textContent, never raw HTML.
+- Work offline in a browser without external scripts or plotting dependencies.
+
+Output
+------
+report.html with embedded data, controls, histograms and per-query score tables.
+"""
 import json
 from pathlib import Path
 
@@ -42,6 +66,7 @@ table{border-collapse:collapse;width:100%;font-size:14px}td,th{text-align:left;p
 <p>ΔA &lt; 0: positive mất điểm. ΔM &lt; 0: lợi thế trước hard negative giảm. Hai hiện tượng được đo riêng.</p>
 <p>Chỉ tính margin cho các cặp query–document được truyền. ΔA/ΔM cần có cặp query Việt trên cùng index để làm mốc; thiếu mốc sẽ hiển thị N/A.</p>
 <div id="index-summary" class="scroll"></div><div id="distributions" class="grid"></div>
+<div id="retrieval-metrics" class="scroll"></div>
 <details><summary>Chi tiết margin theo query</summary><div id="details" class="scroll"></div></details>
 </section><section><h2>Quy ước và dữ liệu thiếu</h2><div id="policies"></div><div id="coverage"></div>
 <p>Báo cáo đầy đủ, các cặp gap và điểm từng positive nằm trong <code>analysis.json</code> cạnh file này.</p></section>
@@ -94,6 +119,7 @@ for(const [kind,gaps] of [['Query',data.query_gaps],['Document',data.document_ga
  $('gaps').append(histogram(`${kind} gap: ${pair}`,gap.pairs.map(p=>p.gap),gap.summary));}
 function table(headers,rows){const t=element('table'),head=element('tr');for(const h of headers)head.append(element('th',h));t.append(head);for(const row of rows){const tr=element('tr');for(const v of row)tr.append(element('td',String(v??'N/A')));t.append(tr)}return t}
 function updateIndex(){const info=data.indexes[$('index').value];$('index-summary').replaceChildren(table(['Query','ΔA mean / median (n)','M mean / median (n)','ΔM mean / median (n)','M thiếu'],Object.entries(info.summary).map(([lang,s])=>[lang,...['delta_alignment','margin','delta_margin'].map(key=>`${num(s[key].mean)} / ${num(s[key].median)} (${s[key].count})`),s.undefined_margin_count])));
+ $('retrieval-metrics').replaceChildren();if(info.retrieval_metrics){$('retrieval-metrics').append(element('h3','Retrieval metrics'),table(['Query → Document','Metric','Score'],Object.entries(info.retrieval_metrics).flatMap(([direction,metrics])=>Object.entries(metrics).map(([name,score])=>[direction,name,num(score)]))));}
  $('distributions').replaceChildren();for(const lang of Object.keys(info.summary)){
  const a=info.alignment.filter(r=>r.language===lang),m=info.margins.filter(r=>r.language===lang);
  $('distributions').append(histogram(`M: positive − negative (${lang})`,m.map(r=>r.margin),info.summary[lang].margin));
