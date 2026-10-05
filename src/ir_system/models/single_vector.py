@@ -44,3 +44,16 @@ class SingleVectorEmbeddingModel(EmbeddingModel):
             Row i corresponds to texts[i].
         """
         ...
+
+    def encode_queries(self, texts: Sequence[str], **kwargs: Any) -> np.ndarray:
+        """Encode search queries. Defaults to encode(); override for query-side prompts."""
+        return self.encode(texts, **kwargs)
+
+    def encode_documents(self, texts: Sequence[str], **kwargs: Any) -> np.ndarray:
+        """Encode corpus documents. Defaults to encode(); override for document-side prompts."""
+        return self.encode(texts, **kwargs)
+
+    @property
+    def document_prompt(self) -> str | None:
+        """Prefix applied to documents, if any. It changes the index, so retrievers hash it."""
+        return None

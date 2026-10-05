@@ -19,6 +19,7 @@ implementation for correctness.
 """
 from __future__ import annotations
 
+import heapq
 import logging
 import math
 from typing import List, Sequence
@@ -107,7 +108,7 @@ class LateInteractionRetriever(Retriever):
                 f"multi-vector representations, got {len(all_vecs)}."
             )
 
-        self._doc_vecs = [v.astype(np.float32) for v in all_vecs]
+        self._doc_vecs = [np.asarray(v, dtype=np.float32) for v in all_vecs]
         self._built = True
 
         logger.info(
@@ -152,7 +153,7 @@ class LateInteractionRetriever(Retriever):
                 f"LateInteractionRetriever.retrieve: expected 1 query representation, "
                 f"got {len(q_vecs_list)}."
             )
-        q_vecs = q_vecs_list[0].astype(np.float32)  # [T_q, dim]
+        q_vecs = np.asarray(q_vecs_list[0], dtype=np.float32)  # [T_q, dim]
 
         if q_vecs.ndim != 2:
             raise RuntimeError(
@@ -178,10 +179,10 @@ class LateInteractionRetriever(Retriever):
 
             scores.append((self._doc_ids[i], doc_score))
 
-        # Sort: score desc, doc_id asc
-        scores.sort(key=lambda x: (-x[1], x[0]))
+        # Select only top-k while preserving score/doc_id ordering.
+        top_scores = heapq.nsmallest(top_k, scores, key=lambda x: (-x[1], x[0]))
 
         return [
             Hit(doc_id=doc_id, score=score)
-            for doc_id, score in scores[:top_k]
+            for doc_id, score in top_scores
         ]

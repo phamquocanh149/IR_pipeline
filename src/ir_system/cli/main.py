@@ -431,6 +431,22 @@ def _make_parser() -> argparse.ArgumentParser:
         help="Model identifier (HuggingFace name or path). Required for non-BM25 retrievers.",
     )
     parser.add_argument(
+        "--query-prefix",
+        default=None,
+        help=(
+            "Prefix added to every query for single-vector models. Default: taken from "
+            "the model (Qwen3, ...) or inferred from its name (e5, bge). Pass '' to disable."
+        ),
+    )
+    parser.add_argument(
+        "--doc-prefix",
+        default=None,
+        help=(
+            "Prefix added to every document for single-vector models. Default: taken from "
+            "the model or inferred from its name (e5). Pass '' to disable."
+        ),
+    )
+    parser.add_argument(
         "--model-type",
         choices=["single-vector", "multi-vector", "cross-encoder"],
         default=None,
@@ -500,6 +516,11 @@ def _make_parser() -> argparse.ArgumentParser:
 
     # ---- Index persistence ----
     parser.add_argument(
+        "--save-index",
+        default=None,
+        help="Save an extra copy of the FAISS index to this directory after building (e.g. indexes/fiqa_bge).",
+    )
+    parser.add_argument(
         "--load-index",
         default=None,
         help="Load a previously saved FAISS index from this directory (skip encoding).",
@@ -538,6 +559,7 @@ def _build_index(retriever, documents, load_dir, logger):
     logger.info("[RETRIEVER] Building index...")
     retriever.build(documents)
     logger.info("[RETRIEVER] Index ready.")
+
 
 
 # ---------------------------------------------------------------------------
@@ -675,6 +697,8 @@ def main(argv: Optional[List[str]] = None) -> int:
                 model_type=args.model_type,
                 device=args.device,
                 batch_size=args.batch_size,
+                query_prompt=args.query_prefix,
+                document_prompt=args.doc_prefix,
             )
         except (ImportError, ValueError, RuntimeError) as exc:
             logger.error("Model loading failed: %s", exc)
@@ -750,7 +774,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 _index_dir(args.load_index),
                 logger,
             )
-        except (ValueError, RuntimeError, ImportError, FileNotFoundError) as exc:
+        except (ValueError, RuntimeError, ImportError, OSError) as exc:
             logger.error("Index building/loading failed: %s", exc)
             return 1
 
@@ -771,6 +795,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             results_by_pair[(q_lang, d_lang)] = metrics_result
             runs_by_pair[(q_lang, d_lang)] = run
             logger.info("[RUN] Pair %s done.", pair_label)
+
+        del pipeline, retriever  # Release this corpus index before building the next.
 
     # Report in the original order: grouped by query language, then doc language.
     for q_lang in q_tags:

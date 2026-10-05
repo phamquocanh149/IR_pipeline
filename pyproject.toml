@@ -21,6 +21,13 @@ dense = [
     "sentence-transformers>=3.0",
     "torch>=2.0",
 ]
+# Qwen3 uses a modern stack; install separately from the ColBERT extras.
+qwen3 = [
+    "sentence-transformers>=5.4,<6",
+    "transformers>=4.51,<5",
+    "torch>=2.0",
+    "faiss-cpu>=1.7",
+]
 late-interaction = [
     "colbert-ai==0.2.22",
     "transformers>=4.40,<4.48",

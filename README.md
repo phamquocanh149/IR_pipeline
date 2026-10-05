@@ -23,9 +23,26 @@ pip install -e .
 # With dense/hybrid retrieval
 pip install -e ".[dense]"
 
-# Full (all retrievers)
+# ColBERT-compatible stack (excludes Qwen3)
 pip install -e ".[all]"
 ```
+
+### Qwen3 Reranker
+
+Use a separate environment from ColBERT:
+
+```bash
+pip install -U -e ".[qwen3]"
+```
+
+Qwen3 requires Transformers >=4.51. Its native CrossEncoder integration requires
+Sentence Transformers >=5.4. The `all` and `late-interaction` extras pin
+Transformers <4.48 for ColBERT, so do not combine them with `qwen3`.
+Restart the notebook runtime after changing dependencies, then rerun the CLI.
+For example, use `--model Qwen/Qwen3-Reranker-4B --retriever cross-encoder`.
+
+References: [Qwen3 model card](https://huggingface.co/Qwen/Qwen3-Reranker-4B)
+and [Sentence Transformers v5.4 integration](https://huggingface.co/Qwen/Qwen3-Reranker-4B/discussions/11).
 
 ## Usage
 
@@ -49,6 +66,38 @@ python -m ir_system.cli.main \
     --top-k 10 \
     --metrics ndcg@10 mrr@10 recall@10
 ```
+
+#### Query / document prefixes
+
+Many embedding models expect different text prefixes for queries and documents.
+Encoding without them lowers retrieval quality. For each side the prefix is chosen in this order:
+
+1. `--query-prefix` / `--doc-prefix` (pass `""` to disable)
+2. Prompts published by the model itself (e.g. Qwen3-Embedding defines a `query` prompt)
+3. Inferred from the model name: e5 uses `query: ` / `passage: `; bge English (`bge-*-en-*`) and
+   Chinese (`bge-*-zh-*`) add an instruction to queries only
+4. No prefix
+
+The chosen prefixes are logged at load time (`[MODEL] Prompts: ...`). They apply to the main
+`--model` only, not to `--candidate-model`.
+
+```bash
+# e5: prefixes are applied automatically
+python -m ir_system.cli.main \
+    --dataset ./data/toy \
+    --model intfloat/multilingual-e5-large \
+    --retriever dense \
+    --top-k 10 \
+    --metrics ndcg@10
+
+# Override or disable
+python -m ir_system.cli.main ... --query-prefix "Query: " --doc-prefix "Passage: "
+python -m ir_system.cli.main ... --query-prefix "" --doc-prefix ""
+```
+
+A document prefix changes the document vectors, so it is part of the index hash. An index built
+before this feature for a model that uses a document prefix (e.g. e5) no longer matches and must
+be rebuilt. Models without a document prefix (bge, Qwen3) keep the same hash.
 
 ### Hybrid (BM25 + Dense via RRF)
 
@@ -94,7 +143,7 @@ directly using normalized inner products (cosine similarity). The `[dense]` extr
 includes FAISS. This is exact search, not an approximate index.
 
 Indexes are automatically written under `indexes/<sha256>/` relative to the current
-working directory. The hash includes the model name and ordered document IDs/text,
+working directory. The hash includes the model name, the document prefix (if any) and ordered document IDs/text,
 so different corpora and languages have separate directories. The saved path is
 logged. Each directory contains `index.faiss`, `doc_ids.json`, and `config.json`.
 There is no save switch: every new build persists its index.

@@ -43,6 +43,10 @@ class DenseRetriever(Retriever):
         doc_ids = [doc.doc_id for doc in documents]
         digest = hashlib.sha256()
         digest.update(json.dumps(self._model.name).encode("utf-8"))
+        document_prompt = self._model.document_prompt
+        if document_prompt:
+            # Changes the document vectors, so indexes built without it are stale.
+            digest.update(json.dumps(document_prompt, ensure_ascii=False).encode("utf-8"))
         for doc in documents:
             digest.update(json.dumps([doc.doc_id, doc.text], ensure_ascii=False).encode("utf-8"))
         corpus_hash = digest.hexdigest()
@@ -61,9 +65,11 @@ class DenseRetriever(Retriever):
         self._built = False
         texts = [doc.text for doc in documents]
         try:
-            embeddings = self._model.encode(texts, batch_size=self._batch_size, show_progress=True)
+            embeddings = self._model.encode_documents(
+                texts, batch_size=self._batch_size, show_progress=True
+            )
         except TypeError:
-            embeddings = self._model.encode(texts, batch_size=self._batch_size)
+            embeddings = self._model.encode_documents(texts, batch_size=self._batch_size)
         embeddings = np.asarray(embeddings, dtype=np.float32)
         if embeddings.ndim != 2 or embeddings.shape[0] != len(documents) or embeddings.shape[1] == 0:
             raise RuntimeError("DenseRetriever.build: invalid embedding shape or document count.")
@@ -86,7 +92,7 @@ class DenseRetriever(Retriever):
             raise RuntimeError("DenseRetriever.retrieve: build() or load_index() must be called first.")
         if top_k <= 0:
             raise ValueError("DenseRetriever.retrieve: top_k must be > 0.")
-        vector = np.asarray(self._model.encode([query.text], batch_size=1), dtype=np.float32)
+        vector = np.asarray(self._model.encode_queries([query.text], batch_size=1), dtype=np.float32)
         if vector.shape != (1, self._index.d):
             raise RuntimeError(f"Unexpected query embedding shape {vector.shape}.")
         if not np.isfinite(vector).all():

@@ -58,6 +58,8 @@ def create_model(
     model_type: Optional[ModelType] = None,
     device: str = "auto",
     batch_size: int = 32,
+    query_prompt: Optional[str] = None,
+    document_prompt: Optional[str] = None,
 ) -> AnyModel:
     """
     Instantiate a model from its identifier.
@@ -72,6 +74,10 @@ def create_model(
         "cpu", "cuda", or "auto".
     batch_size : int
         Default batch size for encoding/scoring.
+    query_prompt, document_prompt : Optional[str]
+        Single-vector models only. Override the query/document prefix that is
+        otherwise taken from the model (or inferred from its name for e5/bge).
+        An empty string disables the prefix.
 
     Returns
     -------
@@ -106,7 +112,9 @@ def create_model(
     logger.info("[MODEL] Device: %s", resolved_device)
 
     if resolved_type == "single-vector":
-        return _build_single_vector(normalized, resolved_device, batch_size)
+        return _build_single_vector(
+            normalized, resolved_device, batch_size, query_prompt, document_prompt
+        )
     elif resolved_type == "multi-vector":
         return _build_multi_vector(normalized, resolved_device, batch_size)
     elif resolved_type == "cross-encoder":
@@ -156,7 +164,11 @@ def _infer_model_type(model_id: str) -> ModelType:
 
 
 def _build_single_vector(
-    model_id: str, device: str, batch_size: int
+    model_id: str,
+    device: str,
+    batch_size: int,
+    query_prompt: Optional[str] = None,
+    document_prompt: Optional[str] = None,
 ) -> SingleVectorEmbeddingModel:
     """Build a concrete single-vector embedding model adapter."""
     # Import deferred to avoid top-level dependency on torch/transformers.
@@ -165,7 +177,11 @@ def _build_single_vector(
     )
 
     return SentenceTransformerAdapter(
-        model_id=model_id, device=device, default_batch_size=batch_size
+        model_id=model_id,
+        device=device,
+        default_batch_size=batch_size,
+        query_prompt=query_prompt,
+        document_prompt=document_prompt,
     )
 
 
