@@ -7,6 +7,11 @@ End-to-end IR pipeline supporting:
 - **Cross Encoder** (joint query-document scoring / reranking)
 - **Hybrid** (BM25 + Dense fused via RRF)
 
+BM25 uses BM25S's Lucene variant with precomputed sparse scores. Tokenization
+remains lowercase whitespace splitting, with no automatic stemming or stopword
+removal. Scores and rankings can differ from the previous `rank-bm25` baseline;
+rerun evaluation when comparing results across these implementations.
+
 Metrics: NDCG@K, MRR@K, Recall@K
 
 ## Installation

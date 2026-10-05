@@ -51,6 +51,40 @@ from ir_system.cli.main import _parse_metric_spec, _setup_logging
 from ir_system.evaluation.evaluator import Evaluator
 
 
+_RERANK_EMBEDDING_MODEL = "Qwen/Qwen3-Embedding-0.6B"
+_QWEN_QUERY_PROMPT = (
+    "Instruct: Given a web search query, retrieve relevant passages that answer the query\nQuery:"
+)
+
+
+class _QueryEmbeddingCache(SingleVectorEmbeddingModel):
+    """Reuse batched query vectors while delegating corpus encoding to the model.
+
+    DenseRetriever still owns normalization, FAISS search and ranking. Cache
+    only complete query batches. Query mode is disabled during corpus builds
+    so a document sharing text with a query never receives its prompted vector.
+    """
+
+    def __init__(self, model: SingleVectorEmbeddingModel) -> None:
+        self._model = model
+        self._vectors: dict[str, np.ndarray] = {}
+        self.query_mode = False
+
+    @property
+    def name(self) -> str:
+        return self._model.name
+
+    def remember(self, texts: list[str], vectors: np.ndarray) -> None:
+        for text, vector in zip(texts, vectors):
+            self._vectors.setdefault(text, vector)
+
+    def encode(self, texts, **kwargs) -> np.ndarray:
+        texts = list(texts)
+        if self.query_mode and texts and all(text in self._vectors for text in texts):
+            return np.stack([self._vectors[text] for text in texts])
+        return self._model.encode(texts, **kwargs)
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(
         description="Analyze query representation drift and positive/negative margins by query-document direction.",
@@ -64,7 +98,8 @@ def main(argv=None) -> int:
                         help="Query languages, e.g. csw or vi en csw.")
     parser.add_argument("--documents", nargs="+", choices=[*DOC_LANGS, "all"],
                         help="Document languages, e.g. vi or en.")
-    parser.add_argument("--model", required=True, help="Single-vector encoder for representation analysis.")
+    parser.add_argument("--model", help="Single-vector encoder; required without --reranker. "
+                        "With --reranker, Qwen/Qwen3-Embedding-0.6B is always used.")
     parser.add_argument("--model-type", choices=["single-vector"], default="single-vector")
     parser.add_argument("--retriever", choices=["dense"], default="dense",
                         help="Dense retrieval; use --reranker for optional cross-encoder scoring.")
@@ -73,10 +108,20 @@ def main(argv=None) -> int:
     parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--top-k", type=int, default=100, help="Hard-negative pool cutoff.")
+    parser.add_argument("--load-index", type=Path,
+                        help="Load an existing FAISS index instead of encoding the corpus. "
+                             "For multiple document languages, use a root containing vi/ and en/ indexes.")
     parser.add_argument("--output", type=Path, default=Path("results/language_analysis"))
     parser.add_argument("--verbose", action="store_true")
     args = parser.parse_args(argv)
     _setup_logging(args.verbose)
+    if args.reranker:
+        if args.model and args.model != _RERANK_EMBEDDING_MODEL:
+            logging.info("Using %s for reranking-stage embeddings instead of %s",
+                         _RERANK_EMBEDDING_MODEL, args.model)
+        args.model = _RERANK_EMBEDDING_MODEL
+    elif not args.model:
+        parser.error("--model is required when --reranker is not provided.")
     if args.top_k <= 0 or args.batch_size <= 0:
         parser.error("--top-k and --batch-size must be positive.")
     if args.direction and (args.queries or args.documents):
@@ -113,14 +158,20 @@ def main(argv=None) -> int:
             raise ValueError("Representation analysis requires a single-vector encoder.")
         reranker = (create_model(args.reranker, model_type="cross-encoder", device=args.device,
                                 batch_size=args.batch_size) if args.reranker else None)
+        cached_model = _QueryEmbeddingCache(model)
+        query_prompt = _QWEN_QUERY_PROMPT if args.model == _RERANK_EMBEDDING_MODEL else ""
         query_vectors = {}
         for lang in queries:
             logging.info("Encoding %s query views", lang)
             qids = list(queries[lang])
-            qv = normalize(model.encode_queries([queries[lang][qid].text for qid in qids],
-                                        batch_size=args.batch_size, show_progress=True))
+            texts = [queries[lang][qid].text for qid in qids]
+            embeddings = np.asarray(model.encode(
+                [query_prompt + text for text in texts],
+                batch_size=args.batch_size, show_progress=True))
+            qv = normalize(embeddings)
             if len(qv) != len(qids):
                 raise ValueError("Encoder returned an incorrect number of embeddings.")
+            cached_model.remember(texts, embeddings)
             query_vectors[lang] = dict(zip(qids, qv))
         points = [{"qid": qid, "language": lang, "text": queries[lang][qid].text}
                   for lang in queries for qid in sorted(queries[lang])]
@@ -132,13 +183,22 @@ def main(argv=None) -> int:
         indexes, document_vectors = {}, {}
         for index_lang, documents in corpora.items():
             logging.info("Analyzing fixed %s index", index_lang)
+            cached_model.query_mode = False
             query_languages = [lang for lang in LANGUAGES if f"{lang}-{index_lang}" in directions]
-            dense = DenseRetriever(model=model, batch_size=args.batch_size)
+            dense = DenseRetriever(model=cached_model, batch_size=args.batch_size)
             retriever = (CrossEncoderRetriever(
                 model=reranker, candidate_retriever=dense,
                 candidate_top_k=len(documents), batch_size=args.batch_size,
             ) if reranker else dense)
+            if args.load_index:
+                index_dir = (args.load_index / index_lang
+                             if len(corpora) > 1 else args.load_index)
+                logging.info("Loading fixed %s index from %s", index_lang, index_dir)
+                dense.load_index(index_dir)
+            # build() also validates a loaded index against the current corpus;
+            # composite retrievers still need their document-text mapping.
             retriever.build(documents)
+            cached_model.query_mode = True
             if len(corpora) > 1:
                 document_vectors[index_lang] = dense.document_embeddings()
             pipeline = SearchPipeline(retriever)
@@ -170,7 +230,8 @@ def main(argv=None) -> int:
                        "dataset": str(args.dataset),
                        "query_languages": list(queries), "document_languages": list(corpora),
                        "directions": directions, "model_type": args.model_type,
-                       "retriever": args.retriever, "metrics": args.metrics},
+                       "retriever": args.retriever, "metrics": args.metrics,
+                       "query_prompt": query_prompt},
             "policies": {
                 "pairing": "Exact shared qid and doc_id denote information needs and document groups.",
                 "projection": "One joint PCA on available query-language views; cosine gaps use original dimensions.",

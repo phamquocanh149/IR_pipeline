@@ -1,7 +1,7 @@
 """
 Retrievers: BM25Retriever
 ==========================
-Concrete sparse retriever using the BM25 algorithm via rank_bm25.
+Concrete sparse retriever using eager sparse scoring via BM25S (Lucene variant).
 
 Implementation guarantees
 -------------------------
@@ -21,6 +21,7 @@ from __future__ import annotations
 import logging
 from typing import Callable, List, Optional, Sequence
 
+import numpy as np
 from tqdm import tqdm
 
 from ir_system.domain.document import Document
@@ -35,7 +36,7 @@ _DEFAULT_TOKENIZER: Callable[[str], List[str]] = lambda text: text.lower().split
 
 class BM25Retriever(SparseRetriever):
     """
-    BM25 retriever backed by rank_bm25.
+    BM25 retriever backed by BM25S's precomputed sparse score index.
 
     Parameters
     ----------
@@ -52,11 +53,11 @@ class BM25Retriever(SparseRetriever):
         b: float = 0.75,
     ) -> None:
         try:
-            import rank_bm25  # noqa: F401
+            import bm25s  # noqa: F401
         except ImportError as exc:
             raise ImportError(
-                "rank-bm25 is required for BM25 retrieval. "
-                "Install it with: pip install rank-bm25"
+                "bm25s is required for BM25 retrieval. "
+                "Install it with: pip install bm25s"
             ) from exc
 
         self._tokenizer = tokenizer or _DEFAULT_TOKENIZER
@@ -66,6 +67,7 @@ class BM25Retriever(SparseRetriever):
         # State populated by build()
         self._bm25 = None
         self._doc_ids: List[str] = []
+        self._doc_id_order = np.empty(0, dtype=np.intp)
         self._built = False
 
     def build(self, documents: Sequence[Document]) -> None:
@@ -74,28 +76,37 @@ class BM25Retriever(SparseRetriever):
 
         Raises
         ------
-        ValueError  If corpus is empty or any document has empty text.
+        ValueError  If corpus is empty or contains no tokens after tokenization.
         """
         if not documents:
             raise ValueError("BM25Retriever.build: corpus must not be empty.")
 
+        self._built = False
         logger.info("[RETRIEVER] Building BM25 index over %d documents...", len(documents))
 
-        self._doc_ids = []
+        doc_ids: List[str] = []
         tokenized_corpus: List[List[str]] = []
 
-        for i, doc in enumerate(tqdm(documents, desc="[BM25] Tokenizing corpus", unit="doc")):
-            self._doc_ids.append(doc.doc_id)
+        for doc in tqdm(documents, desc="[BM25] Tokenizing corpus", unit="doc"):
+            doc_ids.append(doc.doc_id)
             if not doc.text or not doc.text.strip():
                 tokenized_corpus.append([])
             else:
                 tokenized_corpus.append(self._tokenizer(doc.text))
 
+        if not any(tokenized_corpus):
+            raise ValueError("BM25Retriever.build: corpus contains no tokens after tokenization.")
 
-        from rank_bm25 import BM25Okapi
+        import bm25s
 
-        self._bm25 = BM25Okapi(
-            tokenized_corpus, k1=self._k1, b=self._b
+        index = bm25s.BM25(k1=self._k1, b=self._b, method="lucene", backend="numpy")
+        # Preserve the caller's tokenizer: BM25S's default tokenizer would
+        # otherwise introduce different punctuation/stopword handling.
+        index.index(tokenized_corpus, show_progress=False)
+        self._bm25 = index
+        self._doc_ids = doc_ids
+        self._doc_id_order = np.asarray(
+            sorted(range(len(doc_ids)), key=doc_ids.__getitem__), dtype=np.intp
         )
         self._built = True
         logger.info("[RETRIEVER] BM25 index ready (%d documents).", len(self._doc_ids))
@@ -116,7 +127,7 @@ class BM25Retriever(SparseRetriever):
         Raises
         ------
         RuntimeError  If called before build().
-        ValueError    If top_k <= 0 or query text is empty after tokenization.
+        ValueError    If top_k <= 0.
         """
         if not self._built:
             raise RuntimeError(
@@ -135,14 +146,24 @@ class BM25Retriever(SparseRetriever):
             )
             return []
 
-        scores = self._bm25.get_scores(tokens)  # shape: [N_docs]
+        scores = self._bm25.get_scores(tokens)  # sparse postings -> [N_docs]
+        n = len(self._doc_ids)
+        k = min(top_k, n)
+        if k == n:
+            indices = np.arange(n)
+        else:
+            cutoff = np.partition(scores, n - k)[n - k]
+            above = np.flatnonzero(scores > cutoff)
+            # Include only the lexicographically first IDs tied at the cutoff.
+            # Plain argpartition could arbitrarily discard a tied top-k hit.
+            tied = self._doc_id_order[scores[self._doc_id_order] == cutoff]
+            indices = np.concatenate((above, tied[:k - len(above)]))
 
-        # Build (doc_id, score) pairs and sort: score desc, doc_id asc for tie-break.
+        # Sort only selected hits; scoring is not repeated for cutoff ties.
         paired = [
             (self._doc_ids[i], float(scores[i]))
-            for i in range(len(self._doc_ids))
+            for i in indices
         ]
         paired.sort(key=lambda x: (-x[1], x[0]))
 
-        top = paired[:top_k]
-        return [Hit(doc_id=doc_id, score=score) for doc_id, score in top]
+        return [Hit(doc_id=doc_id, score=score) for doc_id, score in paired]
