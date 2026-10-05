@@ -113,6 +113,11 @@ class ColBERTAdapter(MultiVectorEmbeddingModel):
             raise RuntimeError("Expected the ColBERTv2 128-dimensional projection")
 
     @property
+    def device(self) -> str:
+        """Resolved encoder device, also used for exhaustive MaxSim scoring."""
+        return str(self._device)
+
+    @property
     def name(self) -> str:
         return self._model_id
 

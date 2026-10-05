@@ -151,6 +151,10 @@ def _build_retriever(
     candidate_retriever_type: str = "bm25",
     candidate_model=None,
     candidate_batch_size: int = 32,
+    colbert_score_batch_size: int = 128,
+    colbert_query_batch_size: int = 8,
+    colbert_scoring_device: str = "auto",
+    colbert_verify_scores: bool = False,
 ):
     """
     Map --retriever string to a concrete Retriever instance.
@@ -186,7 +190,12 @@ def _build_retriever(
                 f"Got: {type(model).__name__}. "
                 "Use --model-type multi-vector."
             )
-        return LateInteractionRetriever(model=model, batch_size=batch_size)
+        return LateInteractionRetriever(
+            model=model, batch_size=batch_size,
+            score_batch_size=colbert_score_batch_size,
+            query_batch_size=colbert_query_batch_size,
+            scoring_device=None if colbert_scoring_device == "auto" else colbert_scoring_device,
+            verify_scores=colbert_verify_scores)
 
     elif rtype in ("cross-encoder", "cross_encoder", "reranker"):
         if not isinstance(model, CrossEncoderModel):
@@ -464,6 +473,14 @@ def _make_parser() -> argparse.ArgumentParser:
         default=32,
         help="Encoding/scoring batch size (default: 32).",
     )
+    parser.add_argument("--colbert-score-batch-size", type=int, default=128,
+                        help="Documents per exhaustive MaxSim GPU block (default: 128).")
+    parser.add_argument("--colbert-query-batch-size", type=int, default=8,
+                        help="Queries sharing each document GPU transfer (default: 8).")
+    parser.add_argument("--colbert-scoring-device", choices=["auto", "cpu", "cuda"],
+                        default="auto", help="MaxSim device; auto follows the encoder.")
+    parser.add_argument("--colbert-verify-scores", action="store_true",
+                        help="Compare every GPU score to NumPy and return reference scores; slow.")
     parser.add_argument(
         "--candidate-top-k",
         type=int,
@@ -762,6 +779,10 @@ def main(argv: Optional[List[str]] = None) -> int:
                 candidate_retriever_type=args.candidate_retriever,
                 candidate_model=candidate_model,
                 candidate_batch_size=candidate_batch_size,
+                colbert_score_batch_size=args.colbert_score_batch_size,
+                colbert_query_batch_size=args.colbert_query_batch_size,
+                colbert_scoring_device=args.colbert_scoring_device,
+                colbert_verify_scores=args.colbert_verify_scores,
             )
         except (ValueError, TypeError) as exc:
             logger.error("Retriever construction failed: %s", exc)
@@ -847,6 +868,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         "docs_lang": d_tags,
         "device": args.device,
         "batch_size": args.batch_size,
+        "colbert_score_batch_size": args.colbert_score_batch_size,
+        "colbert_query_batch_size": args.colbert_query_batch_size,
+        "colbert_scoring_device": args.colbert_scoring_device,
+        "colbert_verify_scores": args.colbert_verify_scores,
         "candidate_top_k": args.candidate_top_k,
         "candidate_retriever": args.candidate_retriever,
         "candidate_model": args.candidate_model,

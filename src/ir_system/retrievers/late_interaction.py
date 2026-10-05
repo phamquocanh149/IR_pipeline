@@ -15,7 +15,7 @@ Architecture
 
 NOTE: Full corpus MaxSim is O(N * T_q * T_d) which can be slow for large corpora.
 For production, use approximate indexing (PLAID, etc.). This is the reference
-implementation for correctness.
+implementation with optional blocked CUDA scoring.
 """
 from __future__ import annotations
 
@@ -42,14 +42,32 @@ class LateInteractionRetriever(Retriever):
     Parameters
     ----------
     model      : MultiVectorEmbeddingModel
-    batch_size : int   Encoding batch size (default 32)
+    batch_size : int   Document encoding batch size (default 32)
+    score_batch_size : int   Documents per GPU block (default 128)
+    query_batch_size : int   Queries sharing document transfers (default 8)
+    scoring_device : str | None   Follow model.device when omitted
+    verify_scores : bool   Check GPU scores and return NumPy reference scores
     """
 
     def __init__(
         self,
         model: MultiVectorEmbeddingModel,
         batch_size: int = 32,
+        score_batch_size: int = 128,
+        query_batch_size: int = 8,
+        scoring_device: str | None = None,
+        verify_scores: bool = False,
     ) -> None:
+        for name, value in (("batch_size", batch_size), ("score_batch_size", score_batch_size),
+                            ("query_batch_size", query_batch_size)):
+            if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+                raise ValueError(f"{name} must be a positive integer")
+        self._score_batch_size = score_batch_size
+        self._query_batch_size = query_batch_size
+        self._scoring_device = str(scoring_device or getattr(model, "device", "cpu"))
+        self._verify_scores = verify_scores
+        if self._scoring_device != "cpu" and not self._scoring_device.startswith("cuda"):
+            raise ValueError("scoring_device must be cpu or cuda")
         self._model = model
         self._batch_size = batch_size
 
@@ -110,6 +128,9 @@ class LateInteractionRetriever(Retriever):
 
         self._doc_vecs = [np.asarray(v, dtype=np.float32) for v in all_vecs]
         self._built = True
+        logger.info("[MaxSim] device=%s document_block=%d query_group=%d verify=%s",
+                    self._scoring_device, self._score_batch_size,
+                    self._query_batch_size, self._verify_scores)
 
         logger.info(
             "[RETRIEVER] Late-interaction index ready: %d documents.",
@@ -140,6 +161,9 @@ class LateInteractionRetriever(Retriever):
             raise ValueError(
                 f"LateInteractionRetriever.retrieve: top_k must be > 0, got {top_k}"
             )
+
+        if self._scoring_device.startswith("cuda"):
+            return next(self.retrieve_many([query], top_k))
 
         # Encode query: List[np.ndarray] of length 1.
         # Pass is_query=True so ColBERTAdapter uses query encoding (MASK augmentation).
@@ -186,3 +210,90 @@ class LateInteractionRetriever(Retriever):
             Hit(doc_id=doc_id, score=score)
             for doc_id, score in top_scores
         ]
+
+    def retrieve_many(self, queries: Sequence[Query], top_k: int):
+        """Yield results in query order; CUDA reuses each document transfer.
+
+        Exhaustive FP32 MaxSim, not approximate candidate retrieval. GPU floating
+        point results can differ from NumPy near ties. Select on CPU with the
+        original score/doc_id ordering, including ties across block boundaries.
+        """
+        if not self._built:
+            raise RuntimeError("build() must be called before retrieve_many()")
+        if top_k <= 0:
+            raise ValueError("top_k must be positive")
+        if not self._scoring_device.startswith("cuda"):
+            for query in queries:
+                yield self.retrieve(query, top_k)
+            return
+        import torch
+        for start in range(0, len(queries), self._query_batch_size):
+            group = queries[start:start + self._query_batch_size]
+            texts = [query.text for query in group]
+            encoder = getattr(self._model, "encode_queries", self._model.encode)
+            # Preserve the original per-query encoder numerics. Queries share
+            # scoring transfers, but encoding batch shape remains unchanged.
+            vectors = encoder(texts, batch_size=1)
+            if len(vectors) != len(group):
+                raise RuntimeError("Unexpected number of query embeddings")
+            queries_np = [np.asarray(v, dtype=np.float32) for v in vectors]
+            best = [[] for _ in group]
+            # Restore global precision settings even if scoring fails.
+            previous_tf32 = torch.backends.cuda.matmul.allow_tf32
+            try:
+                torch.backends.cuda.matmul.allow_tf32 = False
+                with torch.inference_mode(), torch.autocast(device_type="cuda", enabled=False):
+                    for offset in range(0, len(self._doc_vecs), self._score_batch_size):
+                        docs = self._doc_vecs[offset:offset + self._score_batch_size]
+                        block = self._score_block(queries_np, docs, self._scoring_device)
+                        if self._verify_scores:
+                            reference = np.asarray([
+                                [self._reference_score(q, d) for d in docs]
+                                for q in queries_np], dtype=np.float32)
+                            np.testing.assert_allclose(block, reference, rtol=1e-4, atol=1e-5)
+                            # Exact old scores and ordering in verification mode.
+                            block = reference
+                        ids = self._doc_ids[offset:offset + len(docs)]
+                        for row, scores in enumerate(block):
+                            candidates = best[row] + list(zip(ids, map(float, scores)))
+                            best[row] = heapq.nsmallest(
+                                top_k, candidates, key=lambda item: (-item[1], item[0]))
+            finally:
+                torch.backends.cuda.matmul.allow_tf32 = previous_tf32
+            for hits in best:
+                yield [Hit(doc_id=did, score=score) for did, score in hits]
+
+    @staticmethod
+    def _score_block(queries, documents, device):
+        """One document transfer, then bounded [documents, Q tokens, D tokens] work."""
+        import torch
+        if not queries:
+            return np.empty((0, len(documents)), dtype=np.float32)
+        dimension = queries[0].shape[1]
+        lengths = [len(d) if d.ndim == 2 else 0 for d in documents]
+        width = max(max(lengths, default=0), 1)
+        padded = np.zeros((len(documents), width, dimension), dtype=np.float32)
+        for row, (document, length) in enumerate(zip(documents, lengths)):
+            if length:
+                padded[row, :length] = document
+        docs = torch.as_tensor(padded, device=device)
+        sizes = torch.tensor(lengths, device=device)
+        mask = torch.arange(width, device=device)[None, :] < sizes[:, None]
+        result = []
+        for query in queries:
+            if query.ndim != 2 or query.shape[1] != dimension:
+                raise ValueError("Query embeddings must have shape [tokens, dimension]")
+            q = torch.as_tensor(query, device=device)
+            similarities = torch.matmul(q, docs.transpose(1, 2))
+            similarities.masked_fill_(~mask[:, None, :], -torch.inf)
+            scores = similarities.max(dim=-1).values.sum(dim=-1)
+            scores = torch.where((sizes > 0) & torch.isfinite(scores), scores, 0.0)
+            result.append(scores)
+        return torch.stack(result).cpu().numpy()
+
+    @staticmethod
+    def _reference_score(query, document):
+        if document.ndim != 2 or document.shape[0] == 0:
+            return 0.0
+        score = float((query @ document.T).max(axis=1).sum())
+        return score if math.isfinite(score) else 0.0

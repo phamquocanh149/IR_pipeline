@@ -375,3 +375,37 @@ By default, `<run_id>` is an auto-generated timestamp string (e.g. `20260927T094
   ```
 - `--output <dir>` / `-o <dir>`: Saves to a custom directory. If a single folder name is passed, it is placed under `results/<dir>/`.
 
+
+### ColBERT exhaustive GPU scoring
+
+With `--retriever late-interaction --device cuda`, document encoding and MaxSim
+scoring now use CUDA. Search still scores every document; no approximate index
+or candidate filter is introduced. ColBERT remains a multi-vector late-interaction
+model, not a cross-encoder. Its query augmentation and document token masks are
+unchanged; the cross-encoder reranking path is separate.
+
+- `--batch-size 32`: document encoding batch size.
+- `--colbert-score-batch-size 128`: documents in each GPU scoring block; reduce
+  this if GPU memory is insufficient.
+- `--colbert-query-batch-size 8`: queries sharing each document block transfer.
+  Queries are scored sequentially within the group to bound temporary GPU memory.
+  Query encoding deliberately retains batch size 1 to preserve the old encoder
+  batch shape and numerical behavior.
+- `--colbert-scoring-device auto`: follow the model device. Set `cpu` to use the
+  original NumPy scoring implementation, even when the encoder uses CUDA.
+- `--colbert-verify-scores`: compare every GPU score with the original NumPy
+  formula (`rtol=1e-4`, `atol=1e-5`) and return the NumPy scores. A mismatch raises
+  an error. This diagnostic mode also computes all CPU scores and is slower.
+
+GPU scoring uses FP32 with TF32 and autocast disabled during MaxSim, masks padded
+document tokens with negative infinity, and retains sorting by descending score
+then ascending document ID, including ties across blocks. Empty documents and
+non-finite scores retain the original zero-score behavior. Ordinary GPU mode
+cannot promise bitwise equality with NumPy: floating-point differences may change
+ranking for nearly tied documents. Use CPU scoring or verification mode when exact
+reference scores/order are required for the same encoded embeddings.
+
+The index remains in host RAM; only document blocks are transferred to CUDA.
+This bounds GPU corpus memory but does not reduce the host memory needed for all
+per-token embeddings. Speedup depends on corpus, hardware and transfer cost;
+benchmark encoding and retrieval separately.

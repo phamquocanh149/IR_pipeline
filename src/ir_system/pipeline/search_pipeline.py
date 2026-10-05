@@ -85,8 +85,12 @@ class SearchPipeline:
         logger.info("[SEARCH] Processing %d queries (top_k=%d)...", len(queries), top_k)
 
         run = Run()
-        for i, query in enumerate(tqdm(queries, desc="[SEARCH] Retrieving", unit="query")):
-            hits: Sequence[Hit] = self._retriever.retrieve(query, top_k)
+        retrieve_many = getattr(self._retriever, "retrieve_many", None)
+        results = (retrieve_many(queries, top_k) if callable(retrieve_many)
+                   else (self._retriever.retrieve(query, top_k) for query in queries))
+        for i, (query, hits) in enumerate(tqdm(
+                zip(queries, results, strict=True), total=len(queries),
+                desc="[SEARCH] Retrieving", unit="query")):
             run.add(query.qid, hits)
             if (i + 1) % 100 == 0 or (i + 1) == len(queries):
                 logger.info("[SEARCH] %d / %d queries processed.", i + 1, len(queries))
