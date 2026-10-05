@@ -1,889 +1,428 @@
-{"_id": "mlqa:1", "text": "Chuyên môn của Chkalov là gì?"}
-{"_id": "mlqa:2", "text": "Tại sao một số máy quét đầu tiên không thể truyền dữ liệu nhanh?"}
-{"_id": "mlqa:3", "text": "Những loại biện pháp tránh thai nào làm giảm tỷ lệ mang thai ở tuổi vị thành niên nhiều nhất?"}
-{"_id": "mlqa:4", "text": "Nhóm nào đã ghé thăm thành phố ở Đan Mạch?"}
 {"_id": "mlqa:5", "text": "Jinnah ủng hộ điều gì khi lần đầu tiên trở thành chính trị gia?"}
 {"_id": "mlqa:6", "text": "Ai trực tiếp sở hữu nông sản?"}
 {"_id": "mlqa:7", "text": "Ai sẽ chỉ đạo sự phát triển của thành phố?"}
-{"_id": "mlqa:8", "text": "Motilal cuối cùng đã theo học tại trường cao đẳng nào?"}
 {"_id": "mlqa:9", "text": "Các mảng được tạo nên bởi cái gì?"}
 {"_id": "mlqa:10", "text": "Sao chổi muốn tìm thấy cái gì?"}
-{"_id": "mlqa:11", "text": "Thụy Điển cần được bảo vệ khỏi ai?"}
 {"_id": "mlqa:12", "text": "bao nhiêu quốc gia đã được thành lập từ nơi này?"}
 {"_id": "mlqa:13", "text": "IFAB đã cho thử nghiệm Luật Bàn thắng vàng khi nào?"}
 {"_id": "mlqa:14", "text": "IFAB đã thử nghiệm việc không yêu cầu phải sử dụng loạt sút luân lưu vào khi nào?"}
-{"_id": "mlqa:15", "text": "Có bao nhiêu CEO là thành viên của Business Roundtable?"}
 {"_id": "mlqa:16", "text": "Quan tài được làm bằng gì?"}
-{"_id": "mlqa:17", "text": "Dữ liệu ngôn ngữ cần ở định dạng nào để tạo ra một hệ thống dịch máy mới?"}
-{"_id": "mlqa:18", "text": "Ba bài kiểm tra đầu vào là gì?"}
-{"_id": "mlqa:19", "text": "Ellie Goulding đã giành được giải thưởng nào vào năm 2010?"}
 {"_id": "mlqa:20", "text": "Trọng lượng lớn nhất nó có thể đạt được tính bằng pounds?"}
-{"_id": "mlqa:21", "text": "Cô ấy qua đời vào tháng mấy?"}
 {"_id": "mlqa:22", "text": "Eurocypria đã bắt đầu hoạt động từ năm nào?"}
 {"_id": "mlqa:23", "text": "Độ pH của nước biển là bao nhiêu?"}
 {"_id": "mlqa:24", "text": "Đâu là bước sóng dài nhất của dải hấp thụ băng nước?"}
-{"_id": "mlqa:25", "text": "W-boson phân rã thành gì?"}
 {"_id": "mlqa:26", "text": "Tại sao Johnson cho xem các bộ phim khác nhau?"}
 {"_id": "mlqa:27", "text": "Dự kiến sẽ có bao nhiêu bộ phim?"}
 {"_id": "mlqa:28", "text": "Bản đồ đào vàng đầu tiên được biết đến trong vùng nào?"}
 {"_id": "mlqa:29", "text": "Số lượng thành viên tối đa cần thiết trong viện là bao nhiêu?"}
-{"_id": "mlqa:30", "text": "Điều gì xảy ra với Phân từ trĩ nội?"}
-{"_id": "mlqa:31", "text": "Tác giả của bản nhạc nền bắt đầu sáng tác vào thời gian nào?"}
-{"_id": "mlqa:32", "text": "Các trang văn bản trên World Wide Web có thể được xem bằng cách nào?"}
 {"_id": "mlqa:33", "text": "tác giả xấu hổ về điều gì"}
 {"_id": "mlqa:34", "text": "Tỷ lệ pha trộn là bao nhiêu?"}
-{"_id": "mlqa:35", "text": "Đại học Heidelberg đứng thứ mấy trên bảng xếp hạng quốc gia?"}
-{"_id": "mlqa:36", "text": "Tôn giáo của phần lớn công nhân là gì?"}
-{"_id": "mlqa:37", "text": "Airbus đã thiết kế chiếc máy bay nguyên bản nào?"}
 {"_id": "mlqa:38", "text": "Động đất sau phun trào diễn ra ở đâu năm 2006?"}
-{"_id": "mlqa:39", "text": "Bảy chi nhánh của Leister nằm ở đâu trên thế giới?"}
 {"_id": "mlqa:40", "text": "Chuột xạ hương là gì?"}
-{"_id": "mlqa:41", "text": "Ai là những nhà sản xuất chính của AS9000?"}
 {"_id": "mlqa:42", "text": "Mất bao nhiêu để nó để đi hết một vòng đường"}
 {"_id": "mlqa:43", "text": "Họ đã ghi 5 bàn vào lưới đội nào?"}
-{"_id": "mlqa:44", "text": "Vấn đề duy nhất mà PPP giải quyết là gì?"}
-{"_id": "mlqa:45", "text": "Có bao nhiêu học sinh khiếm thính đã nhập học vào năm 1983?"}
-{"_id": "mlqa:46", "text": "Diễn đàn Tự do ở quốc gia nào?"}
-{"_id": "mlqa:47", "text": "Các phương pháp điều trị tiêu chuẩn cho bệnh ung thư phổi là gì?"}
 {"_id": "mlqa:48", "text": "Có bao nhiêu trường công ngày nay?"}
-{"_id": "mlqa:49", "text": "Mất bao lâu để trưởng thành hoàn toàn?"}
-{"_id": "mlqa:50", "text": "Trình độ học vấn của ông ấy là gì?"}
 {"_id": "mlqa:51", "text": "Nghị viện nào đã được bảo vệ trong cuộc tấn công vào Nhà Trắng ngày 3 tháng Mười?"}
 {"_id": "mlqa:52", "text": "Sân bay thương mại lớn thứ 22 trên thế giới là sân bay nào?"}
-{"_id": "mlqa:53", "text": "Các ủy ban địa phương làm gì khi họ họp?"}
-{"_id": "mlqa:54", "text": "Con tàu cuối cùng đã chìm xuống dưới lớp băng vào ngày nào?"}
-{"_id": "mlqa:55", "text": "Tên của nền tảng thử nghiệm là gì?"}
 {"_id": "mlqa:56", "text": "Các tỉnh được phân cấp thành gì?"}
-{"_id": "mlqa:57", "text": "Những quốc gia nào không bị ảnh hưởng nặng nề?"}
 {"_id": "mlqa:58", "text": "Điều gì khiến Smith nghĩ một hồ sơ đại học nộp tới MIT sẽ có thể được duyệt?"}
-{"_id": "mlqa:59", "text": "Máy tính di động phụ thuộc vào nguồn điện nào khi không có ổ cắm điện hoặc máy phát điện di động?"}
-{"_id": "mlqa:60", "text": "Doanh nghiệp bắt đầu công việc nghiên cứu và phát triển có hệ thống từ khi nào?"}
-{"_id": "mlqa:61", "text": "Sự kiện bóng đá nào được tổ chức tại Nigeria vào tháng 4 năm 1999?"}
 {"_id": "mlqa:62", "text": "Ai là người cung cấp nơi ở an toàn cho Alexievich khi bà trở lại Minsk?"}
-{"_id": "mlqa:63", "text": "Nó được sử dụng để viết những loại tài liệu nào?"}
-{"_id": "mlqa:64", "text": "Nylon ra mắt để thay thế cho vật liệu nào?"}
-{"_id": "mlqa:65", "text": "Tên của bộ phim giả tưởng Ấn Độ do Begum đạo diễn năm 1926 là gì?"}
-{"_id": "mlqa:66", "text": "Từ cuối cùng của Maya tại Bệnh viện Quân đội ở Wellington, Tamil Nadu là gì?"}
-{"_id": "mlqa:67", "text": "Blunt đã làm việc ở đâu trước khi ký hợp đồng thu âm?"}
 {"_id": "mlqa:68", "text": "Số lượng cặp đôi kết hôn chiếm bao nhiêu phần trăm"}
 {"_id": "mlqa:69", "text": "Có bao nhiêu tượng Phật ở đây?"}
-{"_id": "mlqa:70", "text": "Ai là người đầu tiên phát hiện ra vi khuẩn Streptococcus pneumoniae?"}
-{"_id": "mlqa:71", "text": "Abdul Razak Hussein đã thay thế ai?"}
 {"_id": "mlqa:72", "text": "Ngôn ngữ lập trình ban đầu của Wikipedia là gì?"}
-{"_id": "mlqa:73", "text": "Ai là người dẫn dắt các nỗ lực tiêu chuẩn hóa hệ thống chữ viết?"}
-{"_id": "mlqa:74", "text": "Có thể tìm thấy rùa ở những bang nào tại Hoa Kỳ?"}
 {"_id": "mlqa:75", "text": "Karl đã phục vụ ở đâu?"}
-{"_id": "mlqa:76", "text": "Hệ thống ERP phải giới hạn điều gì vì một nhóm lớn các cuộc kiểm toán công ty?"}
 {"_id": "mlqa:77", "text": "Kết quả của việc tăng tốc độ quay của các sao thoái hoá?"}
 {"_id": "mlqa:78", "text": "đô thị lớn thứ bảy về dân số ở Texas là gì?"}
 {"_id": "mlqa:79", "text": "Cụ thể Đô đốc đã lên kế hoạch gì để tiến hành chiếm giữ từ những người Nga?"}
-{"_id": "mlqa:80", "text": "Tên của đĩa đơn là gì?"}
-{"_id": "mlqa:81", "text": "Ngày nay sà lan được sử dụng cho các mặt hàng có giá trị như thế nào?"}
-{"_id": "mlqa:82", "text": "Loại lực lượng cảnh sát nào đã được nhắc đến?"}
 {"_id": "mlqa:83", "text": "Tiểu bang nào ở Ấn Độ có địa điểm khảo cổ được gọi là Kotada Timba?"}
-{"_id": "mlqa:84", "text": "Điều gì phân biệt tiểu hành tinh loại Ld với tiểu hành tinh loại L?"}
-{"_id": "mlqa:85", "text": "Môn thể thao nào được nhiều người ở Malawi yêu thích?"}
-{"_id": "mlqa:86", "text": "Sông South Nahanni nằm ở đâu?"}
 {"_id": "mlqa:87", "text": "Con tàu Honolulu đã gia nhập hạm đội Thái Bình Dương vào năm nào?"}
-{"_id": "mlqa:88", "text": "ai không thích lý thuyết?"}
 {"_id": "mlqa:89", "text": "Hai môi trường duy nhất nào được sử dụng để nuôi cấy virus?"}
-{"_id": "mlqa:90", "text": "Clifford và binh lính của ông đang băng qua cây cầu nào khi họ đụng độ sự kháng cự của người Tây Ban Nha?"}
 {"_id": "mlqa:91", "text": "Muhammad tập hợp được bao nhiêu người đàn ông?"}
 {"_id": "mlqa:92", "text": "Điều gì xảy ra đối với Graf sau cuộc đình công của các thợ đạn dược?"}
-{"_id": "mlqa:93", "text": "Tỷ lệ trẻ em dưới 18 tuổi sống trong cảnh nghèo đói là bao nhiêu?"}
 {"_id": "mlqa:94", "text": "các ví dụ về bài tập aerobic là gì?"}
-{"_id": "mlqa:95", "text": "Tại sao FAC bắt đầu tổ chức các khóa học ở Haiti?"}
 {"_id": "mlqa:96", "text": "Tổng thống nào đã trả cuộc gọi ở Katniss, Quận 12?"}
 {"_id": "mlqa:97", "text": "Hài lòng là gì?"}
-{"_id": "mlqa:98", "text": "Đồng hồ nước (clepsydrae) được sử dụng ở đâu?"}
 {"_id": "mlqa:99", "text": "F-150 được thiết kế cho việc gì?"}
-{"_id": "mlqa:100", "text": "Sợi, tế bào mô mềm và những mạch nào khác cấu tạo nên Xylem?"}
-{"_id": "mlqa:101", "text": "cử chỉ im lặng đã bị nhầm lẫn với màn chào kiểu Black Power là gì?"}
 {"_id": "mlqa:102", "text": "Đối thủ cạnh tranh chính của tạp chí Science là ai?"}
 {"_id": "mlqa:103", "text": "Bạn có thể làm gì với các phần trong phần mềm CAD/CAM?"}
-{"_id": "mlqa:104", "text": "Người Mamluk đã tiến vào Syria vào năm nào?"}
 {"_id": "mlqa:105", "text": "Tốc độ của IK Pegasus A có thể lên đến bao nhiêu?"}
-{"_id": "mlqa:106", "text": "Các nhà máy khử muối cung cấp bao nhiêu nước đã qua xử lý cho khu vực này mỗi ngày?"}
-{"_id": "mlqa:107", "text": "Người Hy Lạp cổ đại đã thiết lập những gì?"}
-{"_id": "mlqa:108", "text": "Từ viết tắt của giấy phép mà GTK sử dụng là gì?"}
-{"_id": "mlqa:109", "text": "Điều gì đã xảy ra sau khi Napoleon sụp đổ vì đến Tây Ban Nha?"}
-{"_id": "mlqa:110", "text": "Ai là người đã cố gắng chiêu mộ Tyson vào Đại học Cornell để tiếp tục việc học?"}
 {"_id": "mlqa:111", "text": "Ai có mức thu nhập bình quân cao hơn, nam giới hay nữ giới?"}
 {"_id": "mlqa:112", "text": "Người cung cấp kịch bản cho Hunger Games: Catching Fire là ai?"}
 {"_id": "mlqa:113", "text": "Hệ thống vũ khí phụ có tổng cộng bao nhiêu ống phóng ngư lôi dưới nước?"}
 {"_id": "mlqa:114", "text": "Điều gì khiến việc quản lý chuỗi cung ứng lại khác với việc quản lý chuỗi nhu cầu?"}
 {"_id": "mlqa:115", "text": "“Bươm bướm trong bụng” là dấu hiệu của điều gì?"}
 {"_id": "mlqa:116", "text": "Breslau và Goeben đã ở cảng bao nhiêu giờ?"}
-{"_id": "mlqa:117", "text": "Khoảng tỷ lệ ước tính mà cellulite có thể xuất hiện ở nữ giới sau tuổi dậy thì là bao nhiêu?"}
 {"_id": "mlqa:118", "text": "Thân thể của Doyle được tìm thấy ở đâu?"}
 {"_id": "mlqa:119", "text": "Dinamo đã giành được chức vô địch năm nào?"}
-{"_id": "mlqa:120", "text": "Họ của học giả hư cấu đến từ thành phố Constantinople là gì?"}
 {"_id": "mlqa:121", "text": "Khi nào các cường quốc bắt đầu kế hoạch gây bất ổn các thuộc địa phương Tây?"}
 {"_id": "mlqa:122", "text": "Tên của nhóm tự coi mình là rất tách biệt với chính phủ Halifax là gì?"}
 {"_id": "mlqa:123", "text": "Thành cổ trở thành Di sản Thế giới của UNESCO từ khi nào?"}
 {"_id": "mlqa:124", "text": "Arthur Conan Dolye được sinh ra ở thành phố nào?"}
-{"_id": "mlqa:125", "text": "Levesque đã hợp tác với Lord Steven Regal trong khoảng thời gian nhiều hơn hay ít hơn một năm trọn vẹn?"}
-{"_id": "mlqa:126", "text": "Cái gì ảnh hưởng đến Java?"}
 {"_id": "mlqa:127", "text": "Tên của sáu nhân vật chính trong chương trình là gì?"}
-{"_id": "mlqa:128", "text": "Tên bức tranh mang tính yêu nước của Bayramov là gì?"}
-{"_id": "mlqa:129", "text": "Đấu trường có hình gì?"}
-{"_id": "mlqa:130", "text": "Loại LED nào có một lớp hữu cơ nằm giữa hai điện cực?"}
 {"_id": "mlqa:131", "text": "Ai là người bảo vệ khu vực Turaif?"}
 {"_id": "mlqa:132", "text": "Tỷ lệ khởi phát lao động là 23.3 phần trăm vào năm nào?"}
-{"_id": "mlqa:133", "text": "Kế hoạch Marshall có liên quan đến ai?"}
-{"_id": "mlqa:134", "text": "Eden trở thành người đứng đầu của tổ chức nào?"}
 {"_id": "mlqa:135", "text": "Sự thống nhất của bùn thành sau vụ phun trào núi St. Helen là gì?"}
 {"_id": "mlqa:136", "text": "AGT đến từ quốc gia nào?"}
-{"_id": "mlqa:137", "text": "Mali trở thành một quốc gia độc lập khi nào?"}
 {"_id": "mlqa:138", "text": "Ba quốc gia nào liên quan đến giải đấu này?"}
-{"_id": "mlqa:139", "text": "Bằng chứng ban đầu cho thấy điều gì?"}
 {"_id": "mlqa:140", "text": "Số lượng hàng hóa ra sao khi giá tăng?"}
 {"_id": "mlqa:141", "text": "Điều gì quan trọng nhất cho tế bào sống sót?"}
-{"_id": "mlqa:142", "text": "Nhiễm trùng huyết có thể được kích hoạt ở giai đoạn nào?"}
 {"_id": "mlqa:143", "text": "Mức lương dựa trên hợp đồng mà anh ấy đã ký là gì?"}
-{"_id": "mlqa:144", "text": "Stewart đã theo học diễn xuất tại ngôi trường nào?"}
 {"_id": "mlqa:145", "text": "Vị hoàng đế nào đã tuyên bố Nhật Bản đầu hàng trong Thế chiến thứ 2?"}
-{"_id": "mlqa:146", "text": "Ponomaryova đã làm việc ở đâu sau Trung tâm Huấn luyện Gagarin?"}
-{"_id": "mlqa:147", "text": "Hai video âm nhạc đầu tiên đã được phát sóng vào năm nào?"}
-{"_id": "mlqa:148", "text": "Casagrande đã đến đâu để học kiến trúc?"}
-{"_id": "mlqa:149", "text": "tại sao cô ấy lại được trao Giải thưởng Ashoka Chakra?"}
-{"_id": "mlqa:150", "text": "Loại lượng kết tủa nào phản chiếu ánh sáng mặt trời?"}
 {"_id": "mlqa:151", "text": "Quân vương phải nhận quyết định từ hai bên nào?"}
-{"_id": "mlqa:152", "text": "Thành phố New York  được đặt tên theo ai?"}
-{"_id": "mlqa:153", "text": "Ngôi sao sáng thứ năm trên bầu trời cách Mặt Trời bao nhiêu ?"}
 {"_id": "mlqa:154", "text": "Toà tháp được hoàn thành khi nào?"}
 {"_id": "mlqa:155", "text": "Bầu khí quyển hành tinh lớn nhất trong hệ mặt trời của chúng ta thuộc về hành tinh không bề mặt rắn nào?"}
-{"_id": "mlqa:156", "text": "Điều gì  thúc đẩy người Yakuts đến vùng lãnh thổ mới?"}
-{"_id": "mlqa:157", "text": "Nhà toán học nào đã chứng minh điều đó?"}
 {"_id": "mlqa:158", "text": "Một bữa ăn điển hình của cá voi Angle bao gồm gì?"}
-{"_id": "mlqa:159", "text": "Đạo luật Điều tiết được ký kết khi nào?"}
-{"_id": "mlqa:160", "text": "Johnson đã tuyên bố những gì?"}
-{"_id": "mlqa:161", "text": "Một tài liệu gốc của nhà soạn nhạc nổi tiếng đã được phát hiện ở đâu?"}
-{"_id": "mlqa:162", "text": "Thành phố lớn nhất ở Áo là thành phố nào?"}
 {"_id": "mlqa:163", "text": "Ai đề nghị hỗ trợ sau khi Pháp rút lui?"}
 {"_id": "mlqa:164", "text": "Các mẫu vẽ mô phỏng bằng nào đôi khi không chính xác?"}
-{"_id": "mlqa:165", "text": "Sau khi chiến tranh kết thúc, sự sụp đổ đã buộc ai phải chấp nhận điều đó?"}
-{"_id": "mlqa:166", "text": "Desai xuất bản tiểu thuyết đầu tiên vào năm nào?"}
-{"_id": "mlqa:167", "text": "Vịnh Mê-hi-cô nằm ở đại dương nào?"}
 {"_id": "mlqa:168", "text": "Cung điện Westminster được xây mới sau sự cố hoả hoạn bao nhiêu năm về trước?"}
 {"_id": "mlqa:169", "text": "Baghlan là một tỉnh của nước nào?"}
-{"_id": "mlqa:170", "text": "Nhược điểm của các phương pháp lặp dừng là gì?"}
 {"_id": "mlqa:171", "text": "Điều gì bị cấm trong các nhà thờ Ba Lan?"}
 {"_id": "mlqa:172", "text": "Khoản tiền bao nhiêu được đóng góp cho các trường nhằm hỗ trợ giáo dục?"}
 {"_id": "mlqa:173", "text": "Album thứ 5 của nghệ sĩ nào được lên batnv Billboards vào tháng 11 năm 2010?"}
-{"_id": "mlqa:174", "text": "Ai là người kế vị Aristotle?"}
 {"_id": "mlqa:175", "text": "Loại động vật ăn thịt lớn nào bị bắt tại Arizona năm 2009?"}
 {"_id": "mlqa:176", "text": "Tiến sĩ Mardon nhận bằng Thạc sĩ ở đâu?"}
-{"_id": "mlqa:177", "text": "Loại tội phạm nào đã được thực hiện chống lại Marsellus?"}
-{"_id": "mlqa:178", "text": "Trọng lượng cất cánh của tên lửa Dong Feng là bao nhiêu?"}
-{"_id": "mlqa:179", "text": "Wilson qua đời vào năm nào?"}
 {"_id": "mlqa:180", "text": "Lực lượng cảnh sát lớn đến mức nào?"}
-{"_id": "mlqa:181", "text": "Kithaab khắc họa điều gì?"}
 {"_id": "mlqa:182", "text": "Knight đã tốt nghiệp ở đâu và chuyên ngành nào?"}
-{"_id": "mlqa:183", "text": "Raj đã nghỉ ngơi trong bao lâu?"}
 {"_id": "mlqa:184", "text": "Đội quân của Brennus đã phải rút lui đến con sông nào sau khi bị đánh bại?"}
-{"_id": "mlqa:185", "text": "Có thể thực hiện hàn ở đâu?"}
 {"_id": "mlqa:186", "text": "Sự kiện nào có vận động viên tham gia từ ba mươi quốc gia?"}
 {"_id": "mlqa:187", "text": "Tác dụng phụ nguy hiểm nhất từ ​​vụ phun trào núi lửa là gì?"}
-{"_id": "mlqa:188", "text": "Tại sao Chúa lại tạo ra sự tiến hóa?"}
-{"_id": "mlqa:189", "text": "Bộ trưởng Urbšys đã dừng chân ở đâu để làm rõ những tin đồn đang lan rộng?"}
 {"_id": "mlqa:190", "text": "Năng lượng địa nhiệt được làm thực nghiệm lần đầu tiên khi nào?"}
-{"_id": "mlqa:191", "text": "Phòng mổ kết hợp (hybrid OR) cung cấp những gì?"}
-{"_id": "mlqa:192", "text": "Hội đồng Công nhân và Binh lính được lập ra nhằm mục đích gì?"}
-{"_id": "mlqa:193", "text": "Phiên bản đầu tiên của .NET 1.0 được phát hành khi nào?"}
 {"_id": "mlqa:194", "text": "Real Madrid đã đoạt cúp thế giới bao nhiêu lần?"}
-{"_id": "mlqa:195", "text": "Nhà ga nào đang được thảo luận?"}
 {"_id": "mlqa:196", "text": "Callisto là nhân vật thuộc thần thoại nào?"}
-{"_id": "mlqa:197", "text": "Ai là người phớt lờ lời cảnh báo?"}
 {"_id": "mlqa:198", "text": "Điều gì đã được thực hiện trong nhiều bộ phim?"}
 {"_id": "mlqa:199", "text": "Goldberg thuộc một tổ chức đấu vật nào khi sự nghiệp diễn xuất của anh bắt đầu?"}
 {"_id": "mlqa:200", "text": "Ai đã được nghiên cứu về khung máy bay?"}
 {"_id": "mlqa:201", "text": "các triệu chứng của bệnh Sán máng là gì?"}
-{"_id": "mlqa:202", "text": "Dân số vào năm 1975 là bao nhiêu?"}
 {"_id": "mlqa:203", "text": "Anh đạt danh hiệu gì khi là cầu thủ ghi nhiều bàn nhất cho Brazil?"}
 {"_id": "mlqa:204", "text": "Thời gian quay quang trục của Ida là bao lâu?"}
-{"_id": "mlqa:205", "text": "Ai là vua xứ Sicily trong vở kịch của Shakespeare?"}
 {"_id": "mlqa:206", "text": "Hệ thống chữ Hanja có bao nhiêu ký tự?"}
-{"_id": "mlqa:207", "text": "Metaxas đã bác bỏ tối hậu thư của Ý vào khi nào?"}
 {"_id": "mlqa:208", "text": "Richard Feyan được giải thưởng gì?"}
 {"_id": "mlqa:209", "text": "Triệu chứng đầu tiên của Ebola là gì?"}
 {"_id": "mlqa:210", "text": "Cuộc thảm sát kéo dài trong bao lâu?"}
 {"_id": "mlqa:211", "text": "Đua ô tô bị cấm ở đâu sau năm 1955?"}
 {"_id": "mlqa:212", "text": "Khi nào các doanh nhân Mỹ được trao quyền gửi tiền?"}
 {"_id": "mlqa:213", "text": "Loại phụ nữ nào mà theo truyện cổ tích cho rằng sẽ là mối nguy hiểm nếu không cố gắng đáp ứng nhu cầu của họ?"}
-{"_id": "mlqa:214", "text": "Tên của loài biểu tượng (flagship species) của bướm là gì?"}
-{"_id": "mlqa:215", "text": "Gaddafi đã giành được giải thưởng gì?"}
-{"_id": "mlqa:216", "text": "Mục tiêu chính là gì?"}
 {"_id": "mlqa:217", "text": "Thuringia cuối cùng đã hoàn thành việc trang bị vũ trang vào năm nào?"}
-{"_id": "mlqa:218", "text": "Hai quốc gia nào đã trải qua cuộc cách mạng trong thế kỷ 18?"}
-{"_id": "mlqa:219", "text": "Có bao nhiêu nhân chứng là thanh thiếu niên?"}
-{"_id": "mlqa:220", "text": "Những phương tiện hai bánh nào vẫn sử dụng lốp khí nén?"}
 {"_id": "mlqa:221", "text": "Loại nhạc cụ nào Edward chơi tốt?"}
 {"_id": "mlqa:222", "text": "Khi nào việc trinh sát đã thực hiện lần đầu tiên?"}
-{"_id": "mlqa:223", "text": "Họ ly hôn khi nào?"}
 {"_id": "mlqa:224", "text": "Kliewer cho rằng những khía cạnh nào của một giai điệu là quan trọng nhất?"}
 {"_id": "mlqa:225", "text": "\"Bản dịch theo nghĩa đen của\"\"tortilla\"\" là gì?\""}
-{"_id": "mlqa:226", "text": "có bao nhiêu người thiệt mạng sau thảm họa?"}
-{"_id": "mlqa:227", "text": "Tại sao cảnh sát lại bận tâm trước câu chuyện của Martha?"}
 {"_id": "mlqa:228", "text": "Tổng Chỉ thị được ban hành khi nào?"}
-{"_id": "mlqa:229", "text": "Thời gian mang thai kéo dài bao lâu?"}
-{"_id": "mlqa:230", "text": "Chế độ quân chủ quyết định chấm dứt vào khi nào?"}
-{"_id": "mlqa:231", "text": "có bao nhiêu trường hợp bị thương nặng?"}
 {"_id": "mlqa:232", "text": "Đồng hóa và Cố định là ví dụ của quá trình nhập nguyên tố nào vào hệ sinh thái?"}
-{"_id": "mlqa:233", "text": "Nhân vật của Chyna trong WWF là gì?"}
-{"_id": "mlqa:234", "text": "Một số quốc gia coi chất nào tương đương với TMP/SMX?"}
 {"_id": "mlqa:235", "text": "Love Me Do đạt vị trí số 17 trên bảng xếp hạng nào?"}
 {"_id": "mlqa:236", "text": "Maxwell chuyên về lĩnh vực gì?"}
-{"_id": "mlqa:237", "text": "BMI được tính toán như thế nào?"}
-{"_id": "mlqa:238", "text": "Chúng được phê chuẩn vào khi nào?"}
-{"_id": "mlqa:239", "text": "Manzoni đã chuyên sâu về lĩnh vực gì khi đi học?"}
-{"_id": "mlqa:240", "text": "Có bao nhiêu thành viên của Thượng viện được bầu?"}
-{"_id": "mlqa:241", "text": "Điều gì phải được phê chuẩn nếu một quốc gia muốn gia nhập WTO?"}
-{"_id": "mlqa:242", "text": "Mái vòm được làm từ chất liệu gì?"}
-{"_id": "mlqa:243", "text": "Streptomycetes sản xuất phần nào của các kháng sinh hữu ích?"}
-{"_id": "mlqa:244", "text": "Thủ đô của Madagascar là gì?"}
 {"_id": "mlqa:245", "text": "Con số dự đoán thấp nhất số người có ở đó là bao nhiêu?"}
-{"_id": "mlqa:246", "text": "Điều 1 hoặc dự luật của Hollande được thông qua với bao nhiêu phiếu thuận?"}
 {"_id": "mlqa:247", "text": "Adolf Erik Nordenskiold đã phát hiện ra điều gì?"}
 {"_id": "mlqa:248", "text": "Pandora bao gồm bao nhiêu bao nhiêu hố va chạm lớn?"}
-{"_id": "mlqa:249", "text": "Tên đầy đủ chính thức của São Tomé và Príncipe là gì?"}
-{"_id": "mlqa:250", "text": "Dawkins đặc biệt chỉ trích những niềm tin tôn giáo nào?"}
 {"_id": "mlqa:251", "text": "Oppenheimer đã mua bao nhiêu mẫu Anh?"}
-{"_id": "mlqa:252", "text": "Giải thưởng Màn trình diễn hài xuất sắc nhất đã được trao bởi ai?"}
-{"_id": "mlqa:253", "text": "Ký ức của bà nằm trong loại cơ sở nào?"}
 {"_id": "mlqa:254", "text": "Nước nào là bên mua đầu tiên?"}
 {"_id": "mlqa:255", "text": "Vào ngày nào cơn bão trở thành cận nhiệt đới?"}
-{"_id": "mlqa:256", "text": "Nam giới nhận nhiễm sắc thể Y từ đâu?"}
 {"_id": "mlqa:257", "text": "Lượng chất béo cao nhất có thể có trong một sản phẩm ít béo là bao nhiêu?"}
-{"_id": "mlqa:258", "text": "Các loài chim ở vùng đồi núi Sri Lanka có thể đẻ tối đa bao nhiêu quả trứng?"}
-{"_id": "mlqa:259", "text": "Những yếu tố nào làm tăng tính dễ cháy trong các nhóm cây?"}
 {"_id": "mlqa:260", "text": "Vương quốc Anh có kiểu hệ thống chính phủ nào?"}
 {"_id": "mlqa:261", "text": "Bayern được tổ chức ở sân vận động mới nào trong mùa giải 2005-06?"}
 {"_id": "mlqa:262", "text": "Vì sao lượng hàng hóa được giao dịch lại giảm đi?"}
-{"_id": "mlqa:263", "text": "Nguyên nhân nào khiến một số câu bị loại bỏ khỏi các bản dịch hiện đại của Kinh thánh?"}
-{"_id": "mlqa:264", "text": "Ai đã sử dụng kỹ thuật này?"}
 {"_id": "mlqa:265", "text": "Ai đã khiến cho Daenerys cưới Khal Drogo?"}
 {"_id": "mlqa:266", "text": "Album đầu tiên của Jojo bán được bao nhiêu bản trong tuần đầu? \\n"}
 {"_id": "mlqa:267", "text": "Công ty mẹ nào đã sáng lập các giải pháp về thiết bị ngoại vi của máy tính và xuất bản?"}
-{"_id": "mlqa:268", "text": "Thay đổi loại hệ thống nào có thể tốn kém?"}
-{"_id": "mlqa:269", "text": "Một kẻ đang tuyệt vọng như White ủng hộ điều gì?"}
 {"_id": "mlqa:270", "text": "Mùa 3 bắt đầu lúc nào?"}
-{"_id": "mlqa:271", "text": "Cái gì được dùng để ép đùn các vật liệu tạo sợi?"}
 {"_id": "mlqa:272", "text": "Boleyn làm gì trước khi ông trở thành Thị trưởng?"}
-{"_id": "mlqa:273", "text": "Nó chứa bao nhiêu lít nước suối?"}
 {"_id": "mlqa:274", "text": "Tình trạng việc làm của Deacon lúc bấy giờ như thế nào?"}
-{"_id": "mlqa:275", "text": "Portola đã đi đâu sau khi người kế nhiệm của ông được bổ nhiệm?"}
-{"_id": "mlqa:276", "text": "Tên của lý thuyết mà Alfred Clebsch đã đặt lên một nền tảng vững chắc là gì?"}
 {"_id": "mlqa:277", "text": "Ai là người buộc tội phản bội?"}
 {"_id": "mlqa:278", "text": "Tại sao người ta từng nghĩ rằng động vật có vú ban đầu là động vật nhỏ sống trên mặt đất hoặc sống trên cây?"}
 {"_id": "mlqa:279", "text": "Có bao nhiêu người ở Nhật Bản tin vào thế giới bên kia vào năm 1998?"}
-{"_id": "mlqa:280", "text": "có bao nhiêu người thiệt mạng trong các vụ tấn công khủng bố?"}
-{"_id": "mlqa:281", "text": "Anh đã hứa cung cấp bao nhiêu binh lính để đổi lấy việc Raghunathrao từ bỏ các vùng lãnh thổ?"}
-{"_id": "mlqa:282", "text": "Ngoài đồng bạc rupee, những loại tiền tệ nào khác được lưu hành ở Afghanistan trước năm 1891?"}
 {"_id": "mlqa:283", "text": "Thành tựu gì của con trẻ được củng cố bởi ý thức của phụ huynh về hiệu quả học tập?"}
 {"_id": "mlqa:284", "text": "Ai đã tuyên bố tài năng của Madonna không nổi bật?"}
 {"_id": "mlqa:285", "text": "Giải đấu cuối cùng của ông ấy là gì?"}
 {"_id": "mlqa:286", "text": "Cha mẹ nghỉ bao nhiêu ngày làm việc để chăm sóc con cái khi chúng bị cảm?"}
 {"_id": "mlqa:287", "text": "Phim nào đã làm sự nghiệp của pacino đi xuống?"}
-{"_id": "mlqa:288", "text": "Lượng mưa trung bình năm của Belarus là bao nhiêu?"}
-{"_id": "mlqa:289", "text": "Tên pháp lý đầy đủ của Anne Murray là gì?"}
-{"_id": "mlqa:290", "text": "Có bao nhiêu kênh DV ra mắt vào tháng 5 năm 2010?"}
 {"_id": "mlqa:291", "text": "Ước tính diện tích bề mặt là bao nhiêu?"}
-{"_id": "mlqa:292", "text": "Delta Canis Majoris có thể chứa vừa mấy lần mặt trời?"}
-{"_id": "mlqa:293", "text": "Trò chơi bắt đầu như thế nào?"}
-{"_id": "mlqa:294", "text": "Công ty sản xuất của Shah Rukh Khan phát hành bộ phim đầu tiên vào khi nào?"}
-{"_id": "mlqa:295", "text": "Bên cạnh việc tham gia nghiên cứu và chính trị, ông còn tham gia vào những lĩnh vực nào khác?"}
-{"_id": "mlqa:296", "text": "Jefferson Davis đã phục vụ với tư cách là trung uý trong bao lâu?"}
 {"_id": "mlqa:297", "text": "Đơn vị nào hỗ trợ Cameron trong sản xuất phim Avatar?"}
 {"_id": "mlqa:298", "text": "Clinton đã nắm giữ vị trí nào trong chính phủ?"}
-{"_id": "mlqa:299", "text": "Tính từ nào được sử dụng để mô tả mức độ thành công của việc kinh doanh?"}
-{"_id": "mlqa:300", "text": "Bài bình luận của Douglas trên Daily Express chống lại The Well of Loneliness là gì?"}
 {"_id": "mlqa:301", "text": "Hạt Gray tọa lạc ở đâu?"}
 {"_id": "mlqa:302", "text": "Giáo viên bị buộc tội có hành vi quấy rối nào?"}
-{"_id": "mlqa:303", "text": "Kegl và các nhà nghiên cứu đang nghiên cứu điều gì ở Nicaragua?"}
-{"_id": "mlqa:304", "text": "Ủy ban quận nằm ở đâu?"}
-{"_id": "mlqa:305", "text": "Buress đã đưa ra những lời đùa về Cosby vào năm nào?"}
-{"_id": "mlqa:306", "text": "Chính phủ nào sẽ trao đổi kim cương để lấy vũ khí?"}
 {"_id": "mlqa:307", "text": "Tại sao Stella rời bỏ Ted?"}
 {"_id": "mlqa:308", "text": "Bộ phim nào được xem là đủ quan trọng để được bảo tồn?"}
 {"_id": "mlqa:309", "text": "Đạo diễn thử vai làm gì?"}
 {"_id": "mlqa:310", "text": "Quá trình nào được sử dụng để thay đổi số cử tri trong cuộc bầu cử?"}
-{"_id": "mlqa:311", "text": "Các bộ phim thường được phát hành vào thời gian nào?"}
 {"_id": "mlqa:312", "text": "Những loại phiên bản nào đã được tạo ra từ bộ?"}
-{"_id": "mlqa:313", "text": "John Williams bắt đầu soạn nhạc cho bộ phim vào khi nào?"}
-{"_id": "mlqa:314", "text": "Có bao nhiêu nguồn bức xạ hồng ngoại được tìm thấy gần đối tượng này?"}
 {"_id": "mlqa:315", "text": "Phim đầu tiên của Seyfried là gì?"}
 {"_id": "mlqa:316", "text": "Steven đã làm gì sau khi giải nghệ khỏi bóng đá chuyên nghiệp?"}
 {"_id": "mlqa:317", "text": "Các em gái thường phải chịu gánh nặng gì trong quá trình học tập của mình?"}
 {"_id": "mlqa:318", "text": "Loài sóc được phân thành bao nhiêu họ?"}
-{"_id": "mlqa:319", "text": "Các mô tả về hấp dẫn lượng tử vòng được viết cho những đối tượng nào?"}
 {"_id": "mlqa:320", "text": "Tại sao người Anh tăng thuế?"}
 {"_id": "mlqa:321", "text": "John Harvard đã để lại cho trường bao nhiêu tiền?"}
-{"_id": "mlqa:322", "text": "Điều gì có thể dẫn đến bệnh thần kinh do đái tháo đường?"}
-{"_id": "mlqa:323", "text": "Lịch nào được sử dụng để xác định thời điểm diễn ra lễ Phục Sinh?"}
-{"_id": "mlqa:324", "text": "Mercedes-Benz đã giới thiệu dòng W116 khi nào?"}
 {"_id": "mlqa:325", "text": "Đoạn trailer Wolverine đầu tiên được phát hành ở Mỹ là khi nào?"}
 {"_id": "mlqa:326", "text": "Tất cả các kho chứa hạch nào?"}
-{"_id": "mlqa:327", "text": "HIV lây truyền như thế nào?"}
 {"_id": "mlqa:328", "text": "Cái gì sẽ làm mất trường điện từ của Trái đất?"}
 {"_id": "mlqa:329", "text": "Ivanovic đã làm gì để tránh các cuộc tập kích khi NATO đánh bom Yugoslavia?"}
 {"_id": "mlqa:330", "text": "Có bao nhiêu nữ diễn viên đã thử vai padme amidala?"}
 {"_id": "mlqa:331", "text": "Anh ấy lần đầu trở thành đội trưởng Chelsea khi nào?"}
 {"_id": "mlqa:332", "text": "Nếu không còn con người trên trái đất, thứ gì sẽ còn lại để lái xe?"}
-{"_id": "mlqa:333", "text": "Ai đã từng quan tâm đến Prison Break trước khi rời khỏi dự án?"}
 {"_id": "mlqa:334", "text": "Một loại tên lửa trong họ KH-25 là gì?"}
 {"_id": "mlqa:335", "text": "Ai là thành viên trong Trung đoàn phòng không 1077?"}
-{"_id": "mlqa:336", "text": "Cơ chế này dựa vào cái gì?"}
-{"_id": "mlqa:337", "text": "Loại hạt nào có thể loại bỏ băng carbon dioxide khỏi các bẫy lạnh trên Titania?"}
 {"_id": "mlqa:338", "text": "Mô hình nào có các mẫu thiết kế?"}
-{"_id": "mlqa:339", "text": "Tên gọi của các cơ sở nằm ở phía đông khu đất của trường đại học là gì?"}
-{"_id": "mlqa:340", "text": "Niggli đã lấy bằng tiến sĩ ở đâu?"}
-{"_id": "mlqa:341", "text": "Vào ngày nào thì hậu duệ được lệnh phải thực hiện điều gì đó đối với con trai của họ?"}
 {"_id": "mlqa:342", "text": "Ai là người chỉ huy sư đoàn 8 ở Malaya?"}
 {"_id": "mlqa:343", "text": "Google Glass hiển thị ở định dạng nào?"}
-{"_id": "mlqa:344", "text": "Có bao nhiêu ngôi nhà?"}
 {"_id": "mlqa:345", "text": "Ai thách thức Grandmaster trong cảnh quay cuối?"}
 {"_id": "mlqa:346", "text": "hắc long giang được dịch là gì?"}
 {"_id": "mlqa:347", "text": "Con tàu bị phá hủy hoàn toàn vào khi nào?"}
 {"_id": "mlqa:348", "text": "Rừng quốc gia Karkaraly rộng bao nhiêu?"}
-{"_id": "mlqa:349", "text": "Ivars Godmanis giữ chức Thủ tướng trong hai khoảng thời gian nào?"}
 {"_id": "mlqa:350", "text": "Ataulf chỉ huy ai đánh bại quân Jovinus?"}
-{"_id": "mlqa:351", "text": "Ai có cùng nghề nghiệp với cô ấy?"}
-{"_id": "mlqa:352", "text": "Điều gì góp phần củng cố bất bình đẳng kinh tế?"}
 {"_id": "mlqa:353", "text": "Tên lúc sinh của Brokovich là gì?"}
-{"_id": "mlqa:354", "text": "Dürer đã không nhìn thấy loài động vật nào?"}
 {"_id": "mlqa:355", "text": "Chris Thomas từng kết bạn với người quản lý nào?"}
-{"_id": "mlqa:356", "text": "Hầu hết các sinh vật cố định đạm tồn tại ở đâu?"}
 {"_id": "mlqa:357", "text": "Trường nào được xem là trường song ngữ?"}
-{"_id": "mlqa:358", "text": "Phương pháp nào sẽ hoạt động hiệu quả hơn nhiều so với Database-as-IPC?"}
 {"_id": "mlqa:359", "text": "Có bao nhiêu hệ thống tái chế được chính phủ thực hiện?"}
 {"_id": "mlqa:360", "text": "Selena đã cho ra mắt Amor Prohibido khi nào?"}
-{"_id": "mlqa:361", "text": "Tôn giáo của gia đình Frankl là gì?"}
-{"_id": "mlqa:362", "text": "Họ của người tạo ra đài tưởng niệm là gì?"}
-{"_id": "mlqa:363", "text": "Thuật ngữ nào đồng nghĩa với sự cháy?"}
 {"_id": "mlqa:364", "text": "Sao Hải vương hoàn thành một vòng quay Trái Đất trong bao lâu?"}
-{"_id": "mlqa:365", "text": "Ngoài âm nhạc, những gì khác được coi là một phần của hệ tư tưởng đất nước?"}
-{"_id": "mlqa:366", "text": "Tổng bưu chính (Postmaster General) nào đã bị điều tra?"}
 {"_id": "mlqa:367", "text": "Cái gì đã đạt được khả năng đánh chặn trong mọi điều kiện thời tiết?"}
-{"_id": "mlqa:368", "text": "Trận chung kết UEFA Europa League năm 2014 được tổ chức tại sân vận động nào?"}
-{"_id": "mlqa:369", "text": "Có bao nhiêu tuần được bao gồm trong mẫu?"}
-{"_id": "mlqa:370", "text": "McRae đã thiết kế các tòa nhà theo những phong cách nào?"}
-{"_id": "mlqa:371", "text": "Phản ứng phân hạch phát ra từ bức xạ gamma của Co-60 có cường độ mạnh đến mức nào?"}
 {"_id": "mlqa:372", "text": "Souchon nhận mệnh lệnh làm gì?"}
-{"_id": "mlqa:373", "text": "Ai là người đã đặt tên cho vịnh Zolotoy Rog ở Nga?"}
-{"_id": "mlqa:374", "text": "Cái gì bắt đầu thay thế các nền tảng hành lý ở các nhà ga xe lửa vào những năm 1960?"}
 {"_id": "mlqa:375", "text": "Moltke và Goeben được xây dựng khi nào?"}
-{"_id": "mlqa:376", "text": "logan trở về đâu?"}
-{"_id": "mlqa:377", "text": "Kinh Quran được truyền đạt như thế nào trước khi việc in ấn được áp dụng rộng rãi?"}
-{"_id": "mlqa:378", "text": "Kim tự tháp ban đầu cao bao nhiêu feet?"}
 {"_id": "mlqa:379", "text": "Hệ thống pháp luật nào được sử dụng tại Đức?"}
 {"_id": "mlqa:380", "text": "Nước Mỹ đã rời nước nào trong Chiến dịch Eagle Pull?"}
-{"_id": "mlqa:381", "text": "Mục đích sử dụng của ngôi nhà trước thế kỷ 19 là gì?"}
-{"_id": "mlqa:382", "text": "The White Ribbon hoạt động ở quốc gia nào?"}
 {"_id": "mlqa:383", "text": "Thủ đô hành chính của Grand Est ở đâu?"}
 {"_id": "mlqa:384", "text": "Biểu hiện của bệnh sâu răng có những yếu tố nào tương tự nhau?"}
 {"_id": "mlqa:385", "text": "Elizabeth II đảm nhiệm cương vị gì trong thế chiến 2?"}
-{"_id": "mlqa:386", "text": "Phần nào vẫn chưa được rải nhựa?"}
 {"_id": "mlqa:387", "text": "Ai đã biểu diễn bản sonnat của Lazarus vào năm 1903?"}
-{"_id": "mlqa:388", "text": "Những khu vực nào được coi là vùng chuyển tiếp ở Đức?"}
 {"_id": "mlqa:389", "text": "Dân số ước tính của Mary năm 2009 là bao nhiêu?"}
-{"_id": "mlqa:390", "text": "Ấn Độ đã tham gia chiến tranh chống lại quốc gia nào?"}
-{"_id": "mlqa:391", "text": "Ngân hàng Nhà nước Ethiopia có bao nhiêu chi nhánh trong nước trước khi ngừng hoạt động?"}
-{"_id": "mlqa:392", "text": "có bao nhiêu sân bay công cộng ở tây ban nha?"}
-{"_id": "mlqa:393", "text": "Anh trai của ai vừa mới qua đời?"}
 {"_id": "mlqa:394", "text": "Sau khi tốt nghiệp Đại học Auburn, Cook đã  đảm nhận vị trí gì ở IBM?"}
 {"_id": "mlqa:395", "text": "Ma trận đã được công chiếu năm nào?"}
-{"_id": "mlqa:396", "text": "Theo nghiên cứu của WMAP, vật chất tối chiếm bao nhiêu phần trăm vũ trụ?"}
 {"_id": "mlqa:397", "text": "Lục địa nào được liệt kê ở đây?"}
 {"_id": "mlqa:398", "text": "Thứ nào được tìm thấy trên phiến đá?"}
-{"_id": "mlqa:399", "text": "Máy bay Airbus A380 có khả năng sử dụng bao nhiêu lượng titan?"}
 {"_id": "mlqa:400", "text": "Cán cân sức mạnh nghiêng về ai?"}
 {"_id": "mlqa:401", "text": "Mỗi mùa của American Horror Story được sinh ra dưới dạng gì?"}
 {"_id": "mlqa:402", "text": "Tên của chiếc máy bay mới nhất trong đội bay Phantom là gì?"}
 {"_id": "mlqa:403", "text": "Chiến tranh Thế giới thứ 2 bùng nổ năm nào?"}
-{"_id": "mlqa:404", "text": "Những quốc gia nào vẫn tiếp tục chấp nhận các loại tiền tệ cũ?"}
-{"_id": "mlqa:405", "text": "Có thể sử dụng chất gì để phục hồi sức mạnh cơ bắp sau cơn liệt cơ do bệnh tuyến giáp?"}
 {"_id": "mlqa:406", "text": "Đĩa Blu-ray bán chạy nhất trên bảng xếp hạng trong bao lâu?"}
 {"_id": "mlqa:407", "text": "Bộ phim được ra mắt khi nào?"}
 {"_id": "mlqa:408", "text": "John Cena và Elizabeth Huberdeau đính hôn năm nào?"}
-{"_id": "mlqa:409", "text": "Cơn ho có thể kéo dài trong bao lâu?"}
 {"_id": "mlqa:410", "text": "Đất nước nào phải chuyển sang nhận viện trợ nước ngoài sau nhiều năm tham nhũng và hạn hán vào những năm 1990?"}
-{"_id": "mlqa:411", "text": "Olaf đã đi đâu sau khi thua trận?"}
-{"_id": "mlqa:412", "text": "Brown đã tìm thấy hộp sọ mỏ vịt ở con sông nào?"}
 {"_id": "mlqa:413", "text": "Protein có lõi kỵ nước, nhưng có các cách khác để kiểm soát chức năng protein cơ bản gọi là gì?"}
 {"_id": "mlqa:414", "text": "Vỏ bọc giúp ích cho những tác nhân gây nhiễm trùng nào?"}
 {"_id": "mlqa:415", "text": "Cái gì hay được tìm thấy ở Libya?"}
 {"_id": "mlqa:416", "text": "Vickey thù ghét điều gì?"}
-{"_id": "mlqa:417", "text": "Bộ phim nào được phát hành vào năm 2002?"}
-{"_id": "mlqa:418", "text": "Kỳ họp của đại hội đồng đơn viện diễn ra vào khi nào?"}
 {"_id": "mlqa:419", "text": "Bởi vì các vệ tinh của châu Âu sử dụng các phổ nhất định, thuật ngữ nào không được sử dụng ở châu Âu?"}
-{"_id": "mlqa:420", "text": "Cần phải làm gì đối với những người có triệu chứng nghiêm trọng hơn?"}
-{"_id": "mlqa:421", "text": "Tên viết tắt của sân bay chính ở Minnesota là gì?"}
 {"_id": "mlqa:422", "text": "Hạt vừng có xuất xứ từ đâu?"}
-{"_id": "mlqa:423", "text": "Ai đã thành lập Scholai?"}
 {"_id": "mlqa:424", "text": "Ai quyết định mạo hiểm thay đổi chiến thuật chiến tranh bình thường?"}
 {"_id": "mlqa:425", "text": "Malvik nằm ở đâu?"}
-{"_id": "mlqa:426", "text": "Cái gì đã được xây dựng tại trụ sở?"}
 {"_id": "mlqa:427", "text": "Ai đã cân nhắc đi khỏi giải đấu?"}
-{"_id": "mlqa:428", "text": "Cái gì đã ra mắt trên HBO?"}
 {"_id": "mlqa:429", "text": "Neutrino được tạo ra ở đâu?"}
-{"_id": "mlqa:430", "text": "Niobi có đóng vai trò sinh học nào không?"}
 {"_id": "mlqa:431", "text": "Nó được chia thành bao nhiêu xu?"}
-{"_id": "mlqa:432", "text": "Có bao nhiêu giới tính trải qua sự cố này?"}
 {"_id": "mlqa:433", "text": "Khi nào Nicholson ra mắt bộ phim?"}
 {"_id": "mlqa:434", "text": "Hôn nhân đồng giới ở New-Zealand nhận bao nhiêu phiếu?"}
-{"_id": "mlqa:435", "text": "Tỷ lệ biến chứng là bao nhiêu?"}
-{"_id": "mlqa:436", "text": "Tên của hệ chữ viết mà từ đó các kiểu chữ hiragana và katakana được bắt nguồn là gì?"}
 {"_id": "mlqa:437", "text": "Vandal đã thỉnh cầu ai trước khi vào trận chiến?"}
-{"_id": "mlqa:438", "text": "Prince of Persia đã được phát hành cho Microsoft Windows vào ngày nào trong tháng 12?"}
 {"_id": "mlqa:439", "text": "Định luật Oersteds được đặt tên theo nhà khoa học nào?"}
-{"_id": "mlqa:440", "text": "Luật được ban hành khi nào?"}
 {"_id": "mlqa:441", "text": "Tên của nhân vật Kylie trong Neighbors?"}
 {"_id": "mlqa:442", "text": "Cầu thủ ngôi sao nào đã phải bị thay thế do chấn thương trong trận tứ kết với trận đấu với Bồ Đào Nha?"}
-{"_id": "mlqa:443", "text": "vị trí tổ được đặt ở đâu?"}
-{"_id": "mlqa:444", "text": "các câu hỏi trắc nghiệm có bao nhiêu lựa chọn trả lời?"}
-{"_id": "mlqa:445", "text": "Nó đã tổ chức loại trận đấu nào vào năm 2007?"}
 {"_id": "mlqa:446", "text": "Tương tác loại nào xảy ra trong tự nhiên?"}
 {"_id": "mlqa:447", "text": "Điều gì có thể gây ra thương tích trong môn khúc côn cầu trên băng?"}
-{"_id": "mlqa:448", "text": "Người Viking đã di chuyển bằng phương tiện gì?"}
 {"_id": "mlqa:449", "text": "Điều gì gián đoạn việc học của anh ấy ở trường Đại học Moscow?"}
 {"_id": "mlqa:450", "text": "Hãng hàng không có trụ sở ở nước nào?"}
 {"_id": "mlqa:451", "text": "Giải vô địch các tay đua thế giới lần đầu được tổ chức tại đâu?"}
 {"_id": "mlqa:452", "text": "Tên thủ đô của Trung Quốc mười triều đại trước?"}
 {"_id": "mlqa:453", "text": "Xavi đã chơi cho đội nào?"}
-{"_id": "mlqa:454", "text": "Các triệu chứng hạng nhất có được cộng đồng khoa học chấp nhận rộng rãi không?"}
-{"_id": "mlqa:455", "text": "Trò chơi của Khan là gì?"}
 {"_id": "mlqa:456", "text": "FCT đã bắt đầu khi nào?"}
-{"_id": "mlqa:457", "text": "MMORPG và game bắn súng góc nhìn thứ nhất là gì?"}
-{"_id": "mlqa:458", "text": "Cảng nào đã thành công rực rỡ trong thời kỳ Ottoman?"}
-{"_id": "mlqa:459", "text": "Một vở kịch một màn có bao nhiêu màn?"}
 {"_id": "mlqa:460", "text": "Từ Kaizen trong tiếng Sino-Nhậtcó nghĩa là gì?"}
 {"_id": "mlqa:461", "text": "Tại sao Liên Xô phát triển dòng máy bay hỗn hợp?"}
 {"_id": "mlqa:462", "text": "các khoáng chất được sử dụng để làm gì?"}
 {"_id": "mlqa:463", "text": "Philip đã tấn công ai bất chấp bị cảnh báo phải rút lui?"}
-{"_id": "mlqa:464", "text": "Một số dân làng đã bị sát hại bởi quân đội Syria như thế nào?"}
-{"_id": "mlqa:465", "text": "Dan Schneider đã làm việc cho ai?"}
-{"_id": "mlqa:466", "text": "Hệ thống RDBMS tập trung vào OLTP thường có định hướng gì?"}
 {"_id": "mlqa:467", "text": "Thế vận hội thay thế sự kiện gì?"}
-{"_id": "mlqa:468", "text": "Tên gọi của liên minh Đức - Ý trong Thế chiến thứ hai là gì?"}
-{"_id": "mlqa:469", "text": "Có những giải pháp nào để khắc phục các hạn chế của Windows 98?"}
 {"_id": "mlqa:470", "text": "Despacito có nghĩa là gì trong tiếng Anh?"}
-{"_id": "mlqa:471", "text": "Đạo luật Đúc tiền đã ấn định tỷ lệ đồng trong thành phần là bao nhiêu?"}
-{"_id": "mlqa:472", "text": "Điều gì phải được cung cấp cho con người để đạt được sự tổng hợp?"}
 {"_id": "mlqa:473", "text": "Vì sao lại muốn có hai viện chính phủ?"}
 {"_id": "mlqa:474", "text": "Những người Ai Cập giàu có triều đại thứ 13 thích những hoạt động nào?"}
-{"_id": "mlqa:475", "text": "Hoạch định thuế quốc tế có giá bao nhiêu?"}
 {"_id": "mlqa:476", "text": "Trong thập kỷ nào các bộ phim tập trung về gia đình của Disney có người xem giảm?"}
-{"_id": "mlqa:477", "text": "tỷ lệ tử vong của những người đang hồi phục sau bệnh về phổi là bao nhiêu phần trăm?"}
-{"_id": "mlqa:478", "text": "Các lá có bao nhiêu cặp lá con?"}
 {"_id": "mlqa:479", "text": "Akan Mashu nằm ở đâu trong Nhật Bản?"}
 {"_id": "mlqa:480", "text": "Bao nhiêu người đã chết khi một toà nhà cũ sập ở Mumbai vì một trận lụt?"}
-{"_id": "mlqa:481", "text": "Thành phố Shiraz nằm ở độ cao bao nhiêu so với mực nước biển?"}
 {"_id": "mlqa:482", "text": "Vị trí của Thụy Điển trong WW2 là gì?"}
 {"_id": "mlqa:483", "text": "Các chấn thương nào có thể xảy ra ở mô hoặc da do bức xạ?"}
-{"_id": "mlqa:484", "text": "Mayer đã viết bài cho tạp chí nào?"}
-{"_id": "mlqa:485", "text": "Lễ Vesak kỷ niệm điều gì?"}
-{"_id": "mlqa:486", "text": "Tên của chiếc máy bay còn được gọi là Núi Phú Sĩ hoặc tâm trí con người là gì?"}
 {"_id": "mlqa:487", "text": "Chi Lacerta là một phần của họ nào?"}
 {"_id": "mlqa:488", "text": "Cô ấy đã nhận những giải thưởng gì từ Giải Hàn lâm?"}
-{"_id": "mlqa:489", "text": "Người anh em cùng cha khác mẹ của Mary là ai?"}
-{"_id": "mlqa:490", "text": "Nghề nghiệp của Rita Maiburg là gì?"}
 {"_id": "mlqa:491", "text": "Cô ấy phát hành phiên bản Crazy Dog khi nào?"}
-{"_id": "mlqa:492", "text": "Thành phố nào nằm cách Baghdad khoảng 170 km?"}
 {"_id": "mlqa:493", "text": "Tuổi thọ dự kiến vào năm 2050 là bao nhiêu?"}
-{"_id": "mlqa:494", "text": "Điều gì xảy ra với áp lực nội sọ trong các trường hợp viêm màng não do cryptococcus?"}
 {"_id": "mlqa:495", "text": "Sân bay lần đầu tiên được xây dựng ở đâu?"}
 {"_id": "mlqa:496", "text": "Danh hiệu cao nhất về dân sự Ấn Độ là gì?"}
 {"_id": "mlqa:497", "text": "Việc mua bán này được tài trợ bởi ai?"}
 {"_id": "mlqa:498", "text": "Việc nghiên cứu thêm về lá thư kéo dài đến bao giờ?"}
-{"_id": "mlqa:499", "text": "Hoa có thể có những màu gì?"}
-{"_id": "mlqa:500", "text": "Lĩnh vực tài chính nào đã trở nên bất ổn hơn do những thất bại này??"}
 {"_id": "mlqa:501", "text": "Làm thế nào mà Angelina Jolie quen với điều kiện ở các nước bị chiến tranh tàn phá?"}
-{"_id": "mlqa:502", "text": "kho chứa ngũ cốc được xây dựng ở đâu?"}
-{"_id": "mlqa:503", "text": "Werner Heisenberg đã giới thiệu các phương trình ma trận cho các lý thuyết của Einstein vào khi nào?"}
-{"_id": "mlqa:504", "text": "Hội chứng Timothy là gì?"}
 {"_id": "mlqa:505", "text": "Hầu hết mọi người gọi nó là gì?"}
 {"_id": "mlqa:506", "text": "Tên của con tàu trong danh sách được chuyển giao?"}
-{"_id": "mlqa:507", "text": "Người Arapaho phân tách vào thập niên nào?"}
-{"_id": "mlqa:508", "text": "Số phận cuối cùng của chương trình máy bay NASA X-43C là gì?"}
-{"_id": "mlqa:509", "text": "Tình trạng loạn thần là loại bệnh lý ở vị trí nào?"}
-{"_id": "mlqa:510", "text": "Nietzsche phát điên vào khi nào?"}
 {"_id": "mlqa:511", "text": "Những bộ phận nào cần được sửa chữa?"}
 {"_id": "mlqa:512", "text": "Tên khác của bệnh bất thường tim bẩm sinh là gì?"}
 {"_id": "mlqa:513", "text": "Địa điểm khác nào được đề xuất tổ chức cho Thế vận hội Olympic đầu tiên?"}
-{"_id": "mlqa:514", "text": "Có bao nhiêu đảo san hô vòng nằm bên trong Tuvalu?"}
-{"_id": "mlqa:515", "text": "Vấn đề trùng hợp (coincidence problem) liên quan đến điều gì?"}
-{"_id": "mlqa:516", "text": "Những quốc gia nào đã ủng hộ việc đưa TRIPS vào hiệp định?"}
-{"_id": "mlqa:517", "text": "Tình nguyện viên có thể làm những dự án gì?"}
-{"_id": "mlqa:518", "text": "Một ví dụ về thời điểm máy bay chiến đấu hộ tống tổng thống là gì?"}
-{"_id": "mlqa:519", "text": "Rosa Luxemburg bị bỏ phiếu bác bỏ vào thời gian nào?"}
 {"_id": "mlqa:520", "text": "Obama đã thắng trong cuộc tuyển cử năm nào?"}
-{"_id": "mlqa:521", "text": "Ai là đạo diễn của bộ phim Winchester?"}
 {"_id": "mlqa:522", "text": "Nhân vật nào có thể thâm nhập?"}
 {"_id": "mlqa:523", "text": "Hóa sinh phức được cho rằng đã tạo nên sự sống thông qua thứ gì?"}
 {"_id": "mlqa:524", "text": "Khởi đầu của mô tả của Archimedes về mọi thứ là gì?"}
 {"_id": "mlqa:525", "text": "Liên minh miền Nam đã tồn tại bao lâu và tổ chức chơi trong bao lâu?"}
 {"_id": "mlqa:526", "text": "Quân Israel rút khỏi Bethlehem năm nào?"}
 {"_id": "mlqa:527", "text": "Gia đình Trask và Hamilton có nguồn gốc từ đâu?"}
-{"_id": "mlqa:528", "text": "Thể tích của bộ não trong câu hỏi là bao nhiêu?"}
 {"_id": "mlqa:529", "text": "Mohan đi du lịch ở đâu?"}
-{"_id": "mlqa:530", "text": "Có bao nhiêu nhà sản xuất khác nhau đã chế tạo chiếc Mark IV?"}
 {"_id": "mlqa:531", "text": "Cuộc Nội Chiến Libya diễn ra vào năm bao nhiêu?"}
 {"_id": "mlqa:532", "text": "IRAP là một chương trình cao học trong lĩnh vực nghiên cứu nào?"}
-{"_id": "mlqa:533", "text": "Ai cung cấp chứng chỉ pmp?"}
-{"_id": "mlqa:534", "text": "Quá trình phát triển đã mất bao lâu?"}
 {"_id": "mlqa:535", "text": "Khoảng cách góc mà thành phần hệ được tìm ra bởi Luhman năm 2013 là bao nhiêu?"}
-{"_id": "mlqa:536", "text": "Chỉ số tự do báo chí của Algeria theo tổ chức Phóng viên Không Biên giới là bao nhiêu?"}
-{"_id": "mlqa:537", "text": "Ai là kẻ đã mưu sát Tổng thống Reagan?"}
 {"_id": "mlqa:538", "text": "Có bao nhiêu tàu khu trục trong hạm đội của Abe?"}
-{"_id": "mlqa:539", "text": "Ai đã viết bộ phim này?"}
 {"_id": "mlqa:540", "text": "Tên miền từng là cấp độ thứ hai gọi là gì?"}
-{"_id": "mlqa:541", "text": "Henry đã kết bạn với ai?"}
-{"_id": "mlqa:542", "text": "Liebknecht bị kết án tù vì tội gì?"}
-{"_id": "mlqa:543", "text": "Chỉ nha khoa bắt đầu được thương mại hóa khi nào?"}
 {"_id": "mlqa:544", "text": "Mức độ quan tâm của Hải quân Hoa Kỳ khi M76 sẵn sàng là gì?"}
 {"_id": "mlqa:545", "text": "Ai là tác giả của những đoạn văn bản đầu tiên được biết tới?"}
-{"_id": "mlqa:546", "text": "Ai đã viết một cuốn tiểu sử về Orlando được xuất bản lần đầu tiên vào năm 1928?"}
-{"_id": "mlqa:547", "text": "Anh trai của Moulay Rachid là ai?"}
 {"_id": "mlqa:548", "text": "Bao nhiêu phần trăm phụ nữ trẻ bị cho rằng mắc căn bệnh PID?"}
 {"_id": "mlqa:549", "text": "Ngày Quốc tế Thiếu nhi ăn mừng vào khi nào?"}
-{"_id": "mlqa:550", "text": "Cái gì được tạo ra để thay thế Bức tường phía Tây đã bị phá hủy?"}
-{"_id": "mlqa:551", "text": "họ đã làm gì để đáp lại cái chết của người chồng?"}
 {"_id": "mlqa:552", "text": "Lễ rửa tội diễn ra khi nào?"}
-{"_id": "mlqa:553", "text": "Phát ban ngoài da của đa số mọi người có màu gì?"}
 {"_id": "mlqa:554", "text": "Loại đồ gì người ngoài hành tinh mặc trên người?"}
-{"_id": "mlqa:555", "text": "Mặc dù Pooja yêu Raj, nhưng Raj lại bị thu hút bởi ai?"}
 {"_id": "mlqa:556", "text": "Điều gì là đáng lo sợ về quần đảo?"}
 {"_id": "mlqa:557", "text": "Nhiệm kì của các Hạ nghị sĩ là bao nhiêu năm"}
-{"_id": "mlqa:558", "text": "Hereroland bao gồm những vùng nào?"}
-{"_id": "mlqa:559", "text": "School of Salamanca đã trình bày chi tiết về vấn đề gì?"}
 {"_id": "mlqa:560", "text": "Điều gì gây ra việc biến thiên chiều cao?"}
 {"_id": "mlqa:561", "text": "Vệ tinh Pandora được tìm ra năm nào?"}
-{"_id": "mlqa:562", "text": "Tòa nhà trung tâm được khai trương vào năm nào?"}
-{"_id": "mlqa:563", "text": "Giáo hoàng đã đề cập điều gì trong bài viết của mình?"}
-{"_id": "mlqa:564", "text": "Các bác sĩ phẫu thuật thiếu loại thị giác nào khi phẫu thuật bằng ống nội soi?"}
-{"_id": "mlqa:565", "text": "Đại hội Thể thao Châu Á đôi khi còn được gọi là gì?"}
-{"_id": "mlqa:566", "text": "Tên ban đầu của bản phân phối Linux Antergos là gì?"}
-{"_id": "mlqa:567", "text": "Có bao nhiêu phần trăm người nghiện rượu mắc rối loạn tâm thần?"}
 {"_id": "mlqa:568", "text": "Nhà sản xuất ô tô nào áp dụng Kaizen?"}
 {"_id": "mlqa:569", "text": "kẻ thù của khỉ đầm lầy là những loài nào?"}
-{"_id": "mlqa:570", "text": "Sia đã nhận được tin tức gì khi cô ấy ở THÁI LAN?"}
 {"_id": "mlqa:571", "text": "Ai cũng đã nghiên cứu về nguồn cung tiền tệ?"}
 {"_id": "mlqa:572", "text": "Điều gì đã khiến Kristoff cố gắng trở về nhà nhanh chóng?"}
-{"_id": "mlqa:573", "text": "Có bao nhiêu binh lính đã bị tòa án quân sự xét xử vào ngày 9 tháng 5?"}
-{"_id": "mlqa:574", "text": "Đã có bao nhiêu thiệt hại được báo cáo dọc theo bờ biển phía tây của châu Phi trong thời gian mưa vừa đến mưa lớn?"}
 {"_id": "mlqa:575", "text": "Album nào theo sau radioactive?"}
-{"_id": "mlqa:576", "text": "Ai đã bị đưa đến một trại lao động khổ sai?"}
-{"_id": "mlqa:577", "text": "Các cơ quan tư pháp thực hiện nhiệm vụ của mình như thế nào?"}
-{"_id": "mlqa:578", "text": "có bao nhiêu người có nguy cơ kháng kháng sinh?"}
 {"_id": "mlqa:579", "text": "Làm thế nào để kích hoạt EFS?"}
-{"_id": "mlqa:580", "text": "Vị tướng nào đã ký kết thỏa thuận với Ebert?"}
 {"_id": "mlqa:581", "text": "Nỗ lực của Đức trong việc thương thuyết hoà bình với Nhật Bản trong 10 năm sau 1905 thành công hay thất bại?"}
-{"_id": "mlqa:582", "text": "SOHO được phóng vào thời gian nào?"}
 {"_id": "mlqa:583", "text": "Ai là Hoàng Thái Hậu của nước Đức vào những năm cuối thế kỷ 1600?"}
 {"_id": "mlqa:584", "text": "Loại thiệt hại nào gây ra đối với các bộ phận Io màu đỏ và nâu?"}
 {"_id": "mlqa:585", "text": "Một trong các chương trình Microsoft nổi tiếng là gì?"}
-{"_id": "mlqa:586", "text": "Ai là vua của Assyria?"}
 {"_id": "mlqa:587", "text": "Bộ phim đã đứng đầu trong bao nhiêu quãng 7 ngày?"}
-{"_id": "mlqa:588", "text": "Râu của chúng trở nên rõ rệt vào thời điểm nào?"}
-{"_id": "mlqa:589", "text": "Tại sao những người leo núi lại muốn bay từ Kathmandu đến Lukla?"}
 {"_id": "mlqa:590", "text": "Scheer đã nhận được sự chấp thuận từ Kaiser vào tháng nào liên quan tới cuộc đối đầu của Hạm đội Anh?"}
 {"_id": "mlqa:591", "text": "Biểu tượng nào mà Edward đã lấy?"}
-{"_id": "mlqa:592", "text": "Ai chịu trách nhiệm sản xuất văn học và nghệ thuật ở Triều Tiên?"}
-{"_id": "mlqa:593", "text": "Ông ấy đã tốt nghiệp tại Surgeon's Hall vào năm nào?"}
-{"_id": "mlqa:594", "text": "Chất rắn màu trắng được hình thành như thế nào?"}
-{"_id": "mlqa:595", "text": "Mục đích chính của các chiến lược hàng đợi khác nhau mà router sử dụng là gì?"}
-{"_id": "mlqa:596", "text": "điều gì liên quan đến một kết luận sai lầm?"}
-{"_id": "mlqa:597", "text": "Sau năm nào Faulstich bắt đầu đào tạo làm trợ lý sau đại học?"}
 {"_id": "mlqa:598", "text": "4 quá trình xảy ra khi các nguồn chứa carbon tương tác nhau?"}
 {"_id": "mlqa:599", "text": "OUMNH toạ lạc trên con đường nào?"}
 {"_id": "mlqa:600", "text": "Pathum Thani là một tỉnh miền trung ở nước nào?"}
 {"_id": "mlqa:601", "text": "Bản ghi nhớ do CIA vận chuyển đến vào lúc mấy giờ?"}
 {"_id": "mlqa:602", "text": "Công cụ nào được sử dụng để truy cập nếu như tập tin bị mất?"}
 {"_id": "mlqa:603", "text": "Bằng cách nào các công ty giới thiệu cho khách hàng hình ảnh của sản phẩm tiềm năng?"}
-{"_id": "mlqa:604", "text": "Mỏ của con chim có màu gì?"}
 {"_id": "mlqa:605", "text": "Quá trình mở rộng của Nam Đại Tây Dương bắt đầu cách đây bao nhiêu năm?"}
-{"_id": "mlqa:606", "text": "Bộ phim đã được đề cử cho giải thưởng nào?"}
-{"_id": "mlqa:607", "text": "Mục đích sử dụng chính của sô-cô-la quân sự là gì?"}
-{"_id": "mlqa:608", "text": "Bạn của Peterson là ai?"}
 {"_id": "mlqa:609", "text": "Những cá thể nào cư ngụ ở vùng đất phía bắc Hoa Kỳ trước khi người châu Âu đến?"}
-{"_id": "mlqa:610", "text": "Hiện tượng cố gắng tạo khoảng cách với các sự kiện tiêu cực của bản thân được gọi là gì?"}
 {"_id": "mlqa:611", "text": "Shu được mô tả là đã mặc loại lông gì?"}
-{"_id": "mlqa:612", "text": "Khu định cư tù nhân được thành lập khi nào?"}
-{"_id": "mlqa:613", "text": "Các bài hát dân ca có nguồn gốc từ đâu?"}
-{"_id": "mlqa:614", "text": "Các tù trưởng Yao cần cái gì?"}
-{"_id": "mlqa:615", "text": "Hệ thống tính điểm mới cho dòng game này được gọi là gì?"}
-{"_id": "mlqa:616", "text": "Hệ thống giao thông được nhắc đến tên là gì?"}
 {"_id": "mlqa:617", "text": "Bert Stern đã chụp ảnh  người mẫu nổi tiếng nào?"}
 {"_id": "mlqa:618", "text": "Nước nào đã nỗ lực diệt trừ bệnh từ virus?"}
 {"_id": "mlqa:619", "text": "Điều gì gây ra xoáy thuận ngoại nhiệt đới?"}
-{"_id": "mlqa:620", "text": "Vùng này rộng lớn bao nhiêu?"}
-{"_id": "mlqa:621", "text": "PwC hoạt động ở đâu ngoài châu Âu?"}
-{"_id": "mlqa:622", "text": "Cô ấy nhận bằng tiến sĩ trong lĩnh vực nào?"}
-{"_id": "mlqa:623", "text": "Ai đã từ bỏ tình yêu vì gia đình của mình?"}
 {"_id": "mlqa:624", "text": "Phiên bản chưa xếp hạng đã được phát hành vào tháng nào?"}
 {"_id": "mlqa:625", "text": "Paideia dành cho người giàu có nào?"}
 {"_id": "mlqa:626", "text": "Ai đã ủng hộ sự hợp tác?"}
 {"_id": "mlqa:627", "text": "Các thiết kế được mô phỏng giống gì?"}
-{"_id": "mlqa:628", "text": "Lớp khí bao quanh Trái Đất được giữ lại ở vị trí của nó bằng cách nào?"}
-{"_id": "mlqa:629", "text": "Thuật ngữ đầy đủ cho quỹ đạo Kepler là gì?"}
 {"_id": "mlqa:630", "text": "Boas hình thành những quan điểm của mình về tiên đề trong nghiên cứu nhân chủng học vào năm nào ?"}
-{"_id": "mlqa:631", "text": "Lễ kỷ niệm nào mà các nam tước đã vắng mặt?"}
-{"_id": "mlqa:632", "text": "Ngân hàng bắt đầu hoạt động ở Ethiopia vào năm nào?"}
 {"_id": "mlqa:633", "text": "Tên của người nghệ sĩ được coi là xinh đẹp là gì?"}
-{"_id": "mlqa:634", "text": "Randall được thụ thai ở thành phố nào?"}
 {"_id": "mlqa:635", "text": "Cái gì được dùng phần lớn bởi quân đồng minh Liên Xô và rất nhiều nước trong hiệp ước Warsaw?"}
-{"_id": "mlqa:636", "text": "Laurer đã sử dụng cái tên nào cho các lần xuất hiện trước công chúng?"}
 {"_id": "mlqa:637", "text": "Những người lính này thuộc quốc tịch gì?"}
 {"_id": "mlqa:638", "text": "Những người do thái tìm thấy an toàn ở Amsterdam đến từ khu vực nào?"}
-{"_id": "mlqa:639", "text": "Quốc tịch của ông Studd là gì?"}
-{"_id": "mlqa:640", "text": "Có bao nhiêu người đã theo dõi buổi lễ đăng quang cuối cùng?"}
 {"_id": "mlqa:641", "text": "Otto chết khi nào?"}
 {"_id": "mlqa:642", "text": "Hạm đội đã bị buộc phải làm gì vì có quân tiếp viện?"}
 {"_id": "mlqa:643", "text": "Có cách nào khác để chỉ ra phương pháp chứng minh bằng phản chứng không?"}
-{"_id": "mlqa:644", "text": "Các điểm dừng bị loại bỏ vào ngày và tháng nào trong năm?"}
 {"_id": "mlqa:645", "text": "Chính sách hạt nhân gì đã được áp dụng bởi Ấn Độ?"}
-{"_id": "mlqa:646", "text": "Ai là người lãnh đạo nhóm tạo ra bài kiểm tra SAT?"}
-{"_id": "mlqa:647", "text": "Bướm đêm và nhặng xanh là ví dụ về lớp động vật nào?"}
-{"_id": "mlqa:648", "text": "Cụm từ 'boh loh' dịch sang tiếng Anh là loại quả táo nào?"}
 {"_id": "mlqa:649", "text": "Khi nào thì Ronald Reagan đã được lựa chọn?"}
-{"_id": "mlqa:650", "text": "Đại hội thể thao tiếp theo sẽ được tổ chức ở đâu?"}
-{"_id": "mlqa:651", "text": "Hệ thống chữ viết nào đã được sử dụng trong lịch sử để viết tiếng Phạn ở Bengal?"}
 {"_id": "mlqa:652", "text": "Mẹ của Nicholson đã làm gì để kiếm sống?"}
-{"_id": "mlqa:653", "text": "Kapoor tham gia chuyến lưu diễn RockStars vào năm nào?"}
-{"_id": "mlqa:654", "text": "Yếu tố nào gây ra các triệu chứng đa dạng và có thể bổ sung?"}
-{"_id": "mlqa:655", "text": "Có bao nhiêu nam trên mỗi nữ ở Belarus?"}
 {"_id": "mlqa:656", "text": "Ai đã yêu cầu tìm kiếm Logan và Mariko?"}
-{"_id": "mlqa:657", "text": "Đảng đã tham gia lại cuộc bầu cử vào năm nào sau khi tẩy chay các cuộc bầu cử năm 2002?"}
 {"_id": "mlqa:658", "text": "Sườn đồi nằm ở khoảng cách nào?"}
 {"_id": "mlqa:659", "text": "Thành phố bao gồm bao nhiêu khu phố?"}
-{"_id": "mlqa:660", "text": "Làm thế nào bạn có thể tránh táo bón và tiêu chảy?"}
-{"_id": "mlqa:661", "text": "tên gọi khác của dây thần kinh mặt là gì?"}
 {"_id": "mlqa:662", "text": "Vai trò của Giáo hoàng Caius trong giáo hội công giáo là gì?"}
 {"_id": "mlqa:663", "text": "Tên thực vật của loại xa trục thảo Ai Cập là gì?"}
 {"_id": "mlqa:664", "text": "Kashi tính toán rễ nth như thế nào?"}
 {"_id": "mlqa:665", "text": "David Herbert sinh ra vào năm nào?"}
-{"_id": "mlqa:666", "text": "Có bao nhiêu người trong phi hành đoàn?"}
-{"_id": "mlqa:667", "text": "Hệ thống cô quay đơn giản được thương mại hóa khi nào?"}
-{"_id": "mlqa:668", "text": "Carlo Airoldi đã nổi tiếng đi bộ đến đâu vào năm 1896?"}
 {"_id": "mlqa:669", "text": "Ai đã giúp anh ta phục hồi?"}
-{"_id": "mlqa:670", "text": "Chiến thắng cuối cùng của Lacy diễn ra ở đâu?"}
-{"_id": "mlqa:671", "text": "Nghề nghiệp của cha Assad là gì?"}
-{"_id": "mlqa:672", "text": "Gandy đã học ở đâu?"}
 {"_id": "mlqa:673", "text": "Điều gì khiến một vật rơi tự do?"}
-{"_id": "mlqa:674", "text": "Điều gì đã bị hạn chế?"}
-{"_id": "mlqa:675", "text": "Thời gian điều trị cụ thể phụ thuộc vào nhiều yếu tố nào?"}
-{"_id": "mlqa:676", "text": "Các thành viên của Đại hội đồng cần phải có chuyên môn trong lĩnh vực nào?"}
-{"_id": "mlqa:677", "text": "Quần vợt bị loại khỏi chương trình Thế vận hội Mùa hè khi nào?"}
-{"_id": "mlqa:678", "text": "Công ty đã đưa ra sự khích lệ, hay thay vào đó họ đã rút lại sự tài trợ?"}
-{"_id": "mlqa:679", "text": "Loại dấu câu nào rất thịnh hành vào những năm 1960?"}
 {"_id": "mlqa:680", "text": "Điều gì khiến món Dal makhani được ưa chuộng đến vậy?"}
-{"_id": "mlqa:681", "text": "Ông đã từng phục vụ trong Lực lượng Cận vệ Hoàng gia và một nhóm quân sự nào khác?"}
 {"_id": "mlqa:682", "text": "Các tín đồ của ockham là ai?"}
-{"_id": "mlqa:683", "text": "Đại hội Thế vận hội (Olympic) đã phân loại Phần Lan như thế nào cho đến năm 1908?"}
 {"_id": "mlqa:684", "text": "Hydrua ba cấu tử Mg6lr2H11 được cho là chứa những electron nào?"}
 {"_id": "mlqa:685", "text": "Có bao nhiêu mặt của động cơ bị hỏng hóc khiến hệ thống bù nhỏ được chế tạo?"}
 {"_id": "mlqa:686", "text": "Hãng phim sản xuất bộ phim Song of the South vào năm nào?"}
-{"_id": "mlqa:687", "text": "Họ của nhân vật chính là gì?"}
 {"_id": "mlqa:688", "text": "Khu vực công nghiệp chia sẻ lĩnh vực công nghệ cao nào?"}
-{"_id": "mlqa:689", "text": "Có bao nhiêu giá trị của lập trình cực đoan sẽ được trình bày chi tiết trong phần tiếp theo?"}
-{"_id": "mlqa:690", "text": "Aich giỏi về lĩnh vực gì?"}
 {"_id": "mlqa:691", "text": "lưỡng cực nghiêng từ trục sao Mộc bao nhiêu độ?"}
 {"_id": "mlqa:692", "text": "Becquerel đã tập trung nghiên cứu cái gì?"}
-{"_id": "mlqa:693", "text": "Ở phương Tây, nam giới tự tử thường xuyên hơn nữ giới bao nhiêu lần?"}
 {"_id": "mlqa:694", "text": "Trong phần lớn thời gian của năm, nhiệt độ không bao giờ giảm xuống dưới mức nào?"}
-{"_id": "mlqa:695", "text": "Sladen đã đóng nhân vật nào nhiều lần?"}
-{"_id": "mlqa:696", "text": "Xilion được phát hành khi nào?"}
-{"_id": "mlqa:697", "text": "Người gọi cầu nguyện phải trèo lên bao nhiêu lần mỗi ngày?"}
-{"_id": "mlqa:698", "text": "Có bao nhiêu người phản đối cuộc trưng cầu dân ý?"}
 {"_id": "mlqa:699", "text": "DVD âm nhạc nào bán chạy nhất?"}
-{"_id": "mlqa:700", "text": "Đồng được phát hành vào năm nào?"}
 {"_id": "mlqa:701", "text": "Văn học dân gian Anh phát triển qua thời kì nào?"}
 {"_id": "mlqa:702", "text": "Nơi nào biệt đội đã bỏ sót?"}
-{"_id": "mlqa:703", "text": "Nữ diễn viên nào thủ vai Ruth McMillan?"}
 {"_id": "mlqa:704", "text": "Họ muốn đem thứ gì vào bộ phim?"}
 {"_id": "mlqa:705", "text": "Điểm cao nhất có thể thấy ở Uganda là bao nhiêu?"}
-{"_id": "mlqa:706", "text": "Loại chu trình nào xảy ra vào mùa hè?"}
-{"_id": "mlqa:707", "text": "Windows Mobile khả dụng cho ô tô và hệ điều hành nào khác?"}
 {"_id": "mlqa:708", "text": "Đồng tiền 20 cent đô la Mỹ giống đồng tiền nào?"}
-{"_id": "mlqa:709", "text": "Điều gì là quan trọng về vị trí của đèn phẫu thuật (OR-lights)?"}
-{"_id": "mlqa:710", "text": "Reutter đã sáng tác bài hát nào?"}
 {"_id": "mlqa:711", "text": "KHi so sánh với trái đất thì nó khác ra sao?"}
-{"_id": "mlqa:712", "text": "đã xảy ra điều gì sau khi độc lập được tuyên bố ở mỗi tỉnh"}
-{"_id": "mlqa:713", "text": "Abel đã đến thăm vị hôn thê của mình vào năm nào?"}
 {"_id": "mlqa:714", "text": "Tsar đã chuyển đến cung điện nào?"}
-{"_id": "mlqa:715", "text": "Sóng hình sin còn được gọi là gì?"}
 {"_id": "mlqa:716", "text": "Có bao nhiêu câu lạc bộ tham gia vào giải đấu mới?"}
-{"_id": "mlqa:717", "text": "Tên của router kết nối duy trì các kết nối là gì?"}
-{"_id": "mlqa:718", "text": "Sự gián đoạn và di cư đã diễn ra ở những nền văn minh nào?"}
-{"_id": "mlqa:719", "text": "Loại tòa nhà nào chủ yếu được xây dựng trong thế kỷ 19 và 20 ở New York?"}
-{"_id": "mlqa:720", "text": "Điều gì đã truyền cảm hứng cho việc đặt tên Reykjavík?"}
-{"_id": "mlqa:721", "text": "Thư pháp còn được sử dụng cho việc gì?"}
-{"_id": "mlqa:722", "text": "Ai đã lái máy bay hộ tống vào ngày đầu tiên?"}
-{"_id": "mlqa:723", "text": "Từ \"delusion\" có ý nghĩa là gì khi được nhắc đến trong bệnh lý học?"}
 {"_id": "mlqa:724", "text": "Nghiên cứu về Titan dẫn đến xác nhận về tồn tại một bầu khí quyển dày trên vệ tinh vào năm nào?"}
 {"_id": "mlqa:725", "text": "Tiêu chuẩn cho các thiết bị bảo vệ mặt là gì?"}
-{"_id": "mlqa:726", "text": "Có bao nhiêu lực lượng lượng tử tập trung vào việc thống nhất giữa trọng lực và điện từ học?"}
 {"_id": "mlqa:727", "text": "Họ đã tìm thấy gì trên đá Rosetta?"}
-{"_id": "mlqa:728", "text": "Tại sao anh ấy quyết định không làm việc trên đường sắt nữa?"}
 {"_id": "mlqa:729", "text": "Ai là người trao Hiến chương cho Lapvesi?"}
 {"_id": "mlqa:730", "text": "Cây trồng này được đưa vào miền Bắc Ấn Độ vào khi nào?"}
 {"_id": "mlqa:731", "text": "Sự can thiệp của hoàng đế nào đã chấm dứt chiến tranh?"}
 {"_id": "mlqa:732", "text": "Ai đã thắng tám huy chương vàng và bốn huy chương bạc ở nội dung thể dục dụng cụ?"}
-{"_id": "mlqa:733", "text": "Tờ The Hindu bắt đầu cung cấp phiên bản trực tuyến vào năm nào?"}
 {"_id": "mlqa:734", "text": "Con tàu vũ trụ nào đã chụp ảnh Janus?"}
 {"_id": "mlqa:735", "text": "dòng chảy Đại Tây Dương ấm lên như thế nào?"}
-{"_id": "mlqa:736", "text": "Các liên doanh bắt đầu xuất hiện ở Liên Xô vào khi nào?"}
 {"_id": "mlqa:737", "text": "Ai đã tổ chức buổi Giáng sinh đặc biệt năm 2004 bên cạnh chồng mình?"}
 {"_id": "mlqa:738", "text": "Kiểu mua sắm nào có thể không nhất thiết phải liên quan đến việc mua hàng?"}
-{"_id": "mlqa:739", "text": "Lực lượng Vũ trang Ukraine có khoảng bao nhiêu nhân sự?"}
 {"_id": "mlqa:740", "text": "HỌ ĐÃ KẾT LUẬN VÀ LÀM GÌ?"}
 {"_id": "mlqa:741", "text": "Quan sát đã tiết lộ điều gì?"}
 {"_id": "mlqa:742", "text": "Tổ chức nào đã bị phát hiện đang âm mưu tấn công các đại sứ quan ở Singapore vào năm 2001?"}
 {"_id": "mlqa:743", "text": "Có bao nhiêu trận địa chấn đã diễn ra trong tháng Mười hai năm 2008 tại Hồ Yellowstone?"}
 {"_id": "mlqa:744", "text": "Tàu Hindenburg thành phế liệu khi nào?"}
 {"_id": "mlqa:745", "text": "Viète tính được bao nhiêu chữ số sử dụng đa giác với số lượng lớn các cạnh?"}
-{"_id": "mlqa:746", "text": "Ali đã kiểm soát miền bắc Sumatra vào năm nào?"}
-{"_id": "mlqa:747", "text": "Ai là đạo diễn của bộ phim Barfi?"}
-{"_id": "mlqa:748", "text": "Khu đất Birkhall rộng bao nhiêu mẫu Anh?"}
 {"_id": "mlqa:749", "text": "Có bao nhiêu câu lạc bộ trong Giải đấu liên đoàn đầu tiên ở Anh?"}
 {"_id": "mlqa:750", "text": "Selvig đã tiết lộ cho Romanoff điều gì?"}
-{"_id": "mlqa:751", "text": "Sải cánh của loài chim cổ rắn (Anhingidae) lớn cỡ nào?"}
 {"_id": "mlqa:752", "text": "Ngôn ngữ được nói bởi nhiều người ở Ukraine là ngôn ngữ gì?"}
 {"_id": "mlqa:753", "text": "Nêu tên một loại hiệu ứng mà các loại phim hoạt hình không lời này ứng dụng."}
-{"_id": "mlqa:754", "text": "Triết học chính trị nào tin rằng hệ thống kinh tế nên bình đẳng?"}
-{"_id": "mlqa:755", "text": "Có bao nhiêu cuốn sách trong thư viện được sử dụng thường xuyên nhất ở Đức?"}
-{"_id": "mlqa:756", "text": "Triều đại Mughal được thành lập vào năm nào?"}
 {"_id": "mlqa:757", "text": "Những quốc gia nào trở thành kẻ địch của nhau?"}
 {"_id": "mlqa:758", "text": "Trudeau được ghi nhận lần đầu tham gia chính trị ở đâu?"}
-{"_id": "mlqa:759", "text": "Các ngôn ngữ ở Comoros là gì?"}
 {"_id": "mlqa:760", "text": "Một quận trưởng thời La mã tương đương chức gì?"}
 {"_id": "mlqa:761", "text": "độ bao phủ di động là bao nhiêu nếu một người sử dụng bộ mã này?"}
 {"_id": "mlqa:762", "text": "Stu kết hôn ở nước nào?"}
 {"_id": "mlqa:763", "text": "Các hạt đó chủ yếu được giữ an toàn bằng cách nào?"}
 {"_id": "mlqa:764", "text": "Cái gì được sử dụng để làm bốc thăm cho chia đội trong mùa giải?"}
 {"_id": "mlqa:765", "text": "Bao nhiêu tập của Applications d'analyse et de geometrie được xuất bản?"}
-{"_id": "mlqa:766", "text": "Ai là biên tập viên của tờ Sunday Express vào thời điểm đó?"}
 {"_id": "mlqa:767", "text": "Bộ phim ra mắt năm 1948 có tên là gì?"}
-{"_id": "mlqa:768", "text": "Ước tính dân số của các khu vực đô thị ở Indiana là bao nhiêu?"}
-{"_id": "mlqa:769", "text": "Kærlev không thích điểm gì ở Donkey Kong?"}
-{"_id": "mlqa:770", "text": "Cái gì bao bọc bán đảo núi non ở phía tây?"}
-{"_id": "mlqa:771", "text": "phim được phát sóng trên kênh nào ở Mỹ?"}
 {"_id": "mlqa:772", "text": "Nhóm nào bị phân tách?"}
-{"_id": "mlqa:773", "text": "Microsoft đã phát triển .NET Framework vào năm nào?"}
 {"_id": "mlqa:774", "text": "Loại radar do thám nào B-45A được trang bị?"}
-{"_id": "mlqa:775", "text": "Cái gì bảo vệ da?"}
 {"_id": "mlqa:776", "text": "Khi nào Okazani chuyển tới 1?"}
 {"_id": "mlqa:777", "text": "Ai đã hỗ trợ Manos trong việc tuyển các đối thủ cạnh tranh?"}
-{"_id": "mlqa:778", "text": "Trường Cao đẳng Y khoa Baylor đã chịu tổng mức thiệt hại là bao nhiêu?"}
-{"_id": "mlqa:779", "text": "Vua của nước Anh thỉnh thoảng được gọi là gì?"}
 {"_id": "mlqa:780", "text": "Schwarzenegger gặp khó khăn trong nghề gì?"}
 {"_id": "mlqa:781", "text": "Engelbart đã mất ở bang nào?"}
 {"_id": "mlqa:782", "text": "Những bang lớn nào ủng hộ Kế hoạch Virginia?"}
 {"_id": "mlqa:783", "text": "Các lực lượng đồng minh muốn chứng minh độ chính xác trong vũ khí của họ, sử dụng hình ảnh trực tiếp để cho thấy các máy bay chiến đấu khởi hành từ đâu?"}
 {"_id": "mlqa:784", "text": "Nền văn minh nào được ghi nhận có những điều cội nguồn của môn đại số?"}
-{"_id": "mlqa:785", "text": "Mặt trời là nguồn năng lượng quan trọng đối với hành tinh nào?"}
 {"_id": "mlqa:786", "text": "Bạn có thể huỷ hoại công sự của đối phương trong Chivalry bằng cách nào?"}
-{"_id": "mlqa:787", "text": "Tổ chức nào đã giúp đỡ các tù nhân ở Belarus?"}
-{"_id": "mlqa:788", "text": "Ông ấy đã trở về Ấn Độ khi nào?"}
 {"_id": "mlqa:789", "text": "Henry Cabot Lodge II là nghị sĩ của đáng phái chính trị nào tại Hoa Kỳ?"}
-{"_id": "mlqa:790", "text": "Dự án nào đã quy tụ Microsoft, HP và Intel lại với nhau?"}
-{"_id": "mlqa:791", "text": "Điều gì làm tăng khả năng mắc bệnh hen suyễn ở trẻ em?"}
-{"_id": "mlqa:792", "text": "Ifri đã kiếm được bao nhiêu Euro vào năm 2011?"}
-{"_id": "mlqa:793", "text": "Bệnh cúm thường trở nên phổ biến nhất vào mùa nào?"}
 {"_id": "mlqa:794", "text": "Nhân tố quan trọng nhất khiến Nixon thôi chơi bóng đá?"}
-{"_id": "mlqa:795", "text": "Ai là người bình luận và dẫn chương trình cho các trận đấu cờ vua?"}
 {"_id": "mlqa:796", "text": "Người Croatia lần đầu tiên đến khu vực được biết đến là Croatia vào khi nào?"}
 {"_id": "mlqa:797", "text": "Đây là phần thứ mấy của loạt phim chính của nhượng quyền thương mại?"}
-{"_id": "mlqa:798", "text": "có bao nhiêu người tham gia cuộc tuần hành 54 dặm?"}
-{"_id": "mlqa:799", "text": "Cô ấy sẽ bị trục xuất khỏi quốc gia nào?"}
 {"_id": "mlqa:800", "text": "Thể loại của bộ phim Hostiles?"}
 {"_id": "mlqa:801", "text": "Có bao nhiêu thương vong khi cả bốn chiến dịch đều thất bại?"}
-{"_id": "mlqa:802", "text": "cái gì có cấu trúc được xác định rõ ràng?"}
-{"_id": "mlqa:803", "text": "Chiều dài 220.000 năm ánh sáng tương đương với bao nhiêu parsec?"}
 {"_id": "mlqa:804", "text": "Môn thể thao thi đấu nào được thảo luận trong câu nói trên?"}
-{"_id": "mlqa:805", "text": "Dân số của Álftanes vào đầu năm 2011 là bao nhiêu?"}
 {"_id": "mlqa:806", "text": "Có bao nhiêu người hoàn toàn an toàn?"}
-{"_id": "mlqa:807", "text": "Nguyên nhân gây ra các biến chứng nghiêm trọng trong phẫu thuật thắt ống dẫn trứng là gì?"}
 {"_id": "mlqa:808", "text": "Tỉ lệ nữ giới và nam giới là bao nhiêu?"}
-{"_id": "mlqa:809", "text": "Ai đã cung cấp cho Anju khóa đào tạo mà cô ấy cần?"}
 {"_id": "mlqa:810", "text": "Trung tâm đã làm rất nhiều công việc trong việc bảo vệ?"}
 {"_id": "mlqa:811", "text": "Úc và Nhật Bản ký hiệp ước gì năm 2007?"}
 {"_id": "mlqa:812", "text": "Khi nào tòa án Arsacid chấp nhận các yếu tố văn hóa Hy Lạp?"}
-{"_id": "mlqa:813", "text": "Quận nào của Nepal nằm ở phía bắc của quận Jhapa?"}
 {"_id": "mlqa:814", "text": "Mặc dù đã quyết tâm tuân thủ một số yêu cầu nhất định, Hội quốc liên đã bỏ qua điều gì?"}
 {"_id": "mlqa:815", "text": "Nhóm nào không nhận đĩa DVD đề cử cho giải Oscars?"}
-{"_id": "mlqa:816", "text": "Viết tắt của Boot to Gecko là gì?"}
-{"_id": "mlqa:817", "text": "Hiệu suất của lưu lượng mã hóa trên internet phải bị giảm cấp để thực hiện loại kiểm tra nào nhằm phục vụ QoS?"}
 {"_id": "mlqa:818", "text": "Thẻ gì là 4 điểm trong bóng đá?"}
-{"_id": "mlqa:819", "text": "Những mối đe dọa tiềm ẩn đi kèm với nước bị hỏng là gì?"}
-{"_id": "mlqa:820", "text": "Ông ấy đã tạo ra những biến nào?"}
 {"_id": "mlqa:821", "text": "Ngoài châu Phi, chim Hút mật có thể sinh sống ở đâu?"}
 {"_id": "mlqa:822", "text": "Khi nào Mary bị đưa vào giam giữ bảo vệ?"}
 {"_id": "mlqa:823", "text": "Một số kỹ thuật Google Analytics sử dụng để tìm ra các trang hoạt động không tốt là gì?"}
 {"_id": "mlqa:824", "text": "Cái gì được sử dụng để bắn hạ trinh sát F-4 của Hoa Kỳ ở miền Bắc Việt Nam?"}
-{"_id": "mlqa:825", "text": "Bên cạnh HIV/AIDS, OFID còn tham gia vào những căn bệnh nào khác?"}
-{"_id": "mlqa:826", "text": "Các thành viên nhân viên được phân bố vào những phòng ban nào?"}
 {"_id": "mlqa:827", "text": "Loại lá cọ nào có phiến lá không bị rời?"}
-{"_id": "mlqa:828", "text": "Ngoài việc là một nhà thơ, nhà văn và nhạc sĩ, Kazi Nazrul Islam còn được biết đến nhiều nhất với vai trò gì?"}
-{"_id": "mlqa:829", "text": "Có bao nhiêu phần trăm các ca nhiễm trùng hoàn toàn không có triệu chứng?"}
-{"_id": "mlqa:830", "text": "Pháp chủ yếu giành huy chương ở môn thể thao nào?"}
 {"_id": "mlqa:831", "text": "Nhật Bản xâm lược Trung Quốc vào năm nào?"}
 {"_id": "mlqa:832", "text": "Vào tháng 8, có bao nhiêu người đã bị buộc phải rời khỏi nhà của mình ở Nepal?"}
-{"_id": "mlqa:833", "text": "Thuật ngữ nào được dùng để chỉ một người bị tụt bậc trong thang bậc xã hội?"}
-{"_id": "mlqa:834", "text": "Tác phẩm của nhà soạn nhạc đã miêu tả đất nước nào?"}
-{"_id": "mlqa:835", "text": "Đảng phái chính trị nào liên quan?"}
-{"_id": "mlqa:836", "text": "Cái nào đã biến mất với tư cách là một ngôn ngữ vào cuối thời kỳ các vương quốc Lưỡng Hà?"}
-{"_id": "mlqa:837", "text": "Phép loại suy mà Russell sử dụng để phản biện chống lại tôn giáo là gì?"}
-{"_id": "mlqa:838", "text": "Tiêu đề của cuốn sách mà bộ phim \"The Irishman\" được chuyển thể từ đó là gì?"}
 {"_id": "mlqa:839", "text": "Các nhà truyền giáo định cư ở đâu?"}
 {"_id": "mlqa:840", "text": "Album này được gọi là gì để kỷ niệm album Saturday Night Fever?"}
 {"_id": "mlqa:841", "text": "Tôn giáo nào chính thức du nhập vào Nhật Bản những năm 500?"}
-{"_id": "mlqa:842", "text": "Angel ban đầu vốn định là kiểu nhân vật nào?"}
-{"_id": "mlqa:843", "text": "Người dân ở bao nhiêu châu lục khác nhau đã kỷ niệm Ngày NGO Thế giới?"}
-{"_id": "mlqa:844", "text": "Peterson từ chức khỏi vị trí nào?"}
 {"_id": "mlqa:845", "text": "Tàu hải quân Iowa đã mất bao nhiêu thủy thủ trong vụ nổ năm 1989?"}
-{"_id": "mlqa:846", "text": "Dữ liệu văn bản đầu tiên được viết vào năm nào?"}
 {"_id": "mlqa:847", "text": "Bộ sưu tập Curbside có gì?"}
 {"_id": "mlqa:848", "text": "Nghị viện có thể thông qua luật không thể thay đổi trong tương lai không?"}
-{"_id": "mlqa:849", "text": "Betatron ban đầu của Donald Kerst đạt đến mức năng lượng nào?"}
-{"_id": "mlqa:850", "text": "Jinnah đã thắng một cuộc bầu cử vào thời gian nào?"}
-{"_id": "mlqa:851", "text": "Lợi ích của việc cảm thấy biết ơn là gì?"}
 {"_id": "mlqa:852", "text": "Georgiou chủ yếu thực hiện công việc của mình ở đâu?"}
-{"_id": "mlqa:853", "text": "Ben-Gurion đã tuyên bố độc lập vào năm nào?"}
 {"_id": "mlqa:854", "text": "Kể tên một cách mà mật mã được sử dụng?"}
 {"_id": "mlqa:855", "text": "Màu da của trẻ sơ sinh có thể như thế nào trước khi thở"}
-{"_id": "mlqa:856", "text": "Loại áo nào thường được sử dụng?"}
 {"_id": "mlqa:857", "text": "B-45A đầu tiên đã có dịch vụ vào khi nào?"}
-{"_id": "mlqa:858", "text": "25 điểm nóng tương đương với bao nhiêu diện tích đất?"}
-{"_id": "mlqa:859", "text": "Ba điều gì đã xảy ra với các nạn nhân?"}
-{"_id": "mlqa:860", "text": "Hiện tượng một hành tinh hoặc vật thể bị dịch chuyển khỏi quỹ đạo bình thường của nó được gọi là gì?"}
 {"_id": "mlqa:861", "text": "Bang nào ở Brazil sản xuất rất nhiều Amethyst?"}
-{"_id": "mlqa:862", "text": "Ai là người không bao giờ quay trở lại sau khi đi đến Constantinople?"}
 {"_id": "mlqa:863", "text": "Colgate xếp hạng thứ mấy?"}
-{"_id": "mlqa:864", "text": "Rãnh khuất gió (lee trough) có thể được hình thành như thế nào?"}
 {"_id": "mlqa:865", "text": "Childers đụng độ phải nhóm nào khi vào châu Phi?"}
-{"_id": "mlqa:866", "text": "Người cung cấp mô tả về những gì đã xảy ra là người được biết danh tính hay ẩn danh?"}
-{"_id": "mlqa:867", "text": "Ông ấy bị hành quyết khi nào?"}
 {"_id": "mlqa:868", "text": "Tên của các con sông lớn nhất, lớn thứ hai và lớn thứ ba của vùng lưu vực là gì?"}
 {"_id": "mlqa:869", "text": "mục đích của một meme là gì?"}
 {"_id": "mlqa:870", "text": "Thư viện nào ngoài Bắc Mỹ sử dụng hệ thống này để thể hiện thông tin thư mục?"}
 {"_id": "mlqa:871", "text": "Số hộ gia đình một thành viên chiếm bao nhiêu phần trăm?"}
-{"_id": "mlqa:872", "text": "Vua Henry VI đã có bao nhiêu lễ đăng quang?"}
-{"_id": "mlqa:873", "text": "Ai là người được đưa cho các cốc trong nhiệm vụ này?"}
-{"_id": "mlqa:874", "text": "Ai đã thành lập CAA?"}
-{"_id": "mlqa:875", "text": "Ishiguro kết hôn khi nào?"}
 {"_id": "mlqa:876", "text": "Hội chứng được mô tả lần đầu tiên vào năm nào?"}
-{"_id": "mlqa:877", "text": "Ai là nhân tố chính mang lại sự thịnh vượng cho Vương quốc Anh?"}
 {"_id": "mlqa:878", "text": "Ai đóng vai chồng của Sandra Bullock, nhân vật Scarlet Overkill trong phim Minions?"}
 {"_id": "mlqa:879", "text": "Lý thuyết gì đứng sau việc có bao nhiêu protons trong vũ trụ?"}
 {"_id": "mlqa:880", "text": "Kết quả của cuộc bầu cử vòng nhì là gì?"}
 {"_id": "mlqa:881", "text": "Độ cao trung bình của Quản Bạ tính theo mét là bao nhiêu?"}
-{"_id": "mlqa:882", "text": "Cái gì bị lệch bởi tầng từ quyển?"}
-{"_id": "mlqa:883", "text": "Meyers có đồng dẫn chương trình mới vào năm nào?"}
-{"_id": "mlqa:884", "text": "Sau khi lấy được lời thú tội từ Newlove, vụ án được chuyển cho ai?"}
 {"_id": "mlqa:885", "text": "Núi chiếm phần lớn diện tích ở loại địa hình nào?"}
-{"_id": "mlqa:886", "text": "Khóa học Bảo tồn Urushi đầu tiên diễn ra vào năm nào?"}
 {"_id": "mlqa:887", "text": "Messier 81 cách Trái Đất khoảng bao nhiêu năm ánh sáng?"}
 {"_id": "mlqa:888", "text": "Loại cân bằng nào tập trung liên quan hơn tính hữu tỉ?"}
 {"_id": "mlqa:889", "text": "Ai là người dẫn đầu việc xuất bản Arturo?"}
