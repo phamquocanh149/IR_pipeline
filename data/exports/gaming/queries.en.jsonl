@@ -14,13 +14,13 @@
 {"_id": "gaming:123315", "text": "Where can I find Obsidian in the Pocket Edition?"}
 {"_id": "gaming:46657", "text": "What is the difference between Black Souls and White Souls?"}
 {"_id": "gaming:139251", "text": "How do I complete \"Find the Bitizen\"?"}
-{"_id": "gaming:row18", "text": "How do I complete \"Find the Bitizen\"?"}
+{"_id": "gaming:139251#1", "text": "How do I complete \"Find the Bitizen\"?"}
 {"_id": "gaming:96661", "text": "Are some racers faster than others?"}
 {"_id": "gaming:148382", "text": "How do I fast travel in Batman Arkham Origins?"}
 {"_id": "gaming:69244", "text": "Where can I find Hunter's Journal Part 2?"}
 {"_id": "gaming:44713", "text": "In the ending, what happens to the boy and the girl?"}
 {"_id": "gaming:146626", "text": "how to level up quicker in borderland 2"}
-{"_id": "gaming:row24", "text": "how to level up quicker in borderland 2"}
+{"_id": "gaming:146626#1", "text": "how to level up quicker in borderland 2"}
 {"_id": "gaming:158329", "text": "How does the \"Revive at Corpse\" option work?"}
 {"_id": "gaming:136179", "text": "In XCOM: Enemy Unknown, which types of scenery are destructible?"}
 {"_id": "gaming:64219", "text": "Skyrim: My Best Friend is a mass Murderer!"}
@@ -28,7 +28,7 @@
 {"_id": "gaming:55091", "text": "Mass Effect 3 Ending"}
 {"_id": "gaming:151465", "text": "I got stung by bees in animal crossing new leaf"}
 {"_id": "gaming:14808", "text": "Age Of Empires III : Lag in Multiplayer game mode ( LAN )"}
-{"_id": "gaming:row32", "text": "Age Of Empires III : Lag in Multiplayer game mode ( LAN )"}
+{"_id": "gaming:14808#1", "text": "Age Of Empires III : Lag in Multiplayer game mode ( LAN )"}
 {"_id": "gaming:37889", "text": "What do I lose when I quit a multiplayer game in BF3?"}
 {"_id": "gaming:172603", "text": "How hard/expensive is it to set up and maintain a Dojo alone?"}
 {"_id": "gaming:32935", "text": "What different versions of xbox 360 are there? What is the hd for with xbox?"}
@@ -51,7 +51,7 @@
 {"_id": "gaming:3040", "text": "Is it possible to play two different Steam games on the same account at the same time?"}
 {"_id": "gaming:22133", "text": "Internal Exception: java.new.SocketTimeoutException: Read timed out"}
 {"_id": "gaming:173621", "text": "How many daedric missions are there that give you armor as a reward?"}
-{"_id": "gaming:row55", "text": "How many daedric missions are there that give you armor as a reward?"}
+{"_id": "gaming:173621#1", "text": "How many daedric missions are there that give you armor as a reward?"}
 {"_id": "gaming:114370", "text": "What video card drivers are needed to play Minecraft with an integrated Intel GPU on Windows 8?"}
 {"_id": "gaming:28975", "text": "How do I beat the Picus boss?"}
 {"_id": "gaming:66621", "text": "How much do I need to invest into the artisan to fully upgrade?"}
@@ -81,7 +81,7 @@
 {"_id": "gaming:149849", "text": "Does Link Between World's Hero Mode impact the street pass battles?"}
 {"_id": "gaming:74554", "text": "Can I enforce a time limit window on Steam games, notably Team Fortress 2?"}
 {"_id": "gaming:63118", "text": "How do I join multiplayer servers in Terraria?"}
-{"_id": "gaming:row86", "text": "How do I join multiplayer servers in Terraria?"}
+{"_id": "gaming:63118#1", "text": "How do I join multiplayer servers in Terraria?"}
 {"_id": "gaming:60354", "text": "What are the most important things for a newbie to League of Legends learn?"}
 {"_id": "gaming:102361", "text": "Diablo 3 Monster Curses"}
 {"_id": "gaming:83002", "text": "How long does it take Tonila to get her gold back? Or is there a better way?"}
@@ -96,7 +96,7 @@
 {"_id": "gaming:155463", "text": "\"Panna City\" dream job?"}
 {"_id": "gaming:120087", "text": "How is the IP reward calculated?"}
 {"_id": "gaming:144588", "text": "By what amount does the Masuda method increase the chance of breeding a Shiny?"}
-{"_id": "gaming:row101", "text": "By what amount does the Masuda method increase the chance of breeding a Shiny?"}
+{"_id": "gaming:144588#1", "text": "By what amount does the Masuda method increase the chance of breeding a Shiny?"}
 {"_id": "gaming:180006", "text": "How do i make a button with delayed reactivation time?"}
 {"_id": "gaming:178477", "text": "How do I take off body armor in GTA V online?"}
 {"_id": "gaming:178477#1", "text": "How do I take off body armor in GTA V online?"}
@@ -115,7 +115,7 @@
 {"_id": "gaming:38609", "text": "Why can't I upgrade the inside of my house?"}
 {"_id": "gaming:24148", "text": "What's the minimum number of booster tracks needed to get up to full speed?"}
 {"_id": "gaming:45630", "text": "what sword has the highest base damage in skyrim?"}
-{"_id": "gaming:row120", "text": "what sword has the highest base damage in skyrim?"}
+{"_id": "gaming:45630#1", "text": "what sword has the highest base damage in skyrim?"}
 {"_id": "gaming:18895", "text": "Why are blocks respawning in my Minecraft 1.3 SMP server?"}
 {"_id": "gaming:18895#1", "text": "Why are blocks respawning in my Minecraft 1.3 SMP server?"}
 {"_id": "gaming:148895", "text": "Redirecting nether portals"}
@@ -123,12 +123,12 @@
 {"_id": "gaming:170910", "text": "Minecraft went small"}
 {"_id": "gaming:102754", "text": "What formula does religious pressure adhere to in Civ 5?"}
 {"_id": "gaming:148022", "text": "I'm getting a, \"Pixel format not accelerated\" error when I try to launch Minecraft"}
-{"_id": "gaming:row129", "text": "I'm getting a, \"Pixel format not accelerated\" error when I try to launch Minecraft"}
+{"_id": "gaming:148022#1", "text": "I'm getting a, \"Pixel format not accelerated\" error when I try to launch Minecraft"}
 {"_id": "gaming:45631", "text": "Can I move the map and other UI elements?"}
 {"_id": "gaming:151773", "text": "Can you slow down pre-AD time progression in Civ V?"}
 {"_id": "gaming:71571", "text": "How are the Battle Points you earn calculated?"}
 {"_id": "gaming:5862", "text": "Is it better to spawn your first overlord at 9 or 10 supply?"}
-{"_id": "gaming:row134", "text": "Is it better to spawn your first overlord at 9 or 10 supply?"}
+{"_id": "gaming:5862#1", "text": "Is it better to spawn your first overlord at 9 or 10 supply?"}
 {"_id": "gaming:75055", "text": "How does Magic Find affect iLvl 61+ drops with 5NV?"}
 {"_id": "gaming:163803", "text": "How do I unlock level 25 of Far Future?"}
 {"_id": "gaming:174116", "text": "Got a new Skyrim mansion, how can I bring the kids and dog with me?"}
@@ -140,33 +140,33 @@
 {"_id": "gaming:150072", "text": "XRay Mod for Minecraft 1.7.4and Installing Mods"}
 {"_id": "gaming:31760", "text": "How can I identify a counterfeit Xbox 360 controller?"}
 {"_id": "gaming:44225", "text": "Is there a difference in effect between Black soul gems and others?"}
-{"_id": "gaming:row146", "text": "Is there a difference in effect between Black soul gems and others?"}
+{"_id": "gaming:44225#1", "text": "Is there a difference in effect between Black soul gems and others?"}
 {"_id": "gaming:149857", "text": "How can I trick Minecraft into thinking two computers are on the same wifi network?"}
 {"_id": "gaming:167119", "text": "How to disable play time tracking?"}
-{"_id": "gaming:row149", "text": "How to disable play time tracking?"}
+{"_id": "gaming:167119#1", "text": "How to disable play time tracking?"}
 {"_id": "gaming:85786", "text": "%increase of elemental effect chance"}
 {"_id": "gaming:85244", "text": "How do Goliath enemies work?"}
 {"_id": "gaming:66734", "text": "How are attributes allocated?"}
 {"_id": "gaming:101931", "text": "How do I complete 'The United Federation'?"}
-{"_id": "gaming:row154", "text": "How do I complete 'The United Federation'?"}
+{"_id": "gaming:101931#1", "text": "How do I complete 'The United Federation'?"}
 {"_id": "gaming:137618", "text": "How do I unlock Disarm and Destroy?"}
 {"_id": "gaming:159789", "text": "How do you access the Shrine of Winter?"}
 {"_id": "gaming:132464", "text": "Which disc(s) should I install for Grand Theft Auto 5?"}
-{"_id": "gaming:row158", "text": "Which disc(s) should I install for Grand Theft Auto 5?"}
+{"_id": "gaming:132464#1", "text": "Which disc(s) should I install for Grand Theft Auto 5?"}
 {"_id": "gaming:108212", "text": "Why can't I join my friend's server?"}
 {"_id": "gaming:75931", "text": "Minecraft Launcher Causing Black Screen and Laggy Cursor"}
 {"_id": "gaming:120218", "text": "How many seconds count until bomb detonates in Counter Strike?"}
 {"_id": "gaming:97343", "text": "Where is the prestige option on Jetpack Joyride?"}
 {"_id": "gaming:121389", "text": "Why can't I log-in in my Minecraft launcher?"}
 {"_id": "gaming:71859", "text": "Can I turn off chat auto-join?"}
-{"_id": "gaming:row165", "text": "Can I turn off chat auto-join?"}
+{"_id": "gaming:71859#1", "text": "Can I turn off chat auto-join?"}
 {"_id": "gaming:98975", "text": "What can a new player do in a high level area?"}
-{"_id": "gaming:row167", "text": "What can a new player do in a high level area?"}
+{"_id": "gaming:98975#1", "text": "What can a new player do in a high level area?"}
 {"_id": "gaming:82758", "text": "Is there now a cap on Gold Find % in Diablo 3?"}
 {"_id": "gaming:142610", "text": "Minecraft login issue"}
 {"_id": "gaming:93582", "text": "What are the effects of Civilization V responses to other leaders?"}
 {"_id": "gaming:155818", "text": "Will adding Featherfalling to my protection 4 boots help?"}
-{"_id": "gaming:row172", "text": "Will adding Featherfalling to my protection 4 boots help?"}
+{"_id": "gaming:155818#1", "text": "Will adding Featherfalling to my protection 4 boots help?"}
 {"_id": "gaming:125260", "text": "Terrain based military upgrades - your terrain or the enemies'?"}
 {"_id": "gaming:34982", "text": "How do I find out the additional 3 effects of ingredients?"}
 {"_id": "gaming:63625", "text": "What are all the status effects and what do they mean?"}
@@ -188,14 +188,14 @@
 {"_id": "gaming:4695", "text": "Has anyone had success with Voice Chat in StarCraft 2?"}
 {"_id": "gaming:28717", "text": "Where is my Minecraft folder on Windows?"}
 {"_id": "gaming:109332", "text": "What's the advantage of cities in a region that aren't connected? Is it possible to connect them?"}
-{"_id": "gaming:row194", "text": "What's the advantage of cities in a region that aren't connected? Is it possible to connect them?"}
+{"_id": "gaming:109332#1", "text": "What's the advantage of cities in a region that aren't connected? Is it possible to connect them?"}
 {"_id": "gaming:29907", "text": "How can I change the bitrate when I watch a video with Netflix on a PS3?"}
 {"_id": "gaming:94597", "text": "Further skill points and levels in borderlands 2"}
 {"_id": "gaming:84838", "text": "Collecting all skins and customizations"}
-{"_id": "gaming:row198", "text": "Collecting all skins and customizations"}
+{"_id": "gaming:84838#1", "text": "Collecting all skins and customizations"}
 {"_id": "gaming:42030", "text": "Can I backup and restore my Skyrim saves if I plan on installing a new OS?"}
 {"_id": "gaming:28714", "text": "What are some high level strategies for 2v2's?"}
-{"_id": "gaming:row201", "text": "What are some high level strategies for 2v2's?"}
+{"_id": "gaming:28714#1", "text": "What are some high level strategies for 2v2's?"}
 {"_id": "gaming:103806", "text": "Can you level down?"}
 {"_id": "gaming:137220", "text": "Where do I get the key for the first house?"}
 {"_id": "gaming:113449", "text": "I still don't get when I win or lose at Caravan"}
@@ -213,12 +213,12 @@
 {"_id": "gaming:63323", "text": "What are the precise differences between \"playable\" and \"optimal\"?"}
 {"_id": "gaming:54642", "text": "Could I have saved Mordin?"}
 {"_id": "gaming:155925", "text": "How do you complete the \"Phantom Prospect\" assignment?"}
-{"_id": "gaming:row219", "text": "How do you complete the \"Phantom Prospect\" assignment?"}
+{"_id": "gaming:155925#1", "text": "How do you complete the \"Phantom Prospect\" assignment?"}
 {"_id": "gaming:69522", "text": "Can you change the game's sound effects?"}
 {"_id": "gaming:11937", "text": "How does zombie spawning in Die2Nite work?"}
 {"_id": "gaming:102996", "text": "How can I stop Steam from loading when I start my computer?"}
 {"_id": "gaming:93742", "text": "What is the cause of Error Code 118, and how can I resolve this?"}
-{"_id": "gaming:row224", "text": "What is the cause of Error Code 118, and how can I resolve this?"}
+{"_id": "gaming:93742#1", "text": "What is the cause of Error Code 118, and how can I resolve this?"}
 {"_id": "gaming:66475", "text": "How can I save the game?"}
 {"_id": "gaming:81176", "text": "Will the Hall of Monuments affect Guild Wars 2 after launch?"}
 {"_id": "gaming:155236", "text": "Stealth Bomber won't fire on cities"}
@@ -226,11 +226,11 @@
 {"_id": "gaming:37138", "text": "What is the range of the T-UGS?"}
 {"_id": "gaming:174493", "text": "How do you spread taint in Thaumcraft 4?"}
 {"_id": "gaming:120163", "text": "How does wielded weapon affect running speed?"}
-{"_id": "gaming:row232", "text": "How does wielded weapon affect running speed?"}
+{"_id": "gaming:120163#1", "text": "How does wielded weapon affect running speed?"}
 {"_id": "gaming:80030", "text": "What is the best way to earn experience in dragonvale?"}
 {"_id": "gaming:77803", "text": "If I have two copies of the same game, can I Gift one of them?"}
 {"_id": "gaming:152462", "text": "How to find the xyz location of objects in minecraft?"}
-{"_id": "gaming:row236", "text": "How to find the xyz location of objects in minecraft?"}
+{"_id": "gaming:152462#1", "text": "How to find the xyz location of objects in minecraft?"}
 {"_id": "gaming:35743", "text": "What do the different symbols on the map represent?"}
 {"_id": "gaming:131837", "text": "Is there a way to switch off Nether portals?"}
 {"_id": "gaming:131837#1", "text": "Is there a way to switch off nether portals?"}
@@ -242,14 +242,14 @@
 {"_id": "gaming:131834", "text": "How can I add more cars to the Special Vehicle list?"}
 {"_id": "gaming:35921", "text": "How to deal with Riddler trophies"}
 {"_id": "gaming:91741", "text": "Do passive mobs breed or respawn naturally in Minecraft?"}
-{"_id": "gaming:row249", "text": "Do passive mobs breed or respawn naturally in Minecraft?"}
+{"_id": "gaming:91741#1", "text": "Do passive mobs breed or respawn naturally in Minecraft?"}
 {"_id": "gaming:58521", "text": "How to counter Karthus' ultimate?"}
 {"_id": "gaming:35221", "text": "How do Soul Gems work?"}
 {"_id": "gaming:148426", "text": "Exactly how do crimson/corruption/hallow spread, and which blocks spread them?"}
 {"_id": "gaming:43555", "text": "In The Old Republic ship-based minigame, is there a way to destroy shielded targets?"}
 {"_id": "gaming:112987", "text": "Is there a difference between Adventure play after pass 2 In Plants vs. Zombies?"}
 {"_id": "gaming:149620", "text": "Is there any way to restart the Tiny Death Star Holiday Decoration Event?"}
-{"_id": "gaming:row257", "text": "Is there any way to restart the Tiny Death Star Holiday Decoration Event?"}
+{"_id": "gaming:149620#1", "text": "Is there any way to restart the Tiny Death Star Holiday Decoration Event?"}
 {"_id": "gaming:10890", "text": "Is there a stand-alone chat client for Battle.net?"}
 {"_id": "gaming:143945", "text": "At what levels do heroes in Hearthstone earn gold cards?"}
 {"_id": "gaming:68106", "text": "How to Change Difficulty in Diablo 3"}
@@ -266,9 +266,9 @@
 {"_id": "gaming:57871", "text": "The Paragon/Renegade option towards the end of Mass Effect 3 aren't opening up"}
 {"_id": "gaming:20523", "text": "What are the lyrics to the Turret Opera at the end of Portal 2?"}
 {"_id": "gaming:34502", "text": "Does MW3 support cross-platform multiplayer?"}
-{"_id": "gaming:row274", "text": "Does MW3 support cross-platform multiplayer?"}
+{"_id": "gaming:34502#1", "text": "Does MW3 support cross-platform multiplayer?"}
 {"_id": "gaming:16380", "text": "Faster ways to transfer resources & share control with other players?"}
-{"_id": "gaming:row276", "text": "Faster ways to transfer resources & share control with other players?"}
+{"_id": "gaming:16380#1", "text": "Faster ways to transfer resources & share control with other players?"}
 {"_id": "gaming:178449", "text": "How do I unlock Shampoodle in Animal Crossing New Leaf?"}
 {"_id": "gaming:162866", "text": "In FTL Advanced Edition, what can be gained from manning sensor or door subsystems?"}
 {"_id": "gaming:36374", "text": "Where can you acquire massive amounts of Soul Gems?"}
@@ -281,7 +281,7 @@
 {"_id": "gaming:119204#1", "text": "How do I unlock the museum collectibles in Puzzle Craft?"}
 {"_id": "gaming:38630", "text": "How can I improve Light Armor as an Archer?"}
 {"_id": "gaming:166806", "text": "Leveling taking ages in WoW, any tips?"}
-{"_id": "gaming:row290", "text": "Leveling taking ages in WoW, any tips?"}
+{"_id": "gaming:166806#1", "text": "Leveling taking ages in WoW, any tips?"}
 {"_id": "gaming:71520", "text": "I keep having to unlock the same things over and over again for Battlefield 3"}
 {"_id": "gaming:70594", "text": "How to identify unidentified items in Diablo 3"}
 {"_id": "gaming:50682", "text": "What are the different monster attributes?"}
@@ -339,7 +339,7 @@
 {"_id": "gaming:85944", "text": "How long does \"Killer\" last?"}
 {"_id": "gaming:70253", "text": "Witch Doctor build for Inferno?"}
 {"_id": "gaming:179106", "text": "How do make a redstone signal select a random set of command blocks"}
-{"_id": "gaming:row350", "text": "How do make a redstone signal select a random set of command blocks"}
+{"_id": "gaming:179106#1", "text": "How do make a redstone signal select a random set of command blocks"}
 {"_id": "gaming:24996", "text": "PS3 keeps saying my WPA key is wrong"}
 {"_id": "gaming:55381", "text": "How does the new 'Weight' Feature work?"}
 {"_id": "gaming:52055", "text": "Skyrim - Killed a chicken in the first town, how screwed is my game?"}
@@ -385,7 +385,7 @@
 {"_id": "gaming:63413", "text": "How do I set a mouse button to a regular attack?"}
 {"_id": "gaming:106408", "text": "What are the new units in Heart of the Swarm?"}
 {"_id": "gaming:121898", "text": "How can I protect my creations from Endermen?"}
-{"_id": "gaming:row396", "text": "How can I protect my creations from Endermen?"}
+{"_id": "gaming:121898#1", "text": "How can I protect my creations from Endermen?"}
 {"_id": "gaming:49427", "text": "Why bother getting larger soul gems in Skyrim?"}
 {"_id": "gaming:75659", "text": "Max Resistance in Diablo 3"}
 {"_id": "gaming:136978", "text": "Plants vs. Zombies 2 Piñata Party mini-game location?"}
@@ -408,18 +408,18 @@
 {"_id": "gaming:75750", "text": "What plane type will I need to go transatlantic in Pocket Planes?"}
 {"_id": "gaming:6656", "text": "Is there a way to make StarCraft 2 remember my battle.net password?"}
 {"_id": "gaming:150776", "text": "How do i sync Xbox 360 Offline Achievement (Not connected to xbox live) that i completed to my xbox live account?"}
-{"_id": "gaming:row419", "text": "How do i sync Xbox 360 Offline Achievement (Not connected to xbox live) that i completed to my xbox live account?"}
+{"_id": "gaming:150776#1", "text": "How do i sync Xbox 360 Offline Achievement (Not connected to xbox live) that i completed to my xbox live account?"}
 {"_id": "gaming:156728", "text": "Mega ring problem in Pokemon X"}
 {"_id": "gaming:42577", "text": "What are the advantages/disadvantages of having a light/dark side alignment of the opposing side?"}
 {"_id": "gaming:55027", "text": "Characters have different weights depending on their race and gender. How does the weight (not Carry Weight/encumbrance) of a character affect the game?"}
-{"_id": "gaming:row423", "text": "Characters have different weights depending on their race and sex. How does the weight (not Carry Weight/encumbrance) of a character affect the game?"}
+{"_id": "gaming:55027#1", "text": "Characters have different weights depending on their race and sex. How does the weight (not Carry Weight/encumbrance) of a character affect the game?"}
 {"_id": "gaming:36656", "text": "Where can I find Daedra hearts?"}
 {"_id": "gaming:7786", "text": "How do you cope with nausea in FPS?"}
 {"_id": "gaming:89316", "text": "In what ways can a game of XCOM:EU end?"}
 {"_id": "gaming:23364", "text": "How can I re-spec my abilities in The Witcher 2?"}
 {"_id": "gaming:120372", "text": "How to save a copy of a multiplayer world in the new 0.7+ menus?"}
 {"_id": "gaming:106193", "text": "What balance changes were made between the final Wings of Liberty Patch and Heart of the Swarm?"}
-{"_id": "gaming:row430", "text": "What balance changes were made between the final Wings of Liberty Patch and Heart of the Swarm?"}
+{"_id": "gaming:106193#1", "text": "What balance changes were made between the final Wings of Liberty Patch and Heart of the Swarm?"}
 {"_id": "gaming:118247", "text": "Minecraft game play is red & blue, but title is gray"}
 {"_id": "gaming:145236", "text": "How do I make signals in dota?"}
 {"_id": "gaming:111879", "text": "Can you go back to the Blue Ribbon Restaurant?"}
@@ -465,14 +465,14 @@
 {"_id": "gaming:54635", "text": "How can I shatter the cockpit of an Atlas?"}
 {"_id": "gaming:57152", "text": "Can I play multiplayer across different platforms?"}
 {"_id": "gaming:63492", "text": "How do I activate the Daedric gauntlet in the Midden?"}
-{"_id": "gaming:row476", "text": "How do I activate the Daedric gauntlet in the Midden?"}
+{"_id": "gaming:63492#1", "text": "How do I activate the Daedric gauntlet in the Midden?"}
 {"_id": "gaming:55146", "text": "How do I establish peace between the Geth and the Quarians?"}
 {"_id": "gaming:87041", "text": "What is this red cross next to my weapon?"}
 {"_id": "gaming:119413", "text": "Is it possible to win a level after the countdown from firing your gun is over?"}
 {"_id": "gaming:64065", "text": "How much damage is dealt per Newton of force?"}
-{"_id": "gaming:row481", "text": "How much damage is dealt per Newton of force?"}
+{"_id": "gaming:64065#1", "text": "How much damage is dealt per Newton of force?"}
 {"_id": "gaming:97334", "text": "Can I restore my wiped out religion in Civ 5 Gods and Kings?"}
-{"_id": "gaming:row483", "text": "Can I restore my wiped out religion in Civ 5 Gods and Kings?"}
+{"_id": "gaming:97334#1", "text": "Can I restore my wiped out religion in Civ 5 Gods and Kings?"}
 {"_id": "gaming:143267", "text": "Do you get trading cards faster when the game has the focus?"}
 {"_id": "gaming:101728", "text": "How can I recover my password?"}
 {"_id": "gaming:56123", "text": "What are all the skills and special abilities of each multiplayer class?"}
@@ -481,7 +481,7 @@
 {"_id": "gaming:24080", "text": "What happens when two players play the same game at different difficulties?"}
 {"_id": "gaming:152444", "text": "What determines the amount of XP gained?"}
 {"_id": "gaming:89187", "text": "Can I configure my PS3 to display videos not larger than my screen?"}
-{"_id": "gaming:row492", "text": "Can I configure my PS3 to display videos not larger than my screen?"}
+{"_id": "gaming:89187#1", "text": "Can I configure my PS3 to display videos not larger than my screen?"}
 {"_id": "gaming:119187", "text": "how do I view the map not the mini map in assassins creed III on ps3"}
 {"_id": "gaming:64616", "text": "How can I turn off the bot spam messages?"}
 {"_id": "gaming:8310", "text": "What's the most efficient Minecraft mining strategy?"}
@@ -522,7 +522,7 @@
 {"_id": "gaming:86322", "text": "Borderlands 2 lost save character Playstation 3"}
 {"_id": "gaming:164704", "text": "Will the Rotation games stay forever even after new rotation?"}
 {"_id": "gaming:166407", "text": "is there a mod that clones a place from a world and transfers to another world"}
-{"_id": "gaming:row535", "text": "is there a mod that clones a place from a world and transfers to another world"}
+{"_id": "gaming:166407#1", "text": "is there a mod that clones a place from a world and transfers to another world"}
 {"_id": "gaming:50820", "text": "I get a \"bad login\" message when trying to play multiplayer"}
 {"_id": "gaming:14500", "text": "Can I transfer an installation?"}
 {"_id": "gaming:5414", "text": "Does matter to match furniture built with the same kind of wood?"}
@@ -593,20 +593,20 @@
 {"_id": "gaming:175094", "text": "How do I create multiple Minecraft installations?"}
 {"_id": "gaming:157028", "text": "Which jobs are dependent on seasons and how?"}
 {"_id": "gaming:161153", "text": "How do I unlock the secret room in Dungeon Defenders"}
-{"_id": "gaming:row608", "text": "How do I unlock the secret room in Dungeon Defenders"}
+{"_id": "gaming:161153#1", "text": "How do I unlock the secret room in Dungeon Defenders"}
 {"_id": "gaming:67564", "text": "What is the most optimal way to build Monk to in Inferno?"}
 {"_id": "gaming:162158", "text": "How can I play Diablo 3 with a gamepad?"}
 {"_id": "gaming:30069", "text": "What blocks can the Enderman pick up and what blocks can't they pick up?"}
 {"_id": "gaming:53966", "text": "Which Merc group is the best for the Aria T'Loak quests?"}
 {"_id": "gaming:49592", "text": "How to salvage Oblivion Walker Achievement after messing up Pieces of the Past"}
-{"_id": "gaming:row614", "text": "How to salvage Oblivion Walker Achievement after messing up Pieces of the Past"}
+{"_id": "gaming:49592#1", "text": "How to salvage Oblivion Walker Achievement after messing up Pieces of the Past"}
 {"_id": "gaming:4778", "text": "How do I cancel Xbox LIVE automatic renewal online?"}
 {"_id": "gaming:27015", "text": "Why do I need to delete the META-INF folder when installing mods?"}
 {"_id": "gaming:44924", "text": "How do I get Steam to recognize a non-Steam game?"}
 {"_id": "gaming:108132", "text": "How do I delete a city to restart from zero?"}
 {"_id": "gaming:47441", "text": "What does the STAG City Takeover allow me to do?"}
 {"_id": "gaming:30322", "text": "How do I remove a Steam game from my library?"}
-{"_id": "gaming:row621", "text": "How do I remove a Steam game from my library?"}
+{"_id": "gaming:30322#1", "text": "How do I remove a Steam game from my library?"}
 {"_id": "gaming:90308", "text": "Can Minecraft Pocket Edition play with a desktop Minecraft on LAN?"}
 {"_id": "gaming:42307", "text": "How to speed up minecraft on my computer"}
 {"_id": "gaming:117519", "text": "What determines which monsters my friends can hunt?"}
@@ -624,7 +624,7 @@
 {"_id": "gaming:63265", "text": "Are there any strategies for getting better weapons/items in Realm of the Mad God?"}
 {"_id": "gaming:81519", "text": "Becoming a vampire lord and getting bloodcursed arrows after curing Serana"}
 {"_id": "gaming:24543", "text": "How do I change player name in minecraft multiplayer in offline mode in Linux?"}
-{"_id": "gaming:row639", "text": "How do I change player name in minecraft multiplayer in offline mode in Linux?"}
+{"_id": "gaming:24543#1", "text": "How do I change player name in minecraft multiplayer in offline mode in Linux?"}
 {"_id": "gaming:142135", "text": "EV training and leveling up"}
 {"_id": "gaming:74255", "text": "What is the effect of low durability in Diablo-3"}
 {"_id": "gaming:132399", "text": "What Properties are available for purchase in Grand Theft Auto V?"}
@@ -633,7 +633,7 @@
 {"_id": "gaming:137170", "text": "Why is my ASCII art all wonky?"}
 {"_id": "gaming:145643", "text": "How do you get fuel"}
 {"_id": "gaming:36167", "text": "How many \"organizations\" can you join? Do some block you from joining others?"}
-{"_id": "gaming:row648", "text": "How many \"organizations\" can you join? Do some block you from joining others?"}
+{"_id": "gaming:36167#1", "text": "How many \"organizations\" can you join? Do some block you from joining others?"}
 {"_id": "gaming:49519", "text": "Why does Lydia prefer an Ebony helmet over a Dragonplate one?"}
 {"_id": "gaming:151335", "text": "Why does Minecraft on PC keep saying that it can't connect to a server?"}
 {"_id": "gaming:137473", "text": "Where do I get HM02 Fly?"}
@@ -646,7 +646,7 @@
 {"_id": "gaming:177132", "text": "I'm stuck in Creative and God mode and lost in the Địa ngục. How can I get out?"}
 {"_id": "gaming:66652", "text": "what does the \"black mushroom\" good for in the full version of D3"}
 {"_id": "gaming:30903", "text": "What items can be farmed fully automatically?"}
-{"_id": "gaming:row661", "text": "What items can be farmed fully automatically?"}
+{"_id": "gaming:30903#1", "text": "What items can be farmed fully automatically?"}
 {"_id": "gaming:95446", "text": "Is it possible to get Steam to continue downloading a game while I'm playing?"}
 {"_id": "gaming:111860", "text": "Can you change the outcome of the game's ending?"}
 {"_id": "gaming:4890", "text": "In StarCraft 2, is there a way to automatically set groups on units about to be produced?"}
@@ -654,7 +654,7 @@
 {"_id": "gaming:13330", "text": "Can I run a steam game without updating it first?"}
 {"_id": "gaming:58395", "text": "What is the Meta Game?"}
 {"_id": "gaming:118118", "text": "How many levels are there for Steam Trading Card badges?"}
-{"_id": "gaming:row669", "text": "How many levels are there for Steam Trading Card badges?"}
+{"_id": "gaming:118118#1", "text": "How many levels are there for Steam Trading Card badges?"}
 {"_id": "gaming:85680", "text": "How do you progress to a new rank on the CS:GO Elo system?"}
 {"_id": "gaming:147159", "text": "Making a Minecraft server"}
 {"_id": "gaming:106132", "text": "How can I gift a game via Origin?"}
@@ -712,7 +712,7 @@
 {"_id": "gaming:66707", "text": "What level is recommended before starting Nightmare/Hell/Inferno?"}
 {"_id": "gaming:149020", "text": "how do I start a 'New Game +' after beating it for the first time?"}
 {"_id": "gaming:55163", "text": "How do I get weapons to level X in singleplayer?"}
-{"_id": "gaming:row729", "text": "How do I get weapons to level X in singleplayer?"}
+{"_id": "gaming:55163#1", "text": "How do I get weapons to level X in singleplayer?"}
 {"_id": "gaming:72763", "text": "How big is the world in Minecraft Pocket Edition?"}
 {"_id": "gaming:68111", "text": "Can Starter Edition/guest pass characters carry into the Standard Edition?"}
 {"_id": "gaming:123983", "text": "What's the most efficient iron golem farm design for SMP?"}
@@ -734,7 +734,7 @@
 {"_id": "gaming:137304", "text": "What is redstone for?"}
 {"_id": "gaming:148073", "text": "Why can't I Switch Batsuit?"}
 {"_id": "gaming:93822", "text": "Chapter 5: Are there multiple Endings?"}
-{"_id": "gaming:row752", "text": "Chapter 5: Are there multiple Endings?"}
+{"_id": "gaming:93822#1", "text": "Chapter 5: Are there multiple Endings?"}
 {"_id": "gaming:55465", "text": "Why is Anderson not a councilor?"}
 {"_id": "gaming:24103", "text": "Using a keyboard/mouse for XBox"}
 {"_id": "gaming:138733", "text": "AirMarshall in game settings?"}
@@ -873,10 +873,10 @@
 {"_id": "gaming:109923", "text": "Where can you find the Yeti Zombie?"}
 {"_id": "gaming:121254", "text": "What's the best way to level at 19?"}
 {"_id": "gaming:25670", "text": "How to skip battle animations in Civilization V?"}
-{"_id": "gaming:row892", "text": "How to skip battle animations in Civilization V?"}
+{"_id": "gaming:25670#1", "text": "How to skip battle animations in Civilization V?"}
 {"_id": "gaming:143188", "text": "How can I catch a golden bee?"}
 {"_id": "gaming:12996", "text": "Leveling up online in Call of Duty: Black Ops?"}
-{"_id": "gaming:row895", "text": "Leveling up online in Call of Duty: Black Ops?"}
+{"_id": "gaming:12996#1", "text": "Leveling up online in Call of Duty: Black Ops?"}
 {"_id": "gaming:148876", "text": "Why can't I use magic launcher?"}
 {"_id": "gaming:52329", "text": "What is the benefit of owning a house?"}
 {"_id": "gaming:20746", "text": "Is there an SMP Server Command to change weather conditions?"}
