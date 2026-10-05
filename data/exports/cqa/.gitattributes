@@ -1,2 +1,0 @@
-documents.en.jsonl filter=lfs diff=lfs merge=lfs -text
-documents.vi.jsonl filter=lfs diff=lfs merge=lfs -text
