@@ -83,6 +83,77 @@ def test_gap_and_joint_projection():
         normalize(np.zeros((1, 2)))
 
 
+def test_sparse_dense_scores_match_full_corpus_analysis_and_reuse_index(tmp_path, monkeypatch):
+    from ir_system.domain.document import Document
+    from ir_system.domain.query import Query
+    from ir_system.models.single_vector import SingleVectorEmbeddingModel
+    from ir_system.retrievers.dense import DenseRetriever
+
+    monkeypatch.chdir(tmp_path)
+    rng = np.random.default_rng(18)
+    vectors = {f'd{i}': v for i, v in enumerate(normalize(rng.normal(size=(100, 6))))}
+    vectors.update({lang: v for lang, v in zip(('vi', 'en', 'csw'), normalize(rng.normal(size=(3, 6))))})
+
+    class Encoder(SingleVectorEmbeddingModel):
+        calls = 0
+        name = 'sparse-analysis-fixture'
+
+        def encode(self, texts, **kwargs):
+            self.calls += 1
+            return np.stack([vectors[t] for t in texts])
+
+    model = Encoder()
+    dense = DenseRetriever(model)
+    documents = [Document(doc_id=f'd{i}', text=f'd{i}') for i in range(100)]
+    dense.build(documents)
+    calls = model.calls
+    reloaded = DenseRetriever(model)
+    reloaded.build(documents)
+    assert model.calls == calls  # Matching default index avoids corpus re-encoding.
+    queries = {lang: Query(qid='q', text=lang) for lang in ('vi', 'en', 'csw')}
+    qrels = Qrels()
+    qrels.add('q', 'd99', 1)
+    full = {l: list(dense.retrieve(q, 100)) for l, q in queries.items()}
+    top = {l: list(dense.retrieve(q, 2)) for l, q in queries.items()}
+    pool = {h.doc_id for hits in top.values() for h in hits if h.doc_id != 'd99'}
+    sparse = {}
+    for lang, hits in top.items():
+        missing = sorted((pool | {'d99'}) - {h.doc_id for h in hits})
+        hits += list(reloaded.score_documents(queries[lang], missing))
+        assert len(hits) <= 7  # Three top-2 rankings plus one positive, not 100 hits.
+        sparse[lang] = sorted(hits, key=lambda h: (-h.score, h.doc_id))
+    def analyze(hits):
+        return fixed_index_analysis([make_runs('q', {l: [(h.doc_id, h.score) for h in hs]
+                                                   for l, hs in hits.items()})], qrels, 2)
+    expected, actual = analyze(full), analyze(sparse)
+    for before, after in zip(expected['margins'], actual['margins']):
+        assert before['negative_pool_ids'] == after['negative_pool_ids']
+        for key in ('positive_score', 'negative_score', 'margin', 'delta_margin'):
+            assert after[key] == pytest.approx(before[key], abs=1e-6)
+
+
+def test_query_cache_preserves_model_specific_encoding():
+    from ir_system.cli.analysis import _QueryEmbeddingCache
+    from ir_system.models.single_vector import SingleVectorEmbeddingModel
+
+    class Encoder(SingleVectorEmbeddingModel):
+        name = 'prompt-fixture'
+        document_prompt = 'passage: '
+        def encode(self, texts, **kwargs):
+            pytest.fail('Side-specific encoding must be delegated.')
+        def encode_queries(self, texts, **kwargs):
+            return np.ones((len(texts), 2))
+        def encode_documents(self, texts, **kwargs):
+            return np.zeros((len(texts), 2))
+
+    cache = _QueryEmbeddingCache(Encoder())
+    cache.remember(['same text'], np.ones((1, 2)))
+    cache.query_mode = True
+    assert cache.document_prompt == 'passage: '
+    assert np.all(cache.encode_queries(['same text']) == 1)
+    assert np.all(cache.encode_documents(['same text']) == 0)
+
+
 def test_report_escapes_query_text(tmp_path):
     path = tmp_path / "report.html"
     write_report({"text": "</script><script>alert(1)</script>"}, path)
@@ -99,6 +170,7 @@ def test_cli_end_to_end(tmp_path, monkeypatch, use_reranker, directions, id_form
     from ir_system.cli import analysis as cli
     from ir_system.models.single_vector import SingleVectorEmbeddingModel
     corpus_encodes = []
+    monkeypatch.chdir(tmp_path)  # Isolate persistent FAISS indexes across cases.
 
     class Encoder(SingleVectorEmbeddingModel):
         @property
