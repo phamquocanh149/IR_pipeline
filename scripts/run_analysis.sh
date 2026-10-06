@@ -6,7 +6,10 @@
 # - Use canonical loader files: queries.vi/en/csw.jsonl, documents.vi/en.jsonl.
 # - Use one shared qrels.tsv; keep DatasetLoader unchanged.
 # - Call the existing Python CLI and allow extra arguments to override defaults.
+# - Dense runs reuse matching indexes/ caches; preserve them between runs.
 # Output: analysis.json and report.html under OUTPUT.
+# Notebook example: !bash scripts/run_analysis.sh --dataset data/exports/fiqa --output results/exports/fiqa
+# CUDA example: bash scripts/run_analysis.sh --dataset data/exports/fiqa --device cuda --batch-size 64
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
@@ -18,7 +21,7 @@ DATASET="${ANALYSIS_DATASET:-$REPO_ROOT/data/fiqa}"
 QUERIES=(vi en csw)
 DOCUMENTS=(vi en)              # Separate Vietnamese and English indexes.
 MODEL="${ANALYSIS_MODEL:-intfloat/multilingual-e5-small}"
-RERANKER=""                    # Optional cross-encoder; empty uses cosine.
+RERANKER=""                    # Optional full-corpus cross-encoder; much more work.
 TOP_K=10
 METRICS=(ndcg@10 mrr@10 recall@10)
 BATCH_SIZE=32

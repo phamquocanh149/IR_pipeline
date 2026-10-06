@@ -20,7 +20,8 @@ Requirements (mandatory)
 - Requested query/document languages must exist; fail before loading models.
 - Use the shared, language-agnostic qrels.tsv through load_qrels(...).
 - Never modify DatasetLoader or duplicate its JSONL/TSV parsing rules.
-- Score all corpus documents so positives outside the negative top-k retain scores.
+- Dense: score top-k plus all positives and shared negatives exactly.
+- Cross-encoder: retain full-corpus scoring to preserve retrieval semantics.
 - Delegate scoring/ranking to DenseRetriever or CrossEncoderRetriever.
 
 Output
@@ -34,8 +35,10 @@ import argparse
 import json
 import logging
 from pathlib import Path
+from time import perf_counter
 
 import numpy as np
+from tqdm import tqdm
 
 from ir_system.analysis.language_views import (
     LANGUAGES, fixed_index_analysis, normalize, paired_gaps, project_3d,
@@ -44,7 +47,6 @@ from ir_system.io.dataset_loader import DOC_LANGS, DatasetLoader
 from ir_system.domain.run import Run
 from ir_system.models.factory import create_model
 from ir_system.models.single_vector import SingleVectorEmbeddingModel
-from ir_system.pipeline.search_pipeline import SearchPipeline
 from ir_system.retrievers.cross_encoder import CrossEncoderRetriever
 from ir_system.retrievers.dense import DenseRetriever
 from ir_system.cli.main import _parse_metric_spec, _setup_logging
@@ -73,6 +75,19 @@ class _QueryEmbeddingCache(SingleVectorEmbeddingModel):
     @property
     def name(self) -> str:
         return self._model.name
+
+    @property
+    def document_prompt(self) -> str | None:
+        return self._model.document_prompt
+
+    def encode_documents(self, texts, **kwargs) -> np.ndarray:
+        return self._model.encode_documents(texts, **kwargs)
+
+    def encode_queries(self, texts, **kwargs) -> np.ndarray:
+        texts = list(texts)
+        if self.query_mode and texts and all(text in self._vectors for text in texts):
+            return np.stack([self._vectors[text] for text in texts])
+        return self._model.encode_queries(texts, **kwargs)
 
     def remember(self, texts: list[str], vectors: np.ndarray) -> None:
         for text, vector in zip(texts, vectors):
@@ -165,7 +180,8 @@ def main(argv=None) -> int:
             logging.info("Encoding %s query views", lang)
             qids = list(queries[lang])
             texts = [queries[lang][qid].text for qid in qids]
-            embeddings = np.asarray(model.encode(
+            encode_queries = model.encode if query_prompt else model.encode_queries
+            embeddings = np.asarray(encode_queries(
                 [query_prompt + text for text in texts],
                 batch_size=args.batch_size, show_progress=True))
             qv = normalize(embeddings)
@@ -197,25 +213,50 @@ def main(argv=None) -> int:
                 dense.load_index(index_dir)
             # build() also validates a loaded index against the current corpus;
             # composite retrievers still need their document-text mapping.
+            build_start = perf_counter()
             retriever.build(documents)
+            logging.info("Index %s ready: %d documents in %.1fs",
+                         index_lang, len(documents), perf_counter() - build_start)
             cached_model.query_mode = True
             if len(corpora) > 1:
                 document_vectors[index_lang] = dense.document_embeddings()
-            pipeline = SearchPipeline(retriever)
             metric_runs = {lang: Run() for lang in query_languages} if evaluator else {}
-            # Full rankings preserve scores for positives outside the negative cutoff.
+            document_ids = {doc.doc_id for doc in documents}
+            if reranker:
+                pair_count = sum(len(queries[lang]) for lang in query_languages) * len(documents)
+                logging.info("Full-corpus reranking: %s query-document pairs on %s index",
+                             f"{pair_count:,}", index_lang)
+            # Dense: retrieve exact top-k, then score only positives and shared negatives.
+            # Reranker retains full-corpus semantics; limiting candidates would change results.
             def run_batches():
                 qids = sorted(set.union(*(set(queries[lang]) for lang in query_languages)))
-                for qid in qids:
-                    runs = {lang: pipeline.search([queries[lang][qid]], len(documents))
-                            if qid in queries[lang] else Run() for lang in query_languages}
+                start = perf_counter()
+                for qid in tqdm(qids, desc=f"[ANALYSIS] {index_lang} index", unit="query"):
+                    rankings = {lang: retriever.retrieve(queries[lang][qid],
+                                len(documents) if reranker else args.top_k)
+                                for lang in query_languages if qid in queries[lang]}
                     if evaluator:
-                        for lang, run in runs.items():
-                            if qid in run.qids:
-                                metric_runs[lang].add(qid, run.get(qid)[:args.top_k])
+                        for lang, hits in rankings.items():
+                            metric_runs[lang].add(qid, hits[:args.top_k])
+                    if not reranker:
+                        positives = {doc_id for doc_id, rel in qrels.judgments_for(qid).items()
+                                     if rel > 0 and doc_id in document_ids}
+                        shared_negatives = {hit.doc_id for hits in rankings.values()
+                                            for hit in hits if hit.doc_id not in positives}
+                        needed = positives | shared_negatives
+                        for lang, hits in rankings.items():
+                            missing = sorted(needed - {hit.doc_id for hit in hits})
+                            if missing:
+                                hits = [*hits, *dense.score_documents(queries[lang][qid], missing)]
+                                rankings[lang] = sorted(hits, key=lambda h: (-h.score, h.doc_id))
+                    runs = {lang: Run() for lang in query_languages}
+                    for lang, hits in rankings.items():
+                        runs[lang].add(qid, hits)
                     yield runs
+                logging.info("Index %s: analyzed %d query IDs in %.1fs",
+                             index_lang, len(qids), perf_counter() - start)
             indexes[index_lang] = fixed_index_analysis(
-                run_batches(), qrels, args.top_k, document_ids={doc.doc_id for doc in documents},
+                run_batches(), qrels, args.top_k, document_ids=document_ids,
             )
             for row in indexes[index_lang]["margins"]:
                 row["direction"] = f"{row['language']}-{index_lang}"

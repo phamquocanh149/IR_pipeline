@@ -22,7 +22,7 @@ Requirements (mandatory)
 - Delta alignment/margin uses the matching Vietnamese query on the same index.
 - Missing positives, negatives or Vietnamese baselines yield null, not zero.
 - Keep all query margins, even when the query has no paired language view.
-- Consume full rankings in batches; do not implement model scoring or retrieval.
+- Consume top-k, positive and shared-negative scores in batches; delegate retrieval.
 
 Output
 ------
@@ -103,12 +103,12 @@ def fixed_index_analysis(
     *,
     document_ids: set[str] | None = None,
 ) -> dict:
-    """Consume batches of existing full-corpus rankings on one fixed index.
+    """Consume rankings containing top-k, all positives and shared negatives.
 
     Batches may contain a single query to keep full rankings out of memory.
 
     All positive judgments in the fixed index are scored, even outside top-k.
-    Hard negatives are non-positive documents in each query's own top-k.
+    Hard negatives share the union of non-positive top-k documents across views.
     Missing positives/negatives produce null margins, never fabricated zeros.
     """
     if top_k <= 0:

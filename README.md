@@ -315,6 +315,44 @@ The underlying CLI also accepts `--direction vi-en en-en csw-en` instead of
 `vi-en` uses Vietnamese queries against English documents. Do not combine
 `--direction` with `--queries`/`--documents`. Keep VI as a query baseline for deltas.
 
+### Analysis performance
+
+For the exported FiQA dataset, including all three query views and both indexes:
+
+```bash
+bash scripts/run_analysis.sh \
+    --dataset data/exports/fiqa \
+    --queries vi en csw \
+    --documents vi en \
+    --model intfloat/multilingual-e5-small \
+    --top-k 10 \
+    --metrics ndcg@10 mrr@10 recall@10 \
+    --output results/exports/fiqa
+```
+
+In a notebook, prefix the command with `!bash`. Open
+`results/exports/fiqa/report.html` after completion.
+
+Dense analysis retrieves top-k and scores all positives plus the shared hard-negative
+pool, including documents outside each view's top-k. It avoids sorting and creating
+full-corpus rankings for every query while preserving the margin definition.
+Query embeddings are computed once and reused across indexes.
+
+The first run still encodes every document in both language indexes. Subsequent
+runs automatically reuse matching FAISS indexes under `indexes/<sha256>`;
+the key includes the model, document prompt, document IDs and text. Keep this
+directory between notebook sessions to reuse it. Logs show index preparation
+times, cache reuse and a query progress bar for each document language.
+
+If your notebook has a CUDA GPU, append `--device cuda --batch-size 64`.
+Reduce the batch size if GPU memory is insufficient. Without a GPU, use
+`--device cpu`. Selecting `--documents vi` reduces work to one index but omits
+English-index results and document-language gap comparisons.
+
+Optional `--load-index PATH` explicitly loads a saved FAISS index and validates
+it against the dataset. With both document languages, PATH must contain `vi/`
+and `en/` index directories; with one language, PATH points directly to its index.
+
 ### Refresh the combined report without running models again
 
 ```bash
@@ -356,7 +394,9 @@ query views' top-k on the same fixed index. Positives outside top-k retain score
 unjudged negatives are counted separately. Missing values are null and excluded.
 Old reports without shared `negative_pool_ids` need a fresh analysis run.
 Optional `--reranker MODEL` changes alignment/margin scoring while gaps/PCA still
-use the single-vector encoder. Full-corpus scoring reuses existing retrievers.
+use the single-vector encoder (the CLI selects Qwen3-Embedding-0.6B in this mode).
+Cross-encoder analysis retains full-corpus scoring, which can be much slower;
+logs show the number of query-document pairs before scoring begins.
 
 ### Retrieval pipeline outputs
 

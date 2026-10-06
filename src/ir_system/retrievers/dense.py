@@ -23,6 +23,7 @@ class DenseRetriever(Retriever):
     """Build and persist normalized IndexFlatIP vectors; search directly in FAISS.
 
     Default storage is indexes/<SHA256 of model and ordered corpus>.
+    Reuse a complete matching default index instead of encoding the corpus again.
     index_dir can override this location for Python callers.
     """
 
@@ -33,6 +34,7 @@ class DenseRetriever(Retriever):
         self._index_dir = Path(index_dir) if index_dir is not None else None
         self._index = None
         self._doc_ids: list[str] = []
+        self._doc_rows: dict[str, int] = {}
         self._built = False
         self._loaded = False
         self._corpus_hash = None
@@ -58,6 +60,16 @@ class DenseRetriever(Retriever):
             self._loaded = False
             return
 
+        index_dir = self._index_dir or Path("indexes") / corpus_hash
+        if self._index_dir is None and all((index_dir / name).is_file()
+                for name in ("index.faiss", "doc_ids.json", "config.json")):
+            self.load_index(index_dir)
+            if self._doc_ids != doc_ids or self._corpus_hash != corpus_hash:
+                raise ValueError("Cached FAISS index does not match the current corpus.")
+            self._loaded = False
+            logger.info("[RETRIEVER] Reused cached FAISS index from %s", index_dir)
+            return
+
         try:
             import faiss
         except ImportError as exc:
@@ -79,10 +91,10 @@ class DenseRetriever(Retriever):
         embeddings = np.ascontiguousarray(embeddings / np.where(norms < 1e-10, 1.0, norms))
         index = faiss.IndexFlatIP(embeddings.shape[1])
         index.add(embeddings)
-        index_dir = self._index_dir or Path("indexes") / corpus_hash
         save_faiss_index(index_dir, index, doc_ids, self._model.name,
                          extra_config={"corpus_hash": corpus_hash})
         self._index, self._doc_ids = index, doc_ids
+        self._doc_rows = {doc_id: row for row, doc_id in enumerate(doc_ids)}
         self._corpus_hash = corpus_hash
         self._built = True
         logger.info("[RETRIEVER] FAISS index ready and saved to %s", index_dir)
@@ -122,6 +134,26 @@ class DenseRetriever(Retriever):
         return {doc_id: self._index.reconstruct(row).copy()
                 for row, doc_id in enumerate(self._doc_ids)}
 
+    def score_documents(self, query: Query, doc_ids: Sequence[str]) -> Sequence[Hit]:
+        """Score specified documents exactly without sorting the whole corpus.
+
+        Reconstruct only selected FAISS vectors. This includes positives outside
+        top-k and negatives contributed by other views of the same query.
+        """
+        if not self._built:
+            raise RuntimeError("DenseRetriever.score_documents: build or load the index first.")
+        if not doc_ids:
+            return []
+        vector = np.asarray(self._model.encode_queries([query.text], batch_size=1), dtype=np.float32)
+        if vector.shape != (1, self._index.d) or not np.isfinite(vector).all():
+            raise ValueError("Invalid query vector for document scoring.")
+        norm = np.linalg.norm(vector)
+        if norm > 1e-10:
+            vector = vector / norm
+        vectors = np.stack([self._index.reconstruct(self._doc_rows[doc_id]) for doc_id in doc_ids])
+        scores = vectors @ vector[0]
+        return [Hit(doc_id=doc_id, score=float(score)) for doc_id, score in zip(doc_ids, scores)]
+
     def save_index(self, index_dir: str | Path) -> Path:
         """Save an additional copy of the current index."""
         if not self._built:
@@ -133,6 +165,7 @@ class DenseRetriever(Retriever):
         """Load FAISS directly without reconstructing a NumPy embedding matrix."""
         index, doc_ids, config = load_faiss_index(index_dir, expected_model=self._model.name)
         self._index, self._doc_ids = index, doc_ids
+        self._doc_rows = {doc_id: row for row, doc_id in enumerate(doc_ids)}
         self._corpus_hash = config.get("corpus_hash")
         self._built = True
         self._loaded = True
