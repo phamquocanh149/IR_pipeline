@@ -54,7 +54,7 @@ class SentenceTransformerAdapter(SingleVectorEmbeddingModel):
         self._default_batch_size = default_batch_size
         self._normalize = normalize_embeddings
         logger.info("[MODEL] Loading SentenceTransformer: %s on %s", model_id, device)
-        self._model = SentenceTransformer(model_id, device=device)
+        self._model = SentenceTransformer(model_id, device=device, trust_remote_code=True)
         self._query_prompt, self._document_prompt = resolve_prompts(
             model_id,
             query_prompt=query_prompt,
