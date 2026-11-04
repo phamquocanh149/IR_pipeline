@@ -64,7 +64,7 @@ class CrossEncoderAdapter(CrossEncoderModel):
         self._default_batch_size = default_batch_size
 
         logger.info("[MODEL] Loading CrossEncoder: %s on %s", model_id, device)
-        self._model = CrossEncoder(model_id, device=device)
+        self._model = CrossEncoder(model_id, device=device, trust_remote_code=True)
 
     @property
     def name(self) -> str:
