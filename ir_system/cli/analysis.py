@@ -1,0 +1,302 @@
+"""
+CLI: Language-view analysis
+==========================
+Analyze representation drift and positive/negative separation on fixed indexes.
+
+Responsibilities
+----------------
+1. Parse --queries/--documents or query-document directions, e.g. vi-en and csw-en.
+2. Load separate language views through DatasetLoader's public multilingual API.
+3. Build only requested document indexes using existing retrievers.
+4. Encode available query views and invoke cosine, PCA and margin analysis.
+5. Evaluate optional retrieval metrics with the existing Evaluator.
+6. Save detailed JSON and a self-contained interactive HTML report.
+
+Requirements (mandatory)
+------------------------
+- Query languages come from QUERY_LANGS; document languages from DOC_LANGS.
+- load_queries(..., lang="all") returns language -> queries; keep views separate.
+- load_documents(..., lang=[...]) returns language -> documents; do not merge IDs.
+- Requested query/document languages must exist; fail before loading models.
+- Use the shared, language-agnostic qrels.tsv through load_qrels(...).
+- Never modify DatasetLoader or duplicate its JSONL/TSV parsing rules.
+- Dense: score top-k plus all positives and shared negatives exactly.
+- Cross-encoder: retain full-corpus scoring to preserve retrieval semantics.
+- Delegate scoring/ranking to DenseRetriever or CrossEncoderRetriever.
+
+Output
+------
+<output>/analysis.json : configuration, cosine/gap pairs, PCA and margins.
+<output>/report.html   : interactive query 3D plot and analysis distributions.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import logging
+from pathlib import Path
+from time import perf_counter
+
+import numpy as np
+from tqdm import tqdm
+
+from ir_system.analysis.language_views import (
+    LANGUAGES, fixed_index_analysis, normalize, paired_gaps, project_3d,
+)
+from ir_system.io.dataset_loader import DOC_LANGS, DatasetLoader
+from ir_system.domain.run import Run
+from ir_system.models.factory import create_model
+from ir_system.models.single_vector import SingleVectorEmbeddingModel
+from ir_system.retrievers.cross_encoder import CrossEncoderRetriever
+from ir_system.retrievers.dense import DenseRetriever
+from ir_system.cli.main import _parse_metric_spec, _setup_logging
+from ir_system.evaluation.evaluator import Evaluator
+
+
+_RERANK_EMBEDDING_MODEL = "Qwen/Qwen3-Embedding-0.6B"
+_QWEN_QUERY_PROMPT = (
+    "Instruct: Given a web search query, retrieve relevant passages that answer the query\nQuery:"
+)
+
+
+class _QueryEmbeddingCache(SingleVectorEmbeddingModel):
+    """Reuse batched query vectors while delegating corpus encoding to the model.
+
+    DenseRetriever still owns normalization, FAISS search and ranking. Cache
+    only complete query batches. Query mode is disabled during corpus builds
+    so a document sharing text with a query never receives its prompted vector.
+    """
+
+    def __init__(self, model: SingleVectorEmbeddingModel) -> None:
+        self._model = model
+        self._vectors: dict[str, np.ndarray] = {}
+        self.query_mode = False
+
+    @property
+    def name(self) -> str:
+        return self._model.name
+
+    @property
+    def document_prompt(self) -> str | None:
+        return self._model.document_prompt
+
+    def encode_documents(self, texts, **kwargs) -> np.ndarray:
+        return self._model.encode_documents(texts, **kwargs)
+
+    def encode_queries(self, texts, **kwargs) -> np.ndarray:
+        texts = list(texts)
+        if self.query_mode and texts and all(text in self._vectors for text in texts):
+            return np.stack([self._vectors[text] for text in texts])
+        return self._model.encode_queries(texts, **kwargs)
+
+    def remember(self, texts: list[str], vectors: np.ndarray) -> None:
+        for text, vector in zip(texts, vectors):
+            self._vectors.setdefault(text, vector)
+
+    def encode(self, texts, **kwargs) -> np.ndarray:
+        texts = list(texts)
+        if self.query_mode and texts and all(text in self._vectors for text in texts):
+            return np.stack([self._vectors[text] for text in texts])
+        return self._model.encode(texts, **kwargs)
+
+
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Analyze query representation drift and positive/negative margins by query-document direction.",
+    )
+    parser.add_argument("--dataset", required=True, type=Path,
+                        help="Multilingual dataset directory with split language files and shared qrels.tsv.")
+    parser.add_argument("--direction", nargs="+",
+                        choices=[f"{query}-{document}" for query in LANGUAGES for document in DOC_LANGS],
+                        help="Query-document languages, e.g. vi-en csw-en; queries vi/en/csw, documents vi/en.")
+    parser.add_argument("--queries", nargs="+", choices=[*LANGUAGES, "all"],
+                        help="Query languages, e.g. csw or vi en csw.")
+    parser.add_argument("--documents", nargs="+", choices=[*DOC_LANGS, "all"],
+                        help="Document languages, e.g. vi or en.")
+    parser.add_argument("--model", help="Single-vector encoder; required without --reranker. "
+                        "With --reranker, Qwen/Qwen3-Embedding-0.6B is always used.")
+    parser.add_argument("--model-type", choices=["single-vector"], default="single-vector")
+    parser.add_argument("--retriever", choices=["dense"], default="dense",
+                        help="Dense retrieval; use --reranker for optional cross-encoder scoring.")
+    parser.add_argument("--metrics", nargs="+", help="Optional retrieval metrics, e.g. ndcg@10 mrr@10 recall@10.")
+    parser.add_argument("--reranker", help="Optional cross-encoder for alignment/margins; otherwise cosine scores.")
+    parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
+    parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--top-k", type=int, default=100, help="Hard-negative pool cutoff.")
+    parser.add_argument("--load-index", type=Path,
+                        help="Load an existing FAISS index instead of encoding the corpus. "
+                             "For multiple document languages, use a root containing vi/ and en/ indexes.")
+    parser.add_argument("--output", type=Path, default=Path("results/language_analysis"))
+    parser.add_argument("--verbose", action="store_true")
+    args = parser.parse_args(argv)
+    _setup_logging(args.verbose)
+    if args.reranker:
+        if args.model and args.model != _RERANK_EMBEDDING_MODEL:
+            logging.info("Using %s for reranking-stage embeddings instead of %s",
+                         _RERANK_EMBEDDING_MODEL, args.model)
+        args.model = _RERANK_EMBEDDING_MODEL
+    elif not args.model:
+        parser.error("--model is required when --reranker is not provided.")
+    if args.top_k <= 0 or args.batch_size <= 0:
+        parser.error("--top-k and --batch-size must be positive.")
+    if args.direction and (args.queries or args.documents):
+        parser.error("Use either --direction or --queries with --documents.")
+    if not args.direction and not (args.queries and args.documents):
+        parser.error("Provide --queries and --documents, or --direction.")
+    try:
+        loader = DatasetLoader(strict_qrels=True)
+        if args.direction:
+            directions = list(dict.fromkeys(args.direction))
+        else:
+            query_tags = LANGUAGES if "all" in args.queries else args.queries
+            document_tags = DOC_LANGS if "all" in args.documents else args.documents
+            directions = list(dict.fromkeys(f"{q}-{d}" for q in query_tags for d in document_tags))
+        evaluator = Evaluator([_parse_metric_spec(spec) for spec in args.metrics]) if args.metrics else None
+        selected_queries = {direction.split("-")[0] for direction in directions}
+        selected_documents = [lang for lang in DOC_LANGS
+                              if any(direction.endswith(f"-{lang}") for direction in directions)]
+        query_views = loader.load_queries(args.dataset, lang="all")
+        queries = {lang: {q.qid: q for q in view} for lang, view in query_views.items()}
+        missing_queries = selected_queries - queries.keys()
+        if missing_queries:
+            raise FileNotFoundError(f"Requested query languages missing from dataset: {sorted(missing_queries)}")
+        # Other available query views are used only for cosine/PCA diagnostics.
+        corpora = loader.load_documents(args.dataset, lang=selected_documents)
+        missing_documents = set(selected_documents) - corpora.keys()
+        if missing_documents:
+            raise FileNotFoundError(f"Requested document languages missing from dataset: {sorted(missing_documents)}")
+        qrels = loader.load_qrels(args.dataset, known_doc_ids={doc.doc_id
+                                 for documents in corpora.values() for doc in documents})
+        model = create_model(args.model, model_type=args.model_type, device=args.device,
+                             batch_size=args.batch_size)
+        if not isinstance(model, SingleVectorEmbeddingModel):
+            raise ValueError("Representation analysis requires a single-vector encoder.")
+        reranker = (create_model(args.reranker, model_type="cross-encoder", device=args.device,
+                                batch_size=args.batch_size) if args.reranker else None)
+        cached_model = _QueryEmbeddingCache(model)
+        query_prompt = _QWEN_QUERY_PROMPT if args.model == _RERANK_EMBEDDING_MODEL else ""
+        query_vectors = {}
+        for lang in queries:
+            logging.info("Encoding %s query views", lang)
+            qids = list(queries[lang])
+            texts = [queries[lang][qid].text for qid in qids]
+            encode_queries = model.encode if query_prompt else model.encode_queries
+            embeddings = np.asarray(encode_queries(
+                [query_prompt + text for text in texts],
+                batch_size=args.batch_size, show_progress=True))
+            qv = normalize(embeddings)
+            if len(qv) != len(qids):
+                raise ValueError("Encoder returned an incorrect number of embeddings.")
+            cached_model.remember(texts, embeddings)
+            query_vectors[lang] = dict(zip(qids, qv))
+        points = [{"qid": qid, "language": lang, "text": queries[lang][qid].text}
+                  for lang in queries for qid in sorted(queries[lang])]
+        coordinates, variance = project_3d(np.stack([
+            query_vectors[p["language"]][p["qid"]] for p in points
+        ]))
+        for point, xyz in zip(points, coordinates):
+            point["xyz"] = xyz.tolist()
+        indexes, document_vectors = {}, {}
+        for index_lang, documents in corpora.items():
+            logging.info("Analyzing fixed %s index", index_lang)
+            cached_model.query_mode = False
+            query_languages = [lang for lang in LANGUAGES if f"{lang}-{index_lang}" in directions]
+            dense = DenseRetriever(model=cached_model, batch_size=args.batch_size)
+            retriever = (CrossEncoderRetriever(
+                model=reranker, candidate_retriever=dense,
+                candidate_top_k=len(documents), batch_size=args.batch_size,
+            ) if reranker else dense)
+            if args.load_index:
+                index_dir = (args.load_index / index_lang
+                             if len(corpora) > 1 else args.load_index)
+                logging.info("Loading fixed %s index from %s", index_lang, index_dir)
+                dense.load_index(index_dir)
+            # build() also validates a loaded index against the current corpus;
+            # composite retrievers still need their document-text mapping.
+            build_start = perf_counter()
+            retriever.build(documents)
+            logging.info("Index %s ready: %d documents in %.1fs",
+                         index_lang, len(documents), perf_counter() - build_start)
+            cached_model.query_mode = True
+            if len(corpora) > 1:
+                document_vectors[index_lang] = dense.document_embeddings()
+            metric_runs = {lang: Run() for lang in query_languages} if evaluator else {}
+            document_ids = {doc.doc_id for doc in documents}
+            if reranker:
+                pair_count = sum(len(queries[lang]) for lang in query_languages) * len(documents)
+                logging.info("Full-corpus reranking: %s query-document pairs on %s index",
+                             f"{pair_count:,}", index_lang)
+            # Dense: retrieve exact top-k, then score only positives and shared negatives.
+            # Reranker retains full-corpus semantics; limiting candidates would change results.
+            def run_batches():
+                qids = sorted(set.union(*(set(queries[lang]) for lang in query_languages)))
+                start = perf_counter()
+                for qid in tqdm(qids, desc=f"[ANALYSIS] {index_lang} index", unit="query"):
+                    rankings = {lang: retriever.retrieve(queries[lang][qid],
+                                len(documents) if reranker else args.top_k)
+                                for lang in query_languages if qid in queries[lang]}
+                    if evaluator:
+                        for lang, hits in rankings.items():
+                            metric_runs[lang].add(qid, hits[:args.top_k])
+                    if not reranker:
+                        positives = {doc_id for doc_id, rel in qrels.judgments_for(qid).items()
+                                     if rel > 0 and doc_id in document_ids}
+                        shared_negatives = {hit.doc_id for hits in rankings.values()
+                                            for hit in hits if hit.doc_id not in positives}
+                        needed = positives | shared_negatives
+                        for lang, hits in rankings.items():
+                            missing = sorted(needed - {hit.doc_id for hit in hits})
+                            if missing:
+                                hits = [*hits, *dense.score_documents(queries[lang][qid], missing)]
+                                rankings[lang] = sorted(hits, key=lambda h: (-h.score, h.doc_id))
+                    runs = {lang: Run() for lang in query_languages}
+                    for lang, hits in rankings.items():
+                        runs[lang].add(qid, hits)
+                    yield runs
+                logging.info("Index %s: analyzed %d query IDs in %.1fs",
+                             index_lang, len(qids), perf_counter() - start)
+            indexes[index_lang] = fixed_index_analysis(
+                run_batches(), qrels, args.top_k, document_ids=document_ids,
+            )
+            for row in indexes[index_lang]["margins"]:
+                row["direction"] = f"{row['language']}-{index_lang}"
+            if evaluator:
+                indexes[index_lang]["retrieval_metrics"] = {
+                    f"{lang}-{index_lang}": evaluator.evaluate(run, qrels)
+                    for lang, run in metric_runs.items()
+                }
+        report = {
+            "config": {"model": args.model, "scorer": args.reranker or "cosine",
+                       "top_k": args.top_k, "batch_size": args.batch_size,
+                       "dataset": str(args.dataset),
+                       "query_languages": list(queries), "document_languages": list(corpora),
+                       "directions": directions, "model_type": args.model_type,
+                       "retriever": args.retriever, "metrics": args.metrics,
+                       "query_prompt": query_prompt},
+            "policies": {
+                "pairing": "Exact shared qid and doc_id denote information needs and document groups.",
+                "projection": "One joint PCA on available query-language views; cosine gaps use original dimensions.",
+                "positives": "Shared qrels.tsv, restricted to relevance > 0 documents present in each fixed index, including positives outside top-k.",
+                "negatives": "Shared union of non-positive documents from the selected query views' top-k on the same fixed index; unjudged documents treated as non-relevant and counted separately.",
+                "missing": "Undefined margins/deltas are null. Deltas require a matching vi query direction on the same index. Unpaired IDs are reported; their margins are still evaluated.",
+                "aggregation": "Alignment is averaged over query-positive-document pairs; margins over each requested query direction. Only requested document indexes are built.",
+            },
+            "query_projection": {"points": points, "explained_variance_ratio": variance},
+            "query_gaps": paired_gaps(query_vectors),
+            "document_gaps": paired_gaps(document_vectors),
+            "indexes": indexes,
+        }
+        from ir_system.analysis.report import write_report
+        args.output.mkdir(parents=True, exist_ok=True)
+        (args.output / "analysis.json").write_text(
+            json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
+        write_report(report, args.output / "report.html")
+        logging.info("Saved analysis to %s", args.output)
+    except (ValueError, RuntimeError, ImportError, OSError) as exc:
+        logging.error("Analysis failed: %s", exc)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -16,38 +16,22 @@ dependencies = [
 
 
 [project.optional-dependencies]
-# Separate environment: do not combine with the ColBERT extras.
-jina-v3 = [
-    "transformers>=4.56,<5",
-    "torch>=2.2",
-]
 dense = [
-    "faiss-cpu>=1.7",
-    "sentence-transformers>=3.0",
-    "torch>=2.0",
-]
-# Qwen3 uses a modern stack; install separately from the ColBERT extras.
-qwen3 = [
-    "sentence-transformers>=5.4,<6",
-    "transformers>=4.51,<5",
-    "torch>=2.0",
-    "faiss-cpu>=1.7",
-]
-late-interaction = [
-    "colbert-ai==0.2.22",
-    "transformers>=4.40,<4.48",
-    "torch>=2.0",
+    "faiss-cpu==1.15.1",
+    "sentence-transformers==5.7.0",
+    "transformers==4.57.6",
+    "torch==2.14.1",
 ]
 cross-encoder = [
-    "sentence-transformers>=3.0",
-    "torch>=2.0",
+    "sentence-transformers==5.7.0",
+    "transformers==4.57.6",
+    "torch==2.14.1",
 ]
 all = [
-    "sentence-transformers>=3.0",
-    "transformers>=4.40,<4.48",
-    "torch>=2.0",
-    "faiss-cpu>=1.7",
-    "colbert-ai==0.2.22",
+    "sentence-transformers==5.7.0",
+    "transformers==4.57.6",
+    "torch==2.14.1",
+    "faiss-cpu==1.15.1",
 ]
 
 [project.scripts]
@@ -55,7 +39,5 @@ ir-system = "ir_system.cli.main:main"
 ir-analyze = "ir_system.cli.analysis:main"
 
 [tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.setuptools.package-dir]
-"" = "src"
+where = ["."]
+include = ["ir_system*"]

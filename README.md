@@ -1,533 +1,107 @@
-# IR System — Information Retrieval Pipeline
+﻿# IR Pipeline
 
-End-to-end IR pipeline supporting:
-- **BM25** (sparse lexical retrieval)
-- **Dense** (bi-encoder with single-vector embeddings)
-- **Late Interaction** (ColBERT-style MaxSim)
-- **Cross Encoder** (joint query-document scoring / reranking)
-- **Hybrid** (BM25 + Dense fused via RRF)
+A modular information retrieval framework for evaluating lexical retrieval, dense
+retrieval, and cross-encoder reranking across Vietnamese (`vi`), English (`en`),
+and code-switched (`csw`) queries.
 
-BM25 uses BM25S's Lucene variant with precomputed sparse scores. Tokenization
-remains lowercase whitespace splitting, with no automatic stemming or stopword
-removal. Scores and rankings can differ from the previous `rank-bm25` baseline;
-rerun evaluation when comparing results across these implementations.
+## Methods
 
-Metrics: NDCG@K, MRR@K, Recall@K
+| Method | Implementation |
+|---|---|
+| BM25 | BM25S, Lucene scoring; lowercase whitespace tokenization |
+| Dense | Single-vector embeddings; exact cosine search with FAISS `IndexFlatIP` |
+| Reranking | BM25 or dense candidate retrieval followed by cross-encoder scoring |
+
+Evaluation supports NDCG@k, MRR@k, Recall@k, Precision@k, and MAP@k.
 
 ## Installation
 
+From the repository root:
+
 ```bash
-# Core (BM25 only)
-pip install -e .
-
-# With dense/hybrid retrieval
-pip install -e ".[dense]"
-
-# ColBERT-compatible stack (excludes Qwen3)
 pip install -e ".[all]"
 ```
 
-### Qwen3 Reranker
+The inference stack is pinned in `pyproject.toml`: PyTorch **2.14.1**,
+Transformers **4.57.6**, Sentence Transformers **5.7.0**, and
+FAISS CPU **1.15.1**. For BM25 alone, use `pip install -e .`.
 
-Use a separate environment from ColBERT:
+## Data
 
-```bash
-pip install -U -e ".[qwen3]"
-```
-
-Qwen3 requires Transformers >=4.51. Its native CrossEncoder integration requires
-Sentence Transformers >=5.4. The `all` and `late-interaction` extras pin
-Transformers <4.48 for ColBERT, so do not combine them with `qwen3`.
-Restart the notebook runtime after changing dependencies, then rerun the CLI.
-For example, use `--model Qwen/Qwen3-Reranker-4B --retriever cross-encoder`.
-
-References: [Qwen3 model card](https://huggingface.co/Qwen/Qwen3-Reranker-4B)
-and [Sentence Transformers v5.4 integration](https://huggingface.co/Qwen/Qwen3-Reranker-4B/discussions/11).
-
-## Usage
-
-### BM25
-
-```bash
-python -m ir_system.cli.main \
-    --dataset ./data/toy \
-    --retriever bm25 \
-    --top-k 3 \
-    --metrics ndcg@3 mrr@3 recall@3
-```
-
-### Dense
-
-```bash
-python -m ir_system.cli.main \
-    --dataset ./data/toy \
-    --model BAAI/bge-base-en-v1.5 \
-    --retriever dense \
-    --top-k 10 \
-    --metrics ndcg@10 mrr@10 recall@10
-```
-
-#### Query / document prefixes
-
-Many embedding models expect different text prefixes for queries and documents.
-Encoding without them lowers retrieval quality. For each side the prefix is chosen in this order:
-
-1. `--query-prefix` / `--doc-prefix` (pass `""` to disable)
-2. Prompts published by the model itself (e.g. Qwen3-Embedding defines a `query` prompt)
-3. Inferred from the model name: e5 uses `query: ` / `passage: `; bge English (`bge-*-en-*`) and
-   Chinese (`bge-*-zh-*`) add an instruction to queries only
-4. No prefix
-
-The chosen prefixes are logged at load time (`[MODEL] Prompts: ...`). They apply to the main
-`--model` only, not to `--candidate-model`.
-
-```bash
-# e5: prefixes are applied automatically
-python -m ir_system.cli.main \
-    --dataset ./data/toy \
-    --model intfloat/multilingual-e5-large \
-    --retriever dense \
-    --top-k 10 \
-    --metrics ndcg@10
-
-# Override or disable
-python -m ir_system.cli.main ... --query-prefix "Query: " --doc-prefix "Passage: "
-python -m ir_system.cli.main ... --query-prefix "" --doc-prefix ""
-```
-
-A document prefix changes the document vectors, so it is part of the index hash. An index built
-before this feature for a model that uses a document prefix (e.g. e5) no longer matches and must
-be rebuilt. Models without a document prefix (bge, Qwen3) keep the same hash.
-
-### Hybrid (BM25 + Dense via RRF)
-
-```bash
-python -m ir_system.cli.main \
-    --dataset ./data/toy \
-    --model BAAI/bge-base-en-v1.5 \
-    --retriever hybrid \
-    --top-k 10 \
-    --candidate-top-k 100 \
-    --metrics ndcg@10 mrr@10 recall@100
-```
-
-### Cross Encoder (2-Stage Reranking)
-
-```bash
-# Stage 1: BM25 (default)
-python -m ir_system.cli.main \
-    --dataset ./data/toy \
-    --model cross-encoder/ms-marco-MiniLM-L-6-v2 \
-    --retriever cross-encoder \
-    --candidate-retriever bm25 \
-    --top-k 10 \
-    --candidate-top-k 100 \
-    --metrics ndcg@10 mrr@10
-
-# Stage 1: Dense
-python -m ir_system.cli.main \
-    --dataset ./data/toy \
-    --model cross-encoder/ms-marco-MiniLM-L-6-v2 \
-    --retriever cross-encoder \
-    --candidate-retriever dense \
-    --candidate-model BAAI/bge-base-en-v1.5 \
-    --top-k 10 \
-    --candidate-top-k 100 \
-    --metrics ndcg@10 mrr@10
-```
-
-### Jina reranker v3 (native listwise, two stages)
-
-Use a **separate Python environment** so the working ColBERT/cross-encoder
-environment is unchanged. From the `ir_system` directory:
-
-```powershell
-python -m venv .venv-jina
-.\.venv-jina\Scripts\python.exe -m pip install -e ".[jina-v3]"
-.\.venv-jina\Scripts\python.exe -m ir_system.cli.main `
-    --dataset data/toy-ml `
-    --model jinaai/jina-reranker-v3 `
-    --retriever listwise-reranker `
-    --candidate-retriever bm25 `
-    --candidate-top-k 100 `
-    --top-k 10 `
-    --queries all --documents all `
-    --device auto `
-    --metrics ndcg@10 mrr@10 recall@10 `
-    --name jina_v3_toy
-```
-
-For CUDA, install the PyTorch build appropriate to your CUDA environment in
-this new environment, then use `--device cuda`. First use downloads the model.
-For dense candidates, install `".[jina-v3,dense]"` in this environment and add
-`--candidate-retriever dense --candidate-model intfloat/multilingual-e5-small`.
-Dense FAISS index loading/saving works as in existing two-stage retrieval.
-Do not combine `[jina-v3]` with `[all]` or `[late-interaction]`.
-
-The new model type is inferred for the exact ID `jinaai/jina-reranker-v3`.
-For a local Jina v3 snapshot, add `--model-type listwise-reranker`.
-Use `--retriever listwise-reranker`, not `cross-encoder`; other model IDs retain
-their previous routing and the existing cross-encoder adapter is unchanged.
-
-Stage 1 supplies up to 100 candidates by default (fewer for smaller corpora).
-Their original order is passed to **one native `model.rerank()` call per query**.
-The Hugging Face implementation owns prompt formatting, token truncation,
-internal blocks, cross-block query aggregation and cosine scoring. We preserve
-its defaults (query: 512 tokens; document: 2048 tokens at the pinned revision).
-`--batch-size` does not split the Jina list; `--candidate-batch-size` controls
-dense candidate encoding. Context memory can be substantial even for a 0.6B
-model; on OOM, explicitly reduce `--candidate-top-k`. There is no silent retry
-with changed candidates or independently scored blocks.
-
-Model and tokenizer use the same pinned Hugging Face revision
-`10fb694fc21f7a710a563ff1eb977a460f3868e4`, with `trust_remote_code=True`,
-`dtype="auto"`, and evaluation mode. `--jina-revision COMMIT` explicitly
-overrides the revision. No projector/config architecture is reimplemented.
-The adapter installs the matching tokenizer into the native model because its
-lazy tokenizer loader otherwise ignores the model revision. The run's
-`config.json` includes revision and dtype under `listwise_inference`.
-
-Native result indices map scores back to candidates, including duplicate text
-under different document IDs. Final ordering remains descending score, then
-ascending document ID. Scores are not normalized, fused with stage-1 scores,
-or interpreted as probabilities. Existing NDCG/MRR/Recall metrics and result
-formats are reused. Metrics use only returned top-k results: to measure
-Recall@100, also request `--top-k 100`. Reranking cannot recover documents
-missing from stage 1; compare models using the same candidate settings.
-
-The language-analysis CLI's `--reranker` remains a **pairwise full-corpus**
-alignment/margin workflow. It rejects Jina v3 with an actionable error rather
-than silently changing that analysis. Use the main CLI above for Jina's
-multilingual retrieval evaluation (VI/EN/CSW queries against VI/EN documents).
-
-For CQA, assemble its parts first, from `ir_system`:
-`python data/exports/cqa/prepare.py`, then use `--dataset data/exports/cqa`.
-
-Offline regression tests use a fake native model and need no model download:
-`python -m pytest tests/test_jina_reranker_v3.py -q`.
-To additionally check the real checkpoint against native inference, install
-pytest in the Jina environment and run:
-
-```powershell
-$env:IR_TEST_JINA_V3 = "1"
-$env:IR_JINA_DEVICE = "cpu" # or cuda
-python -m pytest tests/test_jina_reranker_v3.py -k real_checkpoint -q
-```
-
-References: [model card](https://huggingface.co/jinaai/jina-reranker-v3),
-[pinned inference code](https://huggingface.co/jinaai/jina-reranker-v3/blob/10fb694fc21f7a710a563ff1eb977a460f3868e4/modeling.py).
-The model weights are published under CC BY-NC 4.0.
-
-### Mandatory FAISS Index Storage and Search
-
-Dense retrieval always builds and saves a FAISS `IndexFlatIP`, then searches it
-directly using normalized inner products (cosine similarity). The `[dense]` extra
-includes FAISS. This is exact search, not an approximate index.
-
-Indexes are automatically written under `indexes/<sha256>/` relative to the current
-working directory. The hash includes the model name, the document prefix (if any) and ordered document IDs/text,
-so different corpora and languages have separate directories. The saved path is
-logged. Each directory contains `index.faiss`, `doc_ids.json`, and `config.json`.
-There is no save switch: every new build persists its index.
-
-Build and save automatically:
-```bash
-python -m ir_system.cli.main \
-    --dataset ./data/toy \
-    --model BAAI/bge-base-en-v1.5 \
-    --retriever dense \
-    --top-k 10 \
-    --metrics ndcg@10
-```
-
-Load previously saved FAISS index (skips corpus encoding):
-```bash
-python -m ir_system.cli.main \
-    --dataset ./data/toy \
-    --model BAAI/bge-base-en-v1.5 \
-    --retriever dense \
-    --load-index indexes/<sha256> \
-    --top-k 10 \
-    --metrics ndcg@10
-```
-
-Also works for the Dense branch in **Hybrid** and the Dense candidate retriever in **Cross-Encoder**.
-
-## Multilingual & Cross-Lingual Evaluation
-
-IR Pipeline supports evaluating cross-lingual retrieval across combinations of query and document languages (e.g. `queries.vi` vs `documents.en`).
-
-```bash
-# Evaluate all 6 cross-lingual pairs (3 query langs x 2 doc langs)
-python -m ir_system.cli.main \
-    --dataset ./data/toy-ml \
-    --retriever bm25 \
-    --queries all \
-    --documents all \
-    --top-k 10 \
-    --metrics ndcg@10 mrr@10
-
-# Or evaluate specific language combinations
-python -m ir_system.cli.main \
-    --dataset ./data/toy-ml \
-    --retriever bm25 \
-    --queries vi en \
-    --documents vi \
-    --top-k 10 \
-    --metrics ndcg@10
-```
-
-Results are printed as a comprehensive summary table and saved under `results/<run_id>/queries_<lang>Xdocs_<lang>/`.
-
-## Dataset Format
-
-### Legacy (Single-file)
-```
-data/<dataset_name>/
-├── queries.jsonl      {"qid": "q1", "text": "what is bm25"}
-├── documents.jsonl    {"doc_id": "d1", "text": "BM25 is ..."}
-└── qrels.tsv          q1\td1\t2
-```
-
-Query IDs can use `_id`, `qid`, or `id`; document IDs can use `_id`, `doc_id`,
-or `id` (in that priority order). The loader converts IDs to strings, so a numeric
-JSON ID `7` matches `7` in qrels. The `text` field remains required.
-### Multilingual (Split-file)
-```
-data/<dataset_name>/
-├── queries.vi.jsonl       {"qid": "q1", "text": "bm25 là gì"}
-├── queries.en.jsonl       {"qid": "q1", "text": "what is bm25"}
-├── queries.csw.jsonl      {"qid": "q1", "text": "bm25 la gi va how it works"}
-├── documents.vi.jsonl     {"doc_id": "d1", "text": "BM25 là thuật toán..."}
-├── documents.en.jsonl     {"doc_id": "d1", "text": "BM25 is a ranking function..."}
-└── qrels.tsv              q1\td1\t2
-```
-*Note: `qid` and `doc_id` are shared across languages for consistent relevance judgments.*
-
-## Results
-
-### Language analysis: run four benchmarks and create report.html
-
-Run these commands from the repository root in Bash (Git Bash on Windows).
-Install model dependencies once:
-
-```bash
-pip install -e ".[dense]"
-```
-
-Each benchmark has its own directory with language-suffixed files:
+Datasets must be supplied separately. A single-language dataset contains:
 
 ```text
-data/benchmark_1/
-  queries.vi.jsonl       {"qid":"q1","text":"Vietnamese query"}
-  queries.en.jsonl       {"qid":"q1","text":"English query"}
-  queries.csw.jsonl      {"qid":"q1","text":"Code-switched query"}
-  documents.vi.jsonl     {"doc_id":"d1","text":"Vietnamese document"}
-  documents.en.jsonl     {"doc_id":"d1","text":"English document"}
-  qrels.tsv             q1<TAB>d1<TAB>2
+dataset/
+├── queries.jsonl       # {"qid": "q1", "text": "query text"}
+├── documents.jsonl     # {"doc_id": "d1", "text": "document text"}
+└── qrels.tsv           # qid<TAB>doc_id<TAB>relevance
 ```
 
-Use `.vi.jsonl`, not `.vn.jsonl`: the current loader recognizes `vi`, `en`, `csw`
-for queries and `vi`, `en` for documents. Matching `qid` values represent the same
-information need; matching `doc_id` values represent the same document group.
-Use one shared `qrels.tsv` per benchmark. Only requested document files are needed.
-The analysis calls the existing `DatasetLoader` APIs without modifying the loader.
-The same ID aliases work in split-language files, for example
-`{"_id":7,"text":"query"}` and `{"_id":11,"text":"document"}` with
-the qrels row `7<TAB>11<TAB>1`. Keep these IDs consistent across language views.
+For multilingual evaluation, use `queries.{vi,en,csw}.jsonl` and
+`documents.{vi,en}.jsonl` with a shared `qrels.tsv`. Matching IDs identify the
+same query or document group across language views. Each JSONL record requires
+`text`; IDs also accept `_id` or `id` and are normalized to strings.
 
-Replace the four dataset paths below with your actual benchmark folders:
+## Retrieval experiments
+
+Examples below use Bash syntax. Replace `path/to/dataset` with your dataset.
 
 ```bash
-bash scripts/run_analysis_four_benchmarks.sh \
-    data/benchmark_1 data/benchmark_2 data/benchmark_3 data/benchmark_4 \
-    --model intfloat/multilingual-e5-small \
-    --documents vi en \
-    --device auto
+# Lexical baseline
+python -m ir_system.cli.main \
+  --dataset path/to/dataset --retriever bm25 \
+  --top-k 10 --metrics ndcg@10 mrr@10 recall@10 --name bm25
+
+# Dense retrieval
+python -m ir_system.cli.main \
+  --dataset path/to/dataset --retriever dense \
+  --model Qwen/Qwen3-Embedding-0.6B \
+  --top-k 10 --metrics ndcg@10 mrr@10 recall@10 --name dense
+
+# Dense candidates followed by cross-encoder reranking
+python -m ir_system.cli.main \
+  --dataset path/to/dataset --retriever cross-encoder \
+  --model jinaai/jina-reranker-v2-base-multilingual \
+  --candidate-retriever dense --candidate-model Qwen/Qwen3-Embedding-0.6B \
+  --candidate-top-k 100 --top-k 10 \
+  --metrics ndcg@10 mrr@10 recall@10 --name reranking
 ```
 
-Defaults: `--queries vi en csw`, `--model-type single-vector`, `--retriever dense`,
-`--top-k 10`, `--metrics ndcg@10 mrr@10 recall@10`, `--batch-size 32`.
-Use `--documents vi` if you have only Vietnamese documents, or `--device cpu`
-to run on CPU. Extra analysis options apply to all four benchmarks. Folder names
-must be distinct, and one model/scorer is used across all panels.
+Use `--candidate-retriever bm25` without `--candidate-model` for lexical
+candidates. Add `--queries vi en csw --documents vi en` to evaluate all six
+language pairs. Runtime options include `--device`, `--batch-size`, and
+`--candidate-batch-size`.
 
-The script stops on any failed analysis and creates:
-
-```text
-results/benchmark_1/analysis.json   results/benchmark_1/report.html
-results/benchmark_2/analysis.json   results/benchmark_2/report.html
-results/benchmark_3/analysis.json   results/benchmark_3/report.html
-results/benchmark_4/analysis.json   results/benchmark_4/report.html
-report.html                       Combined report: open this file in a browser
-```
-
-To change output locations or the Python executable:
+## Language analysis
 
 ```bash
-PYTHON=python ANALYSIS_OUTPUT_ROOT=results/my_model ANALYSIS_REPORT_PATH=my_report.html \
-    bash scripts/run_analysis_four_benchmarks.sh \
-    data/benchmark_1 data/benchmark_2 data/benchmark_3 data/benchmark_4 \
-    --documents vi --device cpu
+python -m ir_system.cli.analysis \
+  --dataset path/to/dataset \
+  --model Qwen/Qwen3-Embedding-0.6B \
+  --queries vi en csw --documents vi en \
+  --top-k 10 --output results/language_analysis
 ```
 
-### Run one benchmark or the toy example
+Produces `analysis.json` and an offline `report.html` with embedding gaps,
+joint PCA projections, retrieval metrics, and relevant/non-relevant score
+margins. Analysis compares language views against a fixed document index.
+
+## Outputs and reproducibility
+
+Retrieval runs save `config.json`, `metrics.json`, and `run.jsonl` under
+`results/<name>/`, with separate results for each language pair. Dense indexes
+are cached under `indexes/`; `--load-index PATH` explicitly loads a saved index.
+
+For comparable experiments, keep dataset IDs, relevance judgments, candidate
+selection, and metric cutoffs fixed. Set `--top-k` at least as large as the
+largest metric cutoff. Record model revisions, prompts, seed, and hardware
+alongside the saved configuration. Model-provided or inferred prompts are
+applied automatically; `--query-prefix` and `--doc-prefix` override prompts for
+the main embedding model.
+
+Full CLI options:
 
 ```bash
-bash scripts/run_analysis.sh \
-    --dataset data/toy_multilingual \
-    --queries vi en csw \
-    --documents vi \
-    --model intfloat/multilingual-e5-small \
-    --top-k 10 \
-    --metrics ndcg@10 mrr@10 recall@10 \
-    --output results/toy_multilingual_analysis
-
-# Source-checkout CLI with all options visible:
-python scripts/run_analysis.py --help
+python -m ir_system.cli.main --help
+python -m ir_system.cli.analysis --help
 ```
-
-`run_analysis.sh` defaults to `data/fiqa`, queries VI/EN/CSW, document indexes
-VI/EN, and `results/analysis_fiqa`; the dataset must contain the split-language files
-above. CLI options override these defaults. You can also set `PYTHON`,
-`ANALYSIS_DATASET`, `ANALYSIS_MODEL`, and `ANALYSIS_OUTPUT` in the environment.
-
-The underlying CLI also accepts `--direction vi-en en-en csw-en` instead of
-`--queries vi en csw --documents en`. A direction means **query-document**:
-`vi-en` uses Vietnamese queries against English documents. Do not combine
-`--direction` with `--queries`/`--documents`. Keep VI as a query baseline for deltas.
-
-### Analysis performance
-
-For the exported FiQA dataset, including all three query views and both indexes:
-
-```bash
-bash scripts/run_analysis.sh \
-    --dataset data/exports/fiqa \
-    --queries vi en csw \
-    --documents vi en \
-    --model intfloat/multilingual-e5-small \
-    --top-k 10 \
-    --metrics ndcg@10 mrr@10 recall@10 \
-    --output results/exports/fiqa
-```
-
-In a notebook, prefix the command with `!bash`. Open
-`results/exports/fiqa/report.html` after completion.
-
-Dense analysis retrieves top-k and scores all positives plus the shared hard-negative
-pool, including documents outside each view's top-k. It avoids sorting and creating
-full-corpus rankings for every query while preserving the margin definition.
-Query embeddings are computed once and reused across indexes.
-
-The first run still encodes every document in both language indexes. Subsequent
-runs automatically reuse matching FAISS indexes under `indexes/<sha256>`;
-the key includes the model, document prompt, document IDs and text. Keep this
-directory between notebook sessions to reuse it. Logs show index preparation
-times, cache reuse and a query progress bar for each document language.
-
-If your notebook has a CUDA GPU, append `--device cuda --batch-size 64`.
-Reduce the batch size if GPU memory is insufficient. Without a GPU, use
-`--device cpu`. Selecting `--documents vi` reduces work to one index but omits
-English-index results and document-language gap comparisons.
-
-Optional `--load-index PATH` explicitly loads a saved FAISS index and validates
-it against the dataset. With both document languages, PATH must contain `vi/`
-and `en/` index directories; with one language, PATH points directly to its index.
-
-### Refresh the combined report without running models again
-
-```bash
-bash scripts/render_analysis_four_benchmarks.sh \
-    results/benchmark_1/analysis.json results/benchmark_2/analysis.json \
-    results/benchmark_3/analysis.json results/benchmark_4/analysis.json
-
-# Optional alternate HTML path:
-bash scripts/render_analysis_four_benchmarks.sh \
-    results/benchmark_1/analysis.json results/benchmark_2/analysis.json \
-    results/benchmark_3/analysis.json results/benchmark_4/analysis.json \
-    --output my_report.html
-
-# Refresh a single report:
-python scripts/render_analysis.py results/toy_multilingual_analysis/analysis.json
-```
-
-This step reads saved JSON only. It does not load models or repeat retrieval.
-The four input reports must have distinct dataset paths and the same model/scorer.
-Benchmarks and document indexes remain separate; the HTML contains:
-
-- One horizontal row of four VI-CSW/EN-CSW gap violin/box panels.
-- One horizontal row of four scatter panels using **delta A versus delta M**,
-  with both reference lines at zero. Select CSW or EN versus VI and a fixed index.
-  Delta A averages score changes over the same relevant document groups per query;
-  delta M is `M(variant) - M(VI)`. Zero-axis points are counted separately.
-- A/M boxplot rows across the four benchmarks, each showing VI, CSW and EN.
-- A two-column embedding-space grid with one joint PCA per benchmark, matched
-  query triplets, language colors, explained variance, rotation and zoom.
-- Retrieval metrics and data policies under a collapsible details section.
-
-HTML works offline without plotting dependencies. Small samples show observations
-and boxes; violin density is estimated only for at least 20 nonconstant values.
-Cosine gaps use original embeddings, not the PCA coordinates.
-
-`A = max positive score`, `B = max shared hard-negative score`, `M = A - B`.
-The shared negative pool is the union of non-positive documents from the selected
-query views' top-k on the same fixed index. Positives outside top-k retain scores;
-unjudged negatives are counted separately. Missing values are null and excluded.
-Old reports without shared `negative_pool_ids` need a fresh analysis run.
-Optional `--reranker MODEL` changes alignment/margin scoring while gaps/PCA still
-use the single-vector encoder (the CLI selects Qwen3-Embedding-0.6B in this mode).
-Cross-encoder analysis retains full-corpus scoring, which can be much slower;
-logs show the number of query-document pairs before scoring begins.
-
-### Retrieval pipeline outputs
-
-Each run saves to `results/<run_id>/`:
-- `config.json` — run configuration
-- `metrics.json` — computed metric scores
-- `run.jsonl` — per-query ranked hits
-
-### Customizing Run Name / Output Directory
-
-By default, `<run_id>` is an auto-generated timestamp string (e.g. `20260927T094744_bm25`). You can customize it using:
-
-- `--name <name>` / `--run-name <name>` / `-n <name>`: Saves directly to `results/<name>/`.
-  ```bash
-  python -m ir_system.cli.main --dataset data/toy --retriever bm25 --top-k 10 --metrics ndcg@10 --name my_bm25_test
-  ```
-- `--output <dir>` / `-o <dir>`: Saves to a custom directory. If a single folder name is passed, it is placed under `results/<dir>/`.
-
-
-### ColBERT exhaustive GPU scoring
-
-With `--retriever late-interaction --device cuda`, document encoding and MaxSim
-scoring now use CUDA. Search still scores every document; no approximate index
-or candidate filter is introduced. ColBERT remains a multi-vector late-interaction
-model, not a cross-encoder. Its query augmentation and document token masks are
-unchanged; the cross-encoder reranking path is separate.
-
-- `--batch-size 32`: document encoding batch size.
-- `--colbert-score-batch-size 128`: documents in each GPU scoring block; reduce
-  this if GPU memory is insufficient.
-- `--colbert-query-batch-size 8`: queries sharing each document block transfer.
-  Queries are scored sequentially within the group to bound temporary GPU memory.
-  Query encoding deliberately retains batch size 1 to preserve the old encoder
-  batch shape and numerical behavior.
-- `--colbert-scoring-device auto`: follow the model device. Set `cpu` to use the
-  original NumPy scoring implementation, even when the encoder uses CUDA.
-- `--colbert-verify-scores`: compare every GPU score with the original NumPy
-  formula (`rtol=1e-4`, `atol=1e-5`) and return the NumPy scores. A mismatch raises
-  an error. This diagnostic mode also computes all CPU scores and is slower.
-
-GPU scoring uses FP32 with TF32 and autocast disabled during MaxSim, masks padded
-document tokens with negative infinity, and retains sorting by descending score
-then ascending document ID, including ties across blocks. Empty documents and
-non-finite scores retain the original zero-score behavior. Ordinary GPU mode
-cannot promise bitwise equality with NumPy: floating-point differences may change
-ranking for nearly tied documents. Use CPU scoring or verification mode when exact
-reference scores/order are required for the same encoded embeddings.
-
-The index remains in host RAM; only document blocks are transferred to CUDA.
-This bounds GPU corpus memory but does not reduce the host memory needed for all
-per-token embeddings. Speedup depends on corpus, hardware and transfer cost;
-benchmark encoding and retrieval separately.
