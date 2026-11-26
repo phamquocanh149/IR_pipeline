@@ -1,0 +1,25 @@
+{
+  "documents.en.jsonl": {
+    "parts": [
+      "documents.en.part001.jsonl",
+      "documents.en.part002.jsonl",
+      "documents.en.part003.jsonl"
+    ],
+    "bytes": 120033754,
+    "lines": 121184,
+    "newline": "CRLF",
+    "sha256": "b753d3b51ebd7e15647bbfd7352f740b668bcae993a69cc9080912087db6f4de"
+  },
+  "documents.vi.jsonl": {
+    "parts": [
+      "documents.vi.part001.jsonl",
+      "documents.vi.part002.jsonl",
+      "documents.vi.part003.jsonl",
+      "documents.vi.part004.jsonl"
+    ],
+    "bytes": 144525429,
+    "lines": 121184,
+    "newline": "CRLF",
+    "sha256": "1955e7a5508ceb72fbcc47f3d1a48209164caba0760376348f398557ed6a40fe"
+  }
+}

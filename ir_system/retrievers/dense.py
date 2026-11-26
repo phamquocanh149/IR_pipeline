@@ -34,7 +34,6 @@ class DenseRetriever(Retriever):
         self._index_dir = Path(index_dir) if index_dir is not None else None
         self._index = None
         self._doc_ids: list[str] = []
-        self._doc_rows: dict[str, int] = {}
         self._built = False
         self._loaded = False
         self._corpus_hash = None
@@ -94,7 +93,6 @@ class DenseRetriever(Retriever):
         save_faiss_index(index_dir, index, doc_ids, self._model.name,
                          extra_config={"corpus_hash": corpus_hash})
         self._index, self._doc_ids = index, doc_ids
-        self._doc_rows = {doc_id: row for row, doc_id in enumerate(doc_ids)}
         self._corpus_hash = corpus_hash
         self._built = True
         logger.info("[RETRIEVER] FAISS index ready and saved to %s", index_dir)
@@ -127,33 +125,6 @@ class DenseRetriever(Retriever):
                         if row >= 0 and np.isfinite(score)), key=lambda pair: (-pair[1], pair[0]))
         return [Hit(doc_id=doc_id, score=score) for doc_id, score in pairs[:k]]
 
-    def document_embeddings(self) -> dict[str, np.ndarray]:
-        """Return normalized vectors on demand for representation diagnostics."""
-        if not self._built:
-            raise RuntimeError("DenseRetriever.document_embeddings: build or load the index first.")
-        return {doc_id: self._index.reconstruct(row).copy()
-                for row, doc_id in enumerate(self._doc_ids)}
-
-    def score_documents(self, query: Query, doc_ids: Sequence[str]) -> Sequence[Hit]:
-        """Score specified documents exactly without sorting the whole corpus.
-
-        Reconstruct only selected FAISS vectors. This includes positives outside
-        top-k and negatives contributed by other views of the same query.
-        """
-        if not self._built:
-            raise RuntimeError("DenseRetriever.score_documents: build or load the index first.")
-        if not doc_ids:
-            return []
-        vector = np.asarray(self._model.encode_queries([query.text], batch_size=1), dtype=np.float32)
-        if vector.shape != (1, self._index.d) or not np.isfinite(vector).all():
-            raise ValueError("Invalid query vector for document scoring.")
-        norm = np.linalg.norm(vector)
-        if norm > 1e-10:
-            vector = vector / norm
-        vectors = np.stack([self._index.reconstruct(self._doc_rows[doc_id]) for doc_id in doc_ids])
-        scores = vectors @ vector[0]
-        return [Hit(doc_id=doc_id, score=float(score)) for doc_id, score in zip(doc_ids, scores)]
-
     def save_index(self, index_dir: str | Path) -> Path:
         """Save an additional copy of the current index."""
         if not self._built:
@@ -165,7 +136,6 @@ class DenseRetriever(Retriever):
         """Load FAISS directly without reconstructing a NumPy embedding matrix."""
         index, doc_ids, config = load_faiss_index(index_dir, expected_model=self._model.name)
         self._index, self._doc_ids = index, doc_ids
-        self._doc_rows = {doc_id: row for row, doc_id in enumerate(doc_ids)}
         self._corpus_hash = config.get("corpus_hash")
         self._built = True
         self._loaded = True

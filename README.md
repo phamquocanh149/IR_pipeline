@@ -1,107 +1,58 @@
-﻿# IR Pipeline
+# ViEn-CSIR
 
-A modular information retrieval framework for evaluating lexical retrieval, dense
-retrieval, and cross-encoder reranking across Vietnamese (`vi`), English (`en`),
-and code-switched (`csw`) queries.
+Repository for **ViEn-CSIR: A Benchmark for Vietnamese–English Code-Switched Information Retrieval**.
 
-## Methods
+ViEn-CSIR supports the evaluation of information retrieval with Vietnamese–English
+code-switched queries. The benchmark provides Vietnamese, English, and
+code-switched query variants, Vietnamese and English document collections, and
+shared relevance judgments. These language variants enable evaluation across six
+query–document language configurations.
 
-| Method | Implementation |
-|---|---|
-| BM25 | BM25S, Lucene scoring; lowercase whitespace tokenization |
-| Dense | Single-vector embeddings; exact cosine search with FAISS `IndexFlatIP` |
-| Reranking | BM25 or dense candidate retrieval followed by cross-encoder scoring |
+This repository contains the benchmark data and a retrieval pipeline supporting
+BM25, dense retrieval, and cross-encoder reranking. Evaluation metrics include
+NDCG@k, MRR@k, Recall@k, Precision@k, and MAP@k.
 
-Evaluation supports NDCG@k, MRR@k, Recall@k, Precision@k, and MAP@k.
+## Dataset
+
+Four subsets are provided under `data/`: CQA, FiQA, Gaming, and MLQA.
+Each includes Vietnamese (`vi`), English (`en`), and code-switched (`csw`)
+queries, documents in Vietnamese and English, and shared relevance judgments.
+
+| Subset | Vietnamese queries | English queries | Code-switched queries | Documents per language (VI / EN) | Relevance judgments |
+|---|---:|---:|---:|---:|---:|
+| CQA | 1,014 | 1,014 | 1,014 | 121,184 / 121,184 | 5,510 |
+| FiQA | 1,025 | 1,025 | 1,025 | 57,638 / 57,638 | 17,110 |
+| Gaming | 888 | 898 | 888 | 45,301 / 45,301 | 1,447 |
+| MLQA | 981 | 981 | 981 | 5,279 / 5,279 | 983 |
+| **Total** | **3,908** | **3,918** | **3,908** | **229,402 / 229,402** | **25,050** |
+
+Each subset contains `queries.{vi,en,csw}.jsonl`, `documents.{vi,en}.jsonl`,
+and `qrels.tsv`. Before using CQA, assemble and verify its document files:
+
+```bash
+python data/cqa/prepare.py
+```
 
 ## Installation
 
-From the repository root:
+Python 3.10 or later is required. From the repository root, install the BM25
+retrieval dependencies:
 
 ```bash
-pip install -e ".[all]"
+pip install -e .
 ```
 
-The inference stack is pinned in `pyproject.toml`: PyTorch **2.14.1**,
-Transformers **4.57.6**, Sentence Transformers **5.7.0**, and
-FAISS CPU **1.15.1**. For BM25 alone, use `pip install -e .`.
+For dense retrieval and cross-encoder reranking, install the optional dependencies
+with `pip install -e ".[all]"`. Dependency specifications are provided in
+`pyproject.toml`.
 
-## Data
+## Example retrieval run
 
-Datasets must be supplied separately. A single-language dataset contains:
-
-```text
-dataset/
-├── queries.jsonl       # {"qid": "q1", "text": "query text"}
-├── documents.jsonl     # {"doc_id": "d1", "text": "document text"}
-└── qrels.tsv           # qid<TAB>doc_id<TAB>relevance
-```
-
-For multilingual evaluation, use `queries.{vi,en,csw}.jsonl` and
-`documents.{vi,en}.jsonl` with a shared `qrels.tsv`. Matching IDs identify the
-same query or document group across language views. Each JSONL record requires
-`text`; IDs also accept `_id` or `id` and are normalized to strings.
-
-## Retrieval experiments
-
-Examples below use Bash syntax. Replace `path/to/dataset` with your dataset.
+Evaluate BM25 on MLQA across all six language configurations:
 
 ```bash
-# Lexical baseline
-python -m ir_system.cli.main \
-  --dataset path/to/dataset --retriever bm25 \
-  --top-k 10 --metrics ndcg@10 mrr@10 recall@10 --name bm25
-
-# Dense retrieval
-python -m ir_system.cli.main \
-  --dataset path/to/dataset --retriever dense \
-  --model Qwen/Qwen3-Embedding-0.6B \
-  --top-k 10 --metrics ndcg@10 mrr@10 recall@10 --name dense
-
-# Dense candidates followed by cross-encoder reranking
-python -m ir_system.cli.main \
-  --dataset path/to/dataset --retriever cross-encoder \
-  --model jinaai/jina-reranker-v2-base-multilingual \
-  --candidate-retriever dense --candidate-model Qwen/Qwen3-Embedding-0.6B \
-  --candidate-top-k 100 --top-k 10 \
-  --metrics ndcg@10 mrr@10 recall@10 --name reranking
+python -m ir_system.cli.main --dataset data/mlqa --retriever bm25 --queries vi en csw --documents vi en --top-k 10 --metrics ndcg@10 mrr@10 recall@10 --name mlqa-bm25
 ```
 
-Use `--candidate-retriever bm25` without `--candidate-model` for lexical
-candidates. Add `--queries vi en csw --documents vi en` to evaluate all six
-language pairs. Runtime options include `--device`, `--batch-size`, and
-`--candidate-batch-size`.
-
-## Language analysis
-
-```bash
-python -m ir_system.cli.analysis \
-  --dataset path/to/dataset \
-  --model Qwen/Qwen3-Embedding-0.6B \
-  --queries vi en csw --documents vi en \
-  --top-k 10 --output results/language_analysis
-```
-
-Produces `analysis.json` and an offline `report.html` with embedding gaps,
-joint PCA projections, retrieval metrics, and relevant/non-relevant score
-margins. Analysis compares language views against a fixed document index.
-
-## Outputs and reproducibility
-
-Retrieval runs save `config.json`, `metrics.json`, and `run.jsonl` under
-`results/<name>/`, with separate results for each language pair. Dense indexes
-are cached under `indexes/`; `--load-index PATH` explicitly loads a saved index.
-
-For comparable experiments, keep dataset IDs, relevance judgments, candidate
-selection, and metric cutoffs fixed. Set `--top-k` at least as large as the
-largest metric cutoff. Record model revisions, prompts, seed, and hardware
-alongside the saved configuration. Model-provided or inferred prompts are
-applied automatically; `--query-prefix` and `--doc-prefix` override prompts for
-the main embedding model.
-
-Full CLI options:
-
-```bash
-python -m ir_system.cli.main --help
-python -m ir_system.cli.analysis --help
-```
+Configuration, metrics, and per-configuration rankings are saved under
+`results/mlqa-bm25/`. See `python -m ir_system.cli.main --help` for all options.
