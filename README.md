@@ -51,7 +51,14 @@ with `pip install -e ".[all]"`. Dependency specifications are provided in
 Evaluate BM25 on MLQA across all six language configurations:
 
 ```bash
-python -m ir_system.cli.main --dataset data/mlqa --retriever bm25 --queries vi en csw --documents vi en --top-k 10 --metrics ndcg@10 mrr@10 recall@10 --name mlqa-bm25
+python -m ir_system.cli.main \
+  --dataset data/mlqa \
+  --retriever bm25 \
+  --queries vi en csw \
+  --documents vi en \
+  --top-k 10 \
+  --metrics ndcg@10 mrr@10 recall@10 \
+  --name mlqa-bm25
 ```
 
 Configuration, metrics, and per-configuration rankings are saved under
